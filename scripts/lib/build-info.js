@@ -9,6 +9,7 @@ const {
   linuxTargetSummary,
 } = require("./linux-target-context.js");
 const {
+  enabledLinuxFeatureCapabilities,
   enabledLinuxFeatureIds,
   linuxFeaturesRoot,
 } = require("./linux-features.js");
@@ -333,6 +334,7 @@ function buildInfo(options) {
     linuxFeatures: {
       enabled: enabledLinuxFeatureIds({ featuresRoot }),
     },
+    linuxCapabilities: enabledLinuxFeatureCapabilities({ featuresRoot }),
   };
 }
 
