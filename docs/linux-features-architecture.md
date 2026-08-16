@@ -34,6 +34,7 @@ requirements, and conflicts are errors.
   "title": "My Feature",
   "description": "Optional Linux integration.",
   "defaultEnabled": false,
+  "capabilities": ["my-capability-v1"],
   "entrypoints": {
     "patchDescriptors": "./patch.js",
     "stageHook": "./stage.sh"
@@ -60,6 +61,7 @@ Manifest fields:
 | `title`, `description` | User-facing wizard and documentation text |
 | `defaultEnabled` | Must be `false` for every repository and local feature |
 | `internal` | Optional boolean for build-owned plumbing hidden from public feature selection |
+| `capabilities` | Optional metadata-only public capability identifiers |
 | `entrypoints.patchDescriptors` | Optional ASAR descriptor module |
 | `entrypoints.stageHook` | Last-resort app staging script |
 | `resources` | Declarative files copied into the app tree |
@@ -73,6 +75,13 @@ Manifest fields:
 Unknown keys and unsafe paths fail validation. A manifest title or description
 does not replace the adjacent README; document setup, settings, side effects,
 cleanup, supported sessions/architectures, and tests there.
+
+## Capabilities and packaged build metadata
+
+`capabilities` are metadata-only identifiers owned by enabled features. They
+must be unique strings matching `/^[a-z0-9][a-z0-9-]*$/`. The builder publishes
+them in `resources/codex-linux-build-info.json`; consumers can inspect that file
+without starting Desktop through `start.sh --print-build-info`.
 
 ## Lifecycle
 
@@ -164,6 +173,16 @@ feature configuration followed by the original launcher arguments. Other
 executable hooks receive the original arguments. All hooks receive the
 feature/app directory environment. Keep them bounded; the compact launcher
 does not supervise helper processes or provide a second application lifecycle.
+
+## External App-Server Attachment
+
+`external-app-server-attachment` uses a validated owner-only descriptor to
+connect Desktop to an existing local Unix app-server. It conflicts with
+`shared-app-server-socket`, fails closed on unsafe descriptors or sockets, and
+never manages the external server's lifecycle. Its packaged capability is
+`external-app-server-attachment-descriptor-v1`; see the
+[feature README](../linux-features/external-app-server-attachment/README.md) for
+the descriptor contract.
 
 ## Native package extensions
 

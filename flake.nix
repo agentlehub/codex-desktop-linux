@@ -437,12 +437,15 @@
         remoteMobile = codexDesktop.override { linuxFeatureIds = [ "remote-mobile-control" ]; };
         computerUse = codexDesktop.override { linuxFeatureIds = [ "computer-use-linux" ]; };
         chronicleSkysight = codexDesktop.override { linuxFeatureIds = [ "chronicle-skysight" ]; };
+        maximalCompatibleFeatureIds = lib.filter (
+          featureId: featureId != "external-app-server-attachment"
+        ) nixLinuxFeatures.supportedFeatureIds;
         maximalDirectoryFeatureIds = lib.filter (
           featureId: featureId != "shallow-repository-watches"
-        ) nixLinuxFeatures.supportedFeatureIds;
+        ) maximalCompatibleFeatureIds;
         maximalShallowFeatureIds = lib.filter (
           featureId: featureId != "directory-only-working-tree-watch"
-        ) nixLinuxFeatures.supportedFeatureIds;
+        ) maximalCompatibleFeatureIds;
         maximalDirectory = codexDesktop.override {
           linuxFeatureIds = maximalDirectoryFeatureIds;
         };

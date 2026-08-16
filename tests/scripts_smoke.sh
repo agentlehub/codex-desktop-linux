@@ -17,9 +17,14 @@ assert_executable scripts/ci/update-nix-hashes.sh
 assert_executable scripts/ci/validate-nix-pins.sh
 assert_file assets/openai-codex-linux-repository-key.gpg.base64
 assert_file nix/upstream-linux-packages.json
+assert_file linux-features/external-app-server-attachment/feature.json
+assert_file linux-features/external-app-server-attachment/README.md
 
 bash -n install.sh launcher/start.sh.template scripts/rebuild-candidate.sh scripts/select-latest-package.sh
 bash -n scripts/lib/*.sh scripts/build-deb.sh scripts/build-rpm.sh scripts/build-pacman.sh scripts/build-appimage.sh
+bash -n linux-features/external-app-server-attachment/socket-env.sh
+node --check linux-features/external-app-server-attachment/descriptor-reader.js
+node --check linux-features/external-app-server-attachment/patch.js
 
 assert_contains packaging/linux/codex-desktop.desktop '^Name=ChatGPT Community$'
 assert_contains packaging/linux/codex-desktop.desktop '^Comment=Community Linux distribution based on OpenAI ChatGPT$'
@@ -49,6 +54,40 @@ assert_absent packaging/linux/codex-packaged-runtime.sh '--if-stale'
 
 selector_fixture="$(mktemp -d)"
 trap 'rm -rf -- "$selector_fixture"' EXIT
+
+launcher_build_info_fixture="$selector_fixture/launcher-build-info"
+mkdir -p "$launcher_build_info_fixture/resources"
+sed \
+    -e 's/__CODEX_LINUX_APP_ID__/codex-desktop/g' \
+    -e 's/__CODEX_LINUX_APP_DISPLAY_NAME__/ChatGPT Community/g' \
+    launcher/start.sh.template > "$launcher_build_info_fixture/start.sh"
+chmod +x "$launcher_build_info_fixture/start.sh"
+printf '%s\n' '{"schemaVersion":2,"linuxFeatures":{"enabled":[]}}' \
+    > "$launcher_build_info_fixture/resources/codex-linux-build-info.json"
+"$launcher_build_info_fixture/start.sh" --print-build-info --ozone-platform=wayland \
+    > "$launcher_build_info_fixture/output.json"
+cmp -s \
+    "$launcher_build_info_fixture/resources/codex-linux-build-info.json" \
+    "$launcher_build_info_fixture/output.json" ||
+    fail "launcher build-info query changed packaged bytes"
+if "$launcher_build_info_fixture/start.sh" --new-instance --print-build-info \
+    > "$launcher_build_info_fixture/non-first.stdout" \
+    2> "$launcher_build_info_fixture/non-first.stderr"; then
+    fail "launcher accepted --print-build-info after an ordinary argument"
+fi
+assert_contains "$launcher_build_info_fixture/non-first.stderr" 'ChatGPT executable is missing:'
+rm -f -- "$launcher_build_info_fixture/resources/codex-linux-build-info.json"
+if "$launcher_build_info_fixture/start.sh" --print-build-info \
+    > "$launcher_build_info_fixture/missing.stdout" \
+    2> "$launcher_build_info_fixture/missing.stderr"; then
+    fail "launcher accepted a missing packaged build-info file"
+fi
+[ ! -s "$launcher_build_info_fixture/missing.stdout" ] ||
+    fail "missing build-info query wrote stdout"
+[ "$(wc -l < "$launcher_build_info_fixture/missing.stderr")" -eq 1 ] ||
+    fail "missing build-info query did not emit one diagnostic"
+assert_contains "$launcher_build_info_fixture/missing.stderr" '^codex-linux build info is unavailable: '
+
 touch -t 202608120900 "$selector_fixture/codex-desktop_2026.08.12.community_amd64.deb"
 touch -t 202608121000 "$selector_fixture/codex-desktop_2026.08.12.100000_amd64.deb"
 selected_package="$(scripts/select-latest-package.sh "$selector_fixture/codex-desktop_*.deb")"

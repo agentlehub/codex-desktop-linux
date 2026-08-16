@@ -205,6 +205,70 @@ test("update-builder carries the shared feature compatibility registry", (t) => 
   );
 });
 
+test("attachment-only update-builder staging preserves the declarative feature source", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-update-builder-attachment-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const config = path.join(root, "attachment-only-features.json");
+  const builder = path.join(root, "builder");
+  const disabledBuilder = path.join(root, "disabled-builder");
+  const disabledConfig = path.join(root, "disabled-features.json");
+  const enabledConfig = `${JSON.stringify({ enabled: ["external-app-server-attachment"] }, null, 2)}\n`;
+
+  fs.writeFileSync(config, enabledConfig, { mode: 0o600 });
+  fs.writeFileSync(disabledConfig, `${JSON.stringify({ enabled: [] }, null, 2)}\n`, { mode: 0o600 });
+
+  runPackageCommon(
+    [
+      "export PACKAGE_NAME=codex-desktop",
+      `export CODEX_LINUX_FEATURES_ROOT=${JSON.stringify(path.join(repoRoot, "linux-features"))}`,
+      `export CODEX_LINUX_FEATURES_CONFIG=${JSON.stringify(config)}`,
+      `stage_update_builder_bundle ${JSON.stringify(builder)}`,
+    ].join("\n"),
+    root,
+  );
+
+  const updateBuilderRoot = path.join(builder, "opt", "codex-desktop", "update-builder");
+  const featureRoot = path.join(updateBuilderRoot, "linux-features", "external-app-server-attachment");
+  for (const relativePath of ["feature.json", "README.md", "descriptor-reader.js", "socket-env.sh", "patch.js"]) {
+    const source = path.join(repoRoot, "linux-features", "external-app-server-attachment", relativePath);
+    const staged = path.join(featureRoot, relativePath);
+    assert.equal(fs.readFileSync(staged, "utf8"), fs.readFileSync(source, "utf8"));
+  }
+  assert.equal(
+    fs.statSync(path.join(featureRoot, "descriptor-reader.js")).mode & 0o777,
+    fs.statSync(path.join(repoRoot, "linux-features", "external-app-server-attachment", "descriptor-reader.js")).mode & 0o777,
+  );
+  assert.equal(
+    fs.statSync(path.join(featureRoot, "socket-env.sh")).mode & 0o777,
+    fs.statSync(path.join(repoRoot, "linux-features", "external-app-server-attachment", "socket-env.sh")).mode & 0o777,
+  );
+  assert.equal(
+    fs.readFileSync(path.join(updateBuilderRoot, "linux-features", "features.json"), "utf8"),
+    enabledConfig,
+  );
+  assert.equal(
+    fs.readFileSync(path.join(updateBuilderRoot, "scripts", "lib", "build-info.js"), "utf8"),
+    fs.readFileSync(path.join(repoRoot, "scripts", "lib", "build-info.js"), "utf8"),
+  );
+  assert.equal(
+    fs.readFileSync(path.join(updateBuilderRoot, "launcher", "start.sh.template"), "utf8"),
+    fs.readFileSync(path.join(repoRoot, "launcher", "start.sh.template"), "utf8"),
+  );
+
+  runPackageCommon(
+    [
+      "export PACKAGE_NAME=codex-desktop",
+      `export CODEX_LINUX_FEATURES_ROOT=${JSON.stringify(path.join(repoRoot, "linux-features"))}`,
+      `export CODEX_LINUX_FEATURES_CONFIG=${JSON.stringify(disabledConfig)}`,
+      `stage_update_builder_bundle ${JSON.stringify(disabledBuilder)}`,
+    ].join("\n"),
+    root,
+  );
+  const disabledUpdateBuilderRoot = path.join(disabledBuilder, "opt", "codex-desktop", "update-builder");
+  assert.equal(fs.existsSync(path.join(disabledUpdateBuilderRoot, "linux-features", "external-app-server-attachment")), false);
+  assert.equal(fs.existsSync(path.join(disabledUpdateBuilderRoot, "linux-features", "features.json")), false);
+});
+
 test("update-builder stages only plugin templates consumed by enabled feature hooks", (t) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-update-builder-plugins-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));

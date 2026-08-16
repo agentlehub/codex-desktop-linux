@@ -46,6 +46,165 @@ function waitForFile(filePath, timeoutMs = 2000) {
   assert.equal(fs.existsSync(filePath), true, `timed out waiting for ${filePath}`);
 }
 
+function installBuildInfoTripwires(root) {
+  const hooks = path.join(root, ".codex-linux");
+  const markerPaths = [
+    "env-hook",
+    "prelaunch-hook",
+    "cold-start-hook",
+    "launcher-hook",
+    "runtime-source",
+    "runtime-export",
+    "runtime-prelaunch",
+    "usage-report",
+  ].map((name) => path.join(root, name));
+
+  fs.mkdirSync(path.join(hooks, "env.d"), { recursive: true });
+  fs.writeFileSync(
+    path.join(hooks, "env.d", "tripwire.env"),
+    "printf env-hook > \"$TEST_ROOT/env-hook\"\n",
+  );
+  writeExecutable(
+    path.join(hooks, "prelaunch.d", "tripwire.sh"),
+    "#!/bin/bash\nprintf prelaunch-hook > \"$TEST_ROOT/prelaunch-hook\"\n",
+  );
+  writeExecutable(
+    path.join(hooks, "cold-start.d", "tripwire.sh"),
+    "#!/bin/bash\nprintf cold-start-hook > \"$TEST_ROOT/cold-start-hook\"\n",
+  );
+  writeExecutable(
+    path.join(hooks, "launcher.d", "tripwire.sh"),
+    "#!/bin/bash\nprintf launcher-hook > \"$TEST_ROOT/launcher-hook\"\nprintf '%s\\n' 'env LAUNCHER_TRIPWIRE=unexpected'\n",
+  );
+  fs.writeFileSync(
+    path.join(hooks, "codex-packaged-runtime.sh"),
+    [
+      "printf runtime-source > \"$TEST_ROOT/runtime-source\"",
+      "codex_packaged_runtime_export_env() { printf runtime-export > \"$TEST_ROOT/runtime-export\"; }",
+      "codex_packaged_runtime_prelaunch() { printf runtime-prelaunch > \"$TEST_ROOT/runtime-prelaunch\"; }",
+      "",
+    ].join("\n"),
+  );
+
+  const bundledPlugin = path.join(
+    root,
+    "resources/plugins/openai-bundled/plugins/browser",
+  );
+  const cachedPlugin = path.join(
+    root,
+    "codex-home/plugins/cache/openai-bundled/browser/fixture",
+  );
+  for (const pluginRoot of [bundledPlugin, cachedPlugin]) {
+    fs.mkdirSync(path.join(pluginRoot, ".codex-plugin"), { recursive: true });
+    fs.mkdirSync(path.join(pluginRoot, "scripts"), { recursive: true });
+    fs.writeFileSync(
+      path.join(pluginRoot, ".codex-plugin/plugin.json"),
+      '{"name":"browser","version":"fixture"}\n',
+    );
+  }
+  fs.writeFileSync(
+    path.join(bundledPlugin, "scripts/browser-client.mjs"),
+    "export const official = true;\n",
+  );
+  fs.writeFileSync(
+    path.join(cachedPlugin, "scripts/browser-client.mjs"),
+    "/*codexLinuxPerUserBrowserSocketDir*/ legacy client\n",
+  );
+
+  const binDir = path.join(root, "bin");
+  writeExecutable(
+    path.join(binDir, "curl"),
+    "#!/bin/bash\nprintf usage-report > \"$TEST_ROOT/usage-report\"\n",
+  );
+  return { binDir, cachedPlugin, markerPaths };
+}
+
+function assertBuildInfoTripwiresRemainUntriggered({ cachedPlugin, markerPaths }) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 100);
+  for (const markerPath of markerPaths) {
+    assert.equal(fs.existsSync(markerPath), false, `unexpected launcher side effect: ${markerPath}`);
+  }
+  assert.equal(
+    fs.readFileSync(path.join(cachedPlugin, "scripts/browser-client.mjs"), "utf8"),
+    "/*codexLinuxPerUserBrowserSocketDir*/ legacy client\n",
+  );
+}
+
+test("launcher prints packaged build info before every mutable launcher path", (t) => {
+  const root = createApp(t);
+  const buildInfoPath = path.join(root, "resources/codex-linux-build-info.json");
+  const expected = Buffer.from('{"schemaVersion":2,"linuxFeatures":{"enabled":[]}}\n', "utf8");
+  fs.writeFileSync(buildInfoPath, expected);
+  const tripwires = installBuildInfoTripwires(root);
+  const env = {
+    ...process.env,
+    CODEX_HOME: path.join(root, "codex-home"),
+    CODEX_LINUX_DISABLE_USAGE_REPORTING: "0",
+    PATH: `${tripwires.binDir}:${process.env.PATH}`,
+    TEST_ROOT: root,
+    XDG_CONFIG_HOME: path.join(root, "config"),
+    XDG_STATE_HOME: path.join(root, "state"),
+  };
+
+  const success = childProcess.spawnSync(
+    path.join(root, "start.sh"),
+    ["--print-build-info", "--ozone-platform=wayland", "--class=codex-desktop"],
+    { env },
+  );
+  assert.equal(success.status, 0);
+  assert.deepEqual(success.stdout, expected);
+  assert.deepEqual(success.stderr, Buffer.alloc(0));
+  assertBuildInfoTripwiresRemainUntriggered(tripwires);
+
+  fs.unlinkSync(buildInfoPath);
+  const missing = childProcess.spawnSync(
+    path.join(root, "start.sh"),
+    ["--print-build-info", "--ozone-platform=wayland"],
+    { env },
+  );
+  assert.notEqual(missing.status, 0);
+  assert.deepEqual(missing.stdout, Buffer.alloc(0));
+  const diagnostic = missing.stderr.toString("utf8");
+  assert.equal(diagnostic.split("\n").filter(Boolean).length, 1);
+  assert.match(diagnostic, /^codex-linux build info is unavailable: [^\n]+\n$/);
+  assertBuildInfoTripwiresRemainUntriggered(tripwires);
+});
+
+test("launcher only recognizes build-info discovery as its first argument", (t) => {
+  const root = createApp(t);
+  fs.writeFileSync(
+    path.join(root, "resources/codex-linux-build-info.json"),
+    '{"schemaVersion":2}\n',
+  );
+  const env = {
+    ...process.env,
+    CODEX_HOME: path.join(root, "codex-home"),
+    CODEX_LINUX_DISABLE_USAGE_REPORTING: "1",
+    TEST_ROOT: root,
+    XDG_CONFIG_HOME: path.join(root, "config"),
+  };
+
+  const help = childProcess.spawnSync(path.join(root, "start.sh"), ["--help"], {
+    env,
+    encoding: "utf8",
+  });
+  assert.equal(help.status, 0);
+  assert.match(help.stdout, /^Usage: .*\[--diagnose \| --print-build-info\]/m);
+  assert.match(help.stdout, /--print-build-info/);
+  assert.equal(fs.existsSync(path.join(root, "arguments")), false);
+
+  const ordinaryLaunch = childProcess.spawnSync(
+    path.join(root, "start.sh"),
+    ["--new-instance", "--print-build-info"],
+    { env, encoding: "utf8" },
+  );
+  assert.equal(ordinaryLaunch.status, 7);
+  assert.equal(
+    fs.readFileSync(path.join(root, "arguments"), "utf8"),
+    "--class=codex-desktop\n--new-instance\n--print-build-info\n",
+  );
+});
+
 test("launcher reports only one anonymous usage event per UTC day", (t) => {
   const root = createApp(t);
   const binDir = path.join(root, "bin");
@@ -198,6 +357,24 @@ test("launcher composes declarative hooks and forwards arguments", (t) => {
   ]);
   assert.equal(fs.readFileSync(path.join(root, "prelaunch"), "utf8"), "prelaunch");
   assert.equal(fs.readFileSync(path.join(root, "after-exit"), "utf8"), "after-exit");
+});
+
+test("launcher propagates an attachment fatal marker from a staged launcher hook", (t) => {
+  const root = createApp(t);
+  writeExecutable(
+    path.join(root, "ChatGPT"),
+    "#!/bin/bash\nprintf '%s|%s|%s' \"$CODEX_LINUX_EXTERNAL_APP_SERVER_ATTACHMENT_FATAL\" \"$CODEX_LINUX_APP_SERVER_BRIDGE_ATTACH_ONLY\" \"$CODEX_LINUX_APP_SERVER_BRIDGE_SOCKET\" > \"$TEST_ROOT/attachment-env\"\nexit 7\n",
+  );
+  writeExecutable(
+    path.join(root, ".codex-linux", "launcher.d", "external-app-server-attachment.sh"),
+    "#!/bin/bash\nprintf '%s\\n' 'env CODEX_LINUX_EXTERNAL_APP_SERVER_ATTACHMENT_FATAL=1'\n",
+  );
+  const result = childProcess.spawnSync(path.join(root, "start.sh"), [], {
+    env: { ...process.env, CODEX_HOME: path.join(root, "codex-home"), TEST_ROOT: root },
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 7, result.stderr);
+  assert.equal(fs.readFileSync(path.join(root, "attachment-env"), "utf8"), "1||");
 });
 
 test("launcher loads global and app-specific Electron flags", (t) => {
