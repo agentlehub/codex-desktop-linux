@@ -101,3 +101,22 @@ test("CLI rejects drift in an explicitly enabled feature", (t) => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /explicitly enabled feature patches drifted/);
 });
+
+test("external attachment is a required-upstream feature report entry", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-attachment-required-report-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const buildDir = path.join(root, ".vite", "build");
+  fs.mkdirSync(buildDir, { recursive: true });
+  fs.writeFileSync(path.join(buildDir, "main.js"), "const incompatibleOfficialBundle=true;\n");
+  const configPath = path.join(root, "features.json");
+  fs.writeFileSync(configPath, '{"enabled":["external-app-server-attachment"]}\n');
+  const report = createPatchReport();
+  patchExtractedApp(root, {
+    report,
+    featuresConfigPath: configPath,
+    featuresRoot: path.join(__dirname, "..", "linux-features"),
+  });
+  const [entry] = report.patches.filter((patch) => patch.featureId === "external-app-server-attachment");
+  assert.equal(entry.ciPolicy, "required-upstream");
+  assert.equal(enabledFeatureFailuresFromReport(report).length, 1);
+});

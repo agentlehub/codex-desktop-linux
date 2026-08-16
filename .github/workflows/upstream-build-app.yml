@@ -220,6 +220,61 @@ jobs:
           ./scripts/build-rpm.sh
           PACMAN_STAGE_ONLY=1 ./scripts/build-pacman.sh
           APPIMAGE_STAGE_ONLY=1 ./scripts/build-appimage.sh
+      - name: Build external app-server attachment feature alone
+        env:
+          CODEX_LINUX_FEATURES_CONFIG: ${{ github.workspace }}/external-app-server-attachment-features.json
+          CODEX_INSTALL_DIR: ${{ github.workspace }}/codex-app-external-app-server-attachment-${{ matrix.architecture }}
+          CODEX_PATCH_REPORT_JSON: ${{ github.workspace }}/external-app-server-attachment-report-${{ matrix.architecture }}/patch-report.json
+          CODEX_TARGET_ARCH: ${{ matrix.architecture }}
+        run: |
+          set -euo pipefail
+          cat > "$CODEX_LINUX_FEATURES_CONFIG" <<'JSON'
+          {"enabled": ["external-app-server-attachment"]}
+          JSON
+          ./install.sh "${{ steps.upstream.outputs.package }}"
+          node scripts/ci/validate-patch-report.js "$CODEX_PATCH_REPORT_JSON" \
+            --require-enabled-feature external-app-server-attachment \
+            --require-applied feature:external-app-server-attachment:main-process-external-app-server-attachment
+          node - "$CODEX_PATCH_REPORT_JSON" <<'NODE'
+          const fs = require("node:fs");
+          const { enabledFeatureFailuresFromReport } = require("./scripts/lib/patch-report.js");
+          const report = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          const failures = enabledFeatureFailuresFromReport(report);
+          if (failures.length !== 0) throw new Error(`enabled-feature failures: ${JSON.stringify(failures)}`);
+          NODE
+          reader="$CODEX_INSTALL_DIR/.codex-linux/features/external-app-server-attachment/descriptor-reader.js"
+          hook="$CODEX_INSTALL_DIR/.codex-linux/launcher.d/external-app-server-attachment-external-app-server-attachment.sh"
+          test -f "$reader"
+          test "$(stat -c '%a' "$reader")" = 644
+          test -f "$hook"
+          test "$(stat -c '%a' "$hook")" = 755
+          descriptor_dir="$RUNNER_TEMP/external-app-server-attachment-descriptor-${{ matrix.architecture }}"
+          mkdir -m 700 "$descriptor_dir"
+          descriptor="$descriptor_dir/app-server-attachment.json"
+          cat > "$descriptor" <<JSON
+          {"schemaVersion":1,"socketPath":"$descriptor_dir/app-server.sock","transport":"unix"}
+          JSON
+          chmod 600 "$descriptor"
+          "$CODEX_INSTALL_DIR/resources/cua_node/bin/node" "$reader" "$descriptor" > "$descriptor_dir/reader.env"
+          printf '%s\n' \
+            'env CODEX_LINUX_APP_SERVER_BRIDGE_ATTACH_ONLY=1' \
+            "env CODEX_LINUX_APP_SERVER_BRIDGE_SOCKET=$descriptor_dir/app-server.sock" \
+            > "$descriptor_dir/expected-reader.env"
+          cmp "$descriptor_dir/expected-reader.env" "$descriptor_dir/reader.env"
+          build_info="$CODEX_INSTALL_DIR/resources/codex-linux-build-info.json"
+          node - "$build_info" <<'NODE'
+          const fs = require("node:fs");
+          const info = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          if (info.linuxFeatures?.enabled?.length !== 1
+              || info.linuxFeatures.enabled[0] !== "external-app-server-attachment"
+              || info.linuxCapabilities?.length !== 1
+              || info.linuxCapabilities[0] !== "external-app-server-attachment-descriptor-v1") {
+            throw new Error(`unexpected attachment-only build info: ${JSON.stringify(info)}`);
+          }
+          NODE
+          launcher_build_info="$RUNNER_TEMP/external-app-server-attachment-build-info-${{ matrix.architecture }}.json"
+          "$CODEX_INSTALL_DIR/start.sh" --print-build-info > "$launcher_build_info"
+          cmp "$build_info" "$launcher_build_info"
 
   dock-icon-feature-alone:
     runs-on: ubuntu-latest

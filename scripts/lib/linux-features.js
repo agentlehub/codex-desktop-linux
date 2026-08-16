@@ -134,6 +134,30 @@ function normalizeFeatureIdList(value, label, featureId) {
   return result;
 }
 
+function normalizeLinuxFeatureCapabilities(value, featureId) {
+  if (value == null) {
+    return [];
+  }
+  if (!Array.isArray(value)) {
+    throw new Error(`Linux feature '${featureId}' capabilities must be an array`);
+  }
+  if (value.length === 0) {
+    throw new Error(`Linux feature '${featureId}' capabilities must be a non-empty array`);
+  }
+
+  const seen = new Set();
+  const capabilities = [];
+  for (const capability of value) {
+    assertFeatureId(capability, `Linux feature '${featureId}' capabilities entry`);
+    if (seen.has(capability)) {
+      throw new Error(`Duplicate Linux feature capability '${capability}' in '${featureId}'`);
+    }
+    seen.add(capability);
+    capabilities.push(capability);
+  }
+  return capabilities;
+}
+
 function normalizeEnabledFeatureIds(value, sourcePath, options = {}) {
   if (!Array.isArray(value)) {
     if (options.strict === true) {
@@ -248,6 +272,22 @@ function enabledLinuxFeatureIds(options = {}) {
   return linuxFeaturesConfig(options).enabled;
 }
 
+function enabledLinuxFeatureCapabilities(options = {}) {
+  const owners = new Map();
+  for (const feature of loadEnabledLinuxFeatures(options)) {
+    for (const capability of feature.manifest.capabilities) {
+      const owner = owners.get(capability);
+      if (owner != null) {
+        throw new Error(
+          `Linux feature capability '${capability}' is provided by both '${owner}' and '${feature.id}'`,
+        );
+      }
+      owners.set(capability, feature.id);
+    }
+  }
+  return [...owners.keys()].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+}
+
 function enabledLinuxFeaturesConfig(options = {}) {
   const { enabled, settings } = linuxFeaturesConfig(options);
   const filteredSettings = {};
@@ -335,6 +375,7 @@ function normalizeLinuxFeatureManifest(featuresRoot, candidate) {
       internal: manifest.internal === true,
       requires: normalizeFeatureIdList(manifest.requires, "requires", id),
       conflicts: normalizeFeatureIdList(manifest.conflicts, "conflicts", id),
+      capabilities: normalizeLinuxFeatureCapabilities(manifest.capabilities, id),
     },
   };
 }
@@ -1531,6 +1572,7 @@ module.exports = {
   disabledLinuxFeatureCleanupHooks,
   discoverLinuxFeatureManifests,
   enabledLinuxFeaturesConfig,
+  enabledLinuxFeatureCapabilities,
   enabledLinuxFeatureIds,
   enabledFeatureIdsFromBuildInfo,
   enabledLinuxFeatureInstallPlan,
@@ -1547,6 +1589,7 @@ module.exports = {
   linuxFeaturesConfig,
   linuxFeaturesConfigPath,
   linuxFeaturesRoot,
+  normalizeLinuxFeatureCapabilities,
   resolveFeatureEntrypoint,
   RETIRED_FEATURE_IDS,
   restoreEnabledLinuxFeaturePackageResourcePermissions,

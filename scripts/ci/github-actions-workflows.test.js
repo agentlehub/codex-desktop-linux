@@ -194,3 +194,31 @@ test("manual official Linux validation accepts an exact campaign", () => {
   assert.match(packageMatrix, /package matrix input does not match the dispatched campaign/);
   assert.match(packageMatrix, /\.\/install\.sh "\$\{\{ steps\.upstream\.outputs\.package \}\}"/);
 });
+
+test("official Linux campaigns validate attachment-only builds on both native package legs", () => {
+  const workflow = read(".github/workflows/upstream-build-app.yml");
+  const packageMatrix = job(workflow, "package-matrix");
+  assert.match(packageMatrix, /architecture: amd64\n            runner: ubuntu-latest/);
+  assert.match(packageMatrix, /architecture: arm64\n            runner: ubuntu-24\.04-arm/);
+  const featureStep = packageMatrix.match(
+    /      - name: Build external app-server attachment feature alone\n([\s\S]*?)(?=\n      - name:|\n  [a-zA-Z0-9_-]+:|$)/,
+  );
+  assert.notEqual(featureStep, null, "expected attachment feature-alone package-matrix step");
+  const source = featureStep[0];
+  assert.doesNotMatch(source, /^        if:/m);
+  assert.match(source, /"enabled": \["external-app-server-attachment"\]/);
+  assert.match(source, /\.\/install\.sh "\$\{\{ steps\.upstream\.outputs\.package \}\}"/);
+  assert.match(source, /CODEX_INSTALL_DIR: \$\{\{ github\.workspace \}\}\/codex-app-external-app-server-attachment-\$\{\{ matrix\.architecture \}\}/);
+  assert.match(source, /--require-enabled-feature external-app-server-attachment/);
+  assert.match(source, /--require-applied feature:external-app-server-attachment:main-process-external-app-server-attachment/);
+  assert.match(source, /enabled-feature failures/);
+  assert.match(source, /resources\/cua_node\/bin\/node/);
+  assert.match(source, /descriptor-reader\.js/);
+  assert.match(source, /external-app-server-attachment\.sh/);
+  assert.match(source, /test "\$\(stat -c '%a' "\$reader"\)" = 644/);
+  assert.match(source, /test "\$\(stat -c '%a' "\$hook"\)" = 755/);
+  assert.match(source, /linuxFeatures\?\.enabled\?\.length !== 1/);
+  assert.match(source, /external-app-server-attachment-descriptor-v1/);
+  assert.match(source, /--print-build-info > "\$launcher_build_info"/);
+  assert.match(source, /cmp "\$build_info" "\$launcher_build_info"/);
+});

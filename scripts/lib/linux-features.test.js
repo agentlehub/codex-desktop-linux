@@ -2,23 +2,54 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const childProcess = require("node:child_process");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
 
 const {
+  discoverLinuxFeatureManifests,
   enabledFeatureIdsFromBuildInfo,
+  enabledLinuxFeatureCapabilities,
   enabledLinuxFeaturePackageDependencies,
   enabledLinuxFeaturePackageFiles,
   enabledLinuxFeaturePackagePlan,
   loadLinuxFeaturePatchDescriptors,
   loadEnabledLinuxFeatures,
   linuxFeaturesConfig,
+  normalizeLinuxFeatureCapabilities,
   restoreEnabledLinuxFeaturePackageResourcePermissions,
   stageEnabledLinuxFeaturePackageResources,
   stageEnabledLinuxFeatureInstall,
 } = require("./linux-features.js");
+const { buildInfo } = require("./build-info.js");
+
+test("external app-server attachment is opt-in, stages strict resources, publishes its capability, and conflicts", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-attachment-feature-contract-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const featuresRoot = path.join(__dirname, "..", "..", "linux-features");
+  const configPath = path.join(root, "features.json");
+  fs.writeFileSync(configPath, '{"enabled":[]}\n');
+  assert.deepEqual(loadLinuxFeaturePatchDescriptors({ featuresRoot, featuresConfigPath: configPath }), []);
+  fs.writeFileSync(configPath, '{"enabled":["external-app-server-attachment"]}\n');
+  assert.deepEqual(enabledLinuxFeatureCapabilities({ featuresRoot, featuresConfigPath: configPath }), [
+    "external-app-server-attachment-descriptor-v1",
+  ]);
+  const appDir = path.join(root, "app");
+  const plan = stageEnabledLinuxFeatureInstall(appDir, { featuresRoot, featuresConfigPath: configPath });
+  assert.deepEqual(plan.resources.map(({ target, mode }) => [target, mode.toString(8)]), [
+    [".codex-linux/features/external-app-server-attachment/descriptor-reader.js", "644"],
+  ]);
+  assert.deepEqual(plan.runtimeHooks.map(({ key, target, mode }) => [key, target, mode.toString(8)]), [
+    ["launcher", ".codex-linux/launcher.d/external-app-server-attachment-external-app-server-attachment.sh", "755"],
+  ]);
+  fs.writeFileSync(configPath, '{"enabled":["external-app-server-attachment","shared-app-server-socket"]}\n');
+  assert.throws(
+    () => loadEnabledLinuxFeatures({ featuresRoot, featuresConfigPath: configPath }),
+    /external-app-server-attachment.*conflicts with.*shared-app-server-socket/i,
+  );
+});
 
 test("known retired feature ids are ignored while arbitrary unknown ids fail", (t) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-retired-feature-"));
@@ -132,6 +163,173 @@ function writeStagedManifest(appDir, manifest) {
   fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 }
+
+function writeFeature(featuresRoot, id, manifest = {}) {
+  const featureDir = path.join(featuresRoot, id);
+  fs.mkdirSync(featureDir, { recursive: true });
+  fs.writeFileSync(path.join(featureDir, "README.md"), `# ${id}\n`);
+  fs.writeFileSync(
+    path.join(featureDir, "feature.json"),
+    `${JSON.stringify({ id, title: id, ...manifest }, null, 2)}\n`,
+  );
+  return featureDir;
+}
+
+function makeCapabilityFeatureRoot(root, enabled, manifests) {
+  const featuresRoot = path.join(root, "linux-features");
+  fs.mkdirSync(featuresRoot, { recursive: true });
+  fs.writeFileSync(path.join(featuresRoot, "features.json"), `${JSON.stringify({ enabled })}\n`);
+  for (const [id, manifest] of Object.entries(manifests)) {
+    writeFeature(featuresRoot, id, manifest);
+  }
+  return featuresRoot;
+}
+
+function enabledCapabilitiesForLocale(featuresRoot, locale) {
+  const result = childProcess.spawnSync(
+    process.execPath,
+    [
+      "-e",
+      [
+        `const { enabledLinuxFeatureCapabilities } = require(${JSON.stringify(path.join(__dirname, "linux-features.js"))});`,
+        "process.stdout.write(JSON.stringify(enabledLinuxFeatureCapabilities()));",
+      ].join("\n"),
+    ],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CODEX_LINUX_FEATURES_ROOT: featuresRoot,
+        CODEX_LINUX_FEATURES_CONFIG: path.join(featuresRoot, "features.json"),
+        LC_ALL: locale,
+      },
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout);
+}
+
+test("Linux feature capabilities normalize only exact feature-id grammar values", () => {
+  assert.deepEqual(normalizeLinuxFeatureCapabilities(undefined, "fixture"), []);
+  assert.deepEqual(
+    normalizeLinuxFeatureCapabilities(["a", "a0", "a-b"], "fixture"),
+    ["a", "a0", "a-b"],
+  );
+
+  for (const [value, description] of [
+    ["not-an-array", "non-array"],
+    [[], "empty"],
+    [[42], "non-string"],
+    [["Uppercase"], "uppercase"],
+    [["-leading"], "leading hyphen"],
+    [["trailing!"], "trailing punctuation"],
+    [["under_score"], "underscore"],
+    [["has.dot"], "dot"],
+    [["has:colon"], "colon"],
+    [["has space"], "whitespace"],
+    [["has\u0000control"], "control character"],
+    [["café"], "Unicode"],
+  ]) {
+    assert.throws(
+      () => normalizeLinuxFeatureCapabilities(value, "fixture"),
+      /capabilities.*must match|capabilities must be an array|capabilities must be a non-empty array/i,
+      description,
+    );
+  }
+
+  assert.throws(
+    () => normalizeLinuxFeatureCapabilities(["a", "a"], "fixture"),
+    /duplicate.*capabilit/i,
+  );
+});
+
+test("enabled Linux feature capabilities reject duplicate enabled owners and exclude disabled manifests", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-feature-capabilities-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const featuresRoot = makeCapabilityFeatureRoot(root, ["enabled-alpha", "enabled-beta"], {
+    "enabled-alpha": { capabilities: ["a0", "a"] },
+    "enabled-beta": { capabilities: ["a-b"] },
+    "disabled-feature": { capabilities: ["a"] },
+  });
+
+  const cLocale = enabledCapabilitiesForLocale(featuresRoot, "C");
+  assert.deepEqual(enabledCapabilitiesForLocale(featuresRoot, "sv_SE.UTF-8"), cLocale);
+  assert.deepEqual(cLocale, ["a", "a-b", "a0"]);
+
+  writeFeature(featuresRoot, "enabled-beta", { capabilities: ["a"] });
+  assert.throws(
+    () => enabledLinuxFeatureCapabilities({ featuresRoot }),
+    /capability 'a'.*enabled-alpha.*enabled-beta/i,
+  );
+});
+
+test("internal feature discovery and allowlisting remain unchanged for capabilities", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-feature-capability-internal-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const featuresRoot = makeCapabilityFeatureRoot(root, ["internal-feature"], {
+    "internal-feature": {
+      internal: true,
+      requires: ["dependency-feature"],
+      conflicts: ["conflicting-feature"],
+      capabilities: ["internal-capability"],
+    },
+    "dependency-feature": {},
+    "conflicting-feature": {},
+  });
+
+  const internalFeature = discoverLinuxFeatureManifests({ featuresRoot })
+    .find((feature) => feature.id === "internal-feature");
+  assert.equal(internalFeature.manifest.internal, true);
+  assert.deepEqual(internalFeature.manifest.requires, ["dependency-feature"]);
+  assert.deepEqual(internalFeature.manifest.conflicts, ["conflicting-feature"]);
+  assert.deepEqual(internalFeature.manifest.capabilities, ["internal-capability"]);
+  assert.throws(
+    () => enabledLinuxFeatureCapabilities({ featuresRoot }),
+    /internal and cannot be enabled/i,
+  );
+  assert.deepEqual(
+    enabledLinuxFeatureCapabilities({ featuresRoot, internalFeatureIds: ["internal-feature"] }),
+    ["internal-capability"],
+  );
+});
+
+test("build info publishes sorted top-level Linux capabilities with its schema-v2 feature snapshot", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-build-info-capabilities-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const featuresRoot = makeCapabilityFeatureRoot(root, ["feature-b", "feature-a"], {
+    "feature-a": { capabilities: ["a0", "a"] },
+    "feature-b": { capabilities: ["a-b"] },
+  });
+  const upstreamPackagePath = path.join(root, "chatgpt.deb");
+  fs.writeFileSync(upstreamPackagePath, "signed package fixture\n");
+
+  const info = buildInfo({
+    repoDir: process.cwd(),
+    upstreamPackagePath,
+    upstreamMetadata: { version: "1.2.3", architecture: "amd64" },
+    appId: "codex-desktop",
+    appDisplayName: "ChatGPT Community",
+    featuresRoot,
+    env: { SOURCE_DATE_EPOCH: "0" },
+    linuxTarget: {
+      distro: { id: "arch", idLike: [], versionId: "", versionMajor: null },
+      packageFormat: "pacman",
+      packageManager: "pacman",
+      arch: "amd64",
+      desktop: { tokens: [] },
+      sessionType: null,
+      wayland: false,
+      x11: false,
+      atomic: false,
+    },
+  });
+
+  assert.equal(info.schemaVersion, 2);
+  assert.deepEqual(info.linuxFeatures, { enabled: ["feature-b", "feature-a"] });
+  assert.deepEqual(info.linuxCapabilities, ["a", "a-b", "a0"]);
+  assert.deepEqual(info.appIdentity, { id: "codex-desktop", displayName: "ChatGPT Community" });
+  assert.equal(info.upstreamLinuxPackage.version, "1.2.3");
+});
 
 test("Linux feature asset matchers receive feature settings", (t) => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-feature-asset-match-context-"));

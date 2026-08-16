@@ -2,6 +2,8 @@
 let
   inherit (pkgs) lib;
   packages = self.packages.${system};
+  maximalDirectoryFeatureIds = packages.codex-desktop-maximal-directory-watch.linuxFeatureIds;
+  maximalShallowFeatureIds = packages.codex-desktop-maximal-shallow-watch.linuxFeatureIds;
   features = import ./linux-features.nix { inherit lib; };
   homeManagerModule = import ./home-manager-module.nix { inherit self; };
   nixosModule = import ./nixos-module.nix { inherit self; };
@@ -118,6 +120,18 @@ assert lib.assertMsg
 assert lib.assertMsg
   (!(builtins.tryEval (features.normalize [ "directory-only-working-tree-watch" "shallow-repository-watches" ])).success)
   "conflicting watcher features were accepted";
+assert lib.assertMsg
+  (lib.elem "shared-app-server-socket" maximalDirectoryFeatureIds
+    && !(lib.elem "external-app-server-attachment" maximalDirectoryFeatureIds)
+    && lib.elem "directory-only-working-tree-watch" maximalDirectoryFeatureIds
+    && !(lib.elem "shallow-repository-watches" maximalDirectoryFeatureIds))
+  "the maximal directory-watch package no longer has the compatible feature selection";
+assert lib.assertMsg
+  (lib.elem "shared-app-server-socket" maximalShallowFeatureIds
+    && !(lib.elem "external-app-server-attachment" maximalShallowFeatureIds)
+    && !(lib.elem "directory-only-working-tree-watch" maximalShallowFeatureIds)
+    && lib.elem "shallow-repository-watches" maximalShallowFeatureIds)
+  "the maximal shallow-watch package no longer has the compatible feature selection";
 assert lib.assertMsg
   (!features.optionType.check [ "not-a-feature" ]
     && features.optionType.check [ "codex-wrapper-updater" ])
