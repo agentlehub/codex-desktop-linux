@@ -50,4 +50,13 @@ were not executed and are not implied by this verdict.
 Review passed; no unresolved review findings or reviewer follow-up actions.
 The operator subsequently approved committing the specification and proceeding
 to Astra/high plan writing followed by a separate Astra/high plan review on
-2026-10-11. The specification is now `approved`; implementation is unauthorized.
+2026-10-11. The specification is `approved`. The operator subsequently approved the reviewed
+implementation plan and authorized implementation on 2026-10-11, after the
+independent plan review and fresh no-real-reset audit passed.
+
+Subsequent operator amendment: the approved specification now includes future
+draft-PR delivery in `agentlehub/codex-desktop-linux` against a dedicated upstream
+base, with the upstream template/contributing guide and explicit Astra/xhigh
+reasoning exception. The original spec review predates that delivery-only
+addition. Its coverage is assigned to the current independent plan review; the
+core feature design is unchanged.

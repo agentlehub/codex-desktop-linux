@@ -5,7 +5,7 @@ source: docs/brainstorming/2026-10-11-021140-usage-reset-threshold.md
 
 # Configurable agent usage-reset threshold
 
-Status: approved; self-review and independent combined review passed. The operator approved committing the spec and proceeding to plan writing and independent plan review on 2026-10-11. Implementation remains unauthorized.
+Status: approved; self-review and independent combined review passed. The operator approved committing the spec and proceeding to plan writing and independent plan review on 2026-10-11. The operator subsequently approved the reviewed plan and authorized Astra/high implementation on 2026-10-11, retaining every no-real-reset and delivery constraint.
 
 Review: [combined Astra/high review](../reviews/2026-10-11-usage-reset-threshold-spec-review.md).
 
@@ -40,7 +40,7 @@ The endpoints 0 and 100 are invalid. Backend acceptance uncertainty is a documen
 
 ## Scope and non-goals
 
-In scope: feature packaging, native setting registration, Usage controls, renderer eligibility enforcement, accurate tool/help/search text, offline tests, official-bundle drift checks, and English/Chinese top-level feature documentation.
+In scope: feature packaging, native setting registration, Usage controls, renderer eligibility enforcement, accurate tool/help/search text, offline tests, official-bundle drift checks, English/Chinese top-level feature documentation, and the operator-approved future draft-PR delivery below.
 
 Out of scope: changing the existing master permission's semantics, automatic reset use, schedules or monitors, new reset-tool arguments, selecting credits, changing account authentication, making remote tools newly available, replacing the consume transport, modifying manual reset behavior, editing the app-server/service, purchasing resets, and guaranteeing service acceptance at any percentage. Do not add a core patch, launcher hook, custom settings file, background process, or package dependency for this feature.
 
@@ -265,10 +265,86 @@ Run the existing official-bundle feature audit against a disposable extracted si
 
 If bundle acquisition/build or one architecture is unavailable, report that acceptance item as unverified; synthetic tests alone are not full patch-compatibility evidence. The no-reset boundary remains absolute in all lanes. A real profile restart, live UI test, or successful backend redemption is neither necessary nor authorized to validate the local feature contracts.
 
+## Operator-approved implementation delivery amendment
+
+On 2026-10-11, after the original spec review, the operator added a future
+implementation deliverable: a draft PR in their fork, using the upstream PR
+template and contributing guide, with GPT-6 Astra/xhigh replacing the template's
+maximum-reasoning requirement. The operator selected a dedicated upstream base.
+
+- Repository: `agentlehub/codex-desktop-linux` (`origin`); head `feat/usage-reset`.
+- PR creator must be the GitHub account `kortylokai`, never `kamilbeda`. Verify
+  the authenticated API login under the same credential selection used for
+  delivery writes; repository ownership, Git author and SSH aliases are not
+  identity evidence. Missing or mismatched authentication blocks dependent
+  writes until resolved. Never expose credentials or silently use another
+  account. Verify the resulting PR author is `kortylokai`; a same-work PR by a
+  different author requires operator resolution rather than a duplicate PR.
+- Base: `base/usage-reset-upstream`, pinned to
+  `839dbb50fbd2ad041089981441a82f2460dac455`. Create only if absent; reuse only at
+  that SHA. Protect publication against concurrent creation. A differing ref
+  requires operator input, not force replacement.
+- Preserve the fork's `main` and attachment feature. Never target or push to
+  upstream `ilysenko` or the `personal` remote. Base-to-head changes must be this
+  feature and its related tests/docs only.
+- Once implementation is separately authorized and checks/reviews pass, scoped
+  commits, publication of the specified fork base/head, and draft-PR creation are
+  authorized delivery actions. No renewed routine approval is needed for these
+  exact actions. The present planning task executes none of them.
+- Follow `CONTRIBUTING.md` and `.github/pull_request_template.md` from the verified
+  upstream-derived checkout. Final whole-implementation coding-agent review uses
+  `gpt-6-astra`/`xhigh`, with the operator exception stated honestly in the PR.
+  Never claim maximum reasoning or silently downgrade if xhigh is unavailable.
+- Retain Summary, Validation, and Checklist. Leave the no-longer-draft checkbox
+  unchecked. Check validation/CI items only with actual evidence. Describe the
+  no-real-reset checks and unresolved backend eligibility.
+- Report actual existing Nix CI results. Manifest discovery includes this
+  feature in both maximal profiles on x86_64 and ARM64; those checks cover Nix
+  packaging/integration, while inert feature tests cover reset behavior. No
+  additional local Nix build or new CI job is required for this feature scope.
+  The operator explicitly prohibits installing Nix on this machine: Nix
+  verification is CI-only, never a local installation prerequisite or fallback.
+  Pending, skipped or unavailable CI must not be reported as passing.
+- If any CI check fails for an unknown reason, pause implementation and report
+  the failed check/run URL, status and available log evidence to the operator.
+  Do not attempt speculative fixes, rerun loops, workflow changes or scope
+  expansion. Read-only evidence capture is allowed; further dependent work
+  waits for operator direction.
+- Omit the template's opening contributor/one-open-PR reminder and instructional
+  HTML comments from the actual PR description. They are authoring guidance,
+  not PR content. The operator clarified the contributor limit applies only to
+  the official `ilysenko` repository, not this fork-only draft.
+- Honor focused scope and avoid duplicate PRs for this same fork/head/base.
+  Unrelated open PRs in `agentlehub/codex-desktop-linux` do not block creation.
+  Reuse the same work's existing PR; do not close unrelated PRs or assign labels.
+  No official/upstream submission is authorized, so its contributor cap is not
+  a gate for this delivery.
+- Read-only GitHub inspection on 2026-10-11 found the fork's inherited
+  `contributor-pr-limit.yml` workflow active (ID `326078947`), with no recorded
+  runs. Repository-wide Actions permissions could not be read (403), so overall
+  execution availability is unknown. The workflow can close this or unrelated
+  PRs after an opened/reopened event. After disclosure, the operator explicitly
+  chose to proceed without disabling automation or stopping before creation.
+  Leave workflow/configuration unchanged and add no fork PR-count gate. Verify
+  and report actual post-creation state; do not auto-reopen, alter automation,
+  or claim lasting draft retention. An automatic closure leaves delivery
+  acceptance unmet and must be reported honestly.
+- Use explicit repository/base/head arguments and a Markdown body file. Verify
+  repository, refs/SHAs, diff scope, and draft status after creation; attach the PR
+  to the current Codex task using the app tool.
+- No merge, ready-for-review transition, installation, runtime action, or real
+  reset is authorized by this addition.
+
+Delivery acceptance: one verified draft PR authored by `kortylokai` exists in the fork at the specified
+base/head, its description accurately uses the template and Astra/xhigh exception,
+omits the contributor-limit reminder/instructional comments, and fork main is
+unchanged. This later addition changes delivery scope only;
+the original spec review did not cover it, so the plan review must do so.
+
 ## Self-review and next boundary
 
 Requirements review: the approved master/custom state matrix, default 10, feature default-off behavior, explicit per-reset authorization, idempotency, core-only fresh usage, no automatic redemption, accurate metadata, and unknown backend acceptance are represented. The operator-approved 1-99 integer range and commit behavior are represented; no unresolved product decisions remain.
 
 Design/API review: the native object value avoids split-policy reads; native queued persistence and invalid-load fallback are stated accurately; all four registry copies are covered; renderer and task-host responsibilities are distinct; manual HTTP is preserved; stale catalogs cannot become runtime authority. The alternative designs and failure boundaries are documented. No implementation or live reset path was executed during spec creation.
 
-Document checks verify source/evidence links, current framework paths and CI discovery, metadata coherence, no unresolved placeholders, the complete approved range contract, and whitespace. These are specification checks, not execution of the future acceptance suite. The operator-authorized single combined GPT-6 Astra/high reviewer returned PASS with no findings on 2026-10-11; the linked trace preserves its scope and verification. Only review/approval-status documentation changed after that verdict. The operator subsequently directed committing the spec, then launching a new Astra/high plan writer followed by a separate Astra/high plan reviewer. This spec is approved for that planning work. Plan approval and implementation remain separate boundaries; do not start implementation.
+Document checks verify source/evidence links, current framework paths and CI discovery, metadata coherence, no unresolved placeholders, the complete approved range contract, and whitespace. These are specification checks, not execution of the future acceptance suite. The operator-authorized single combined GPT-6 Astra/high reviewer returned PASS with no findings on 2026-10-11; the linked trace preserves its scope and verification. The operator subsequently added the delivery amendment above; the core feature design is unchanged. The plan review must cover the new delivery contract. The operator subsequently directed committing the spec, then launching a new Astra/high plan writer followed by a separate Astra/high plan reviewer. This spec is approved for that planning work. Both independent plan review and a fresh no-real-reset audit subsequently passed. The operator approved the plan and authorized implementation on 2026-10-11; follow the approved plan and its unchanged safety/delivery boundaries.

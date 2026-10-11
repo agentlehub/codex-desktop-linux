@@ -10,8 +10,10 @@ The operator requested a feasibility investigation of an optional community Linu
 feature that allows agent-requested usage resets above the stock 10% remaining
 threshold, preferably with a user-selected percentage in Settings.
 
-Scope is analysis only. No implementation, installation, application restart,
-setting changes, reset requests, or reset-credit consumption is authorized.
+Initial investigation scope was analysis only. The operator subsequently approved
+the reviewed plan and authorized its implementation on 2026-10-11. Installation,
+application restart, real setting changes, reset requests and reset-credit
+consumption remain unauthorized.
 Do not invoke a reset endpoint even to test a rejection or with an invalid key.
 
 Checkout: `/home/korty/dev/agentlehub/codex-desktop-linux`, branch
@@ -35,7 +37,8 @@ from community source `839dbb50`, with `computer-use-linux`,
   This source is approved for that specification work; a separate brainstorming
   review was not performed. The detailed spec subsequently passed an independent
   Astra/high review and was approved for commit and planning on 2026-10-11.
-  Implementation remains unauthorized.
+  The reviewed plan was subsequently approved and implementation authorized on
+  2026-10-11, with all no-real-reset and delivery constraints retained.
 - Existing reset permission off: all agent resets remain blocked, regardless of
   the saved custom threshold or custom-mode toggle.
 - Existing reset permission on, custom mode off: stock 10% remaining limit.
@@ -45,6 +48,8 @@ from community source `839dbb50`, with `computer-use-linux`,
 - Operator resolved the input contract during specification: whole percentages
   from 1 through 99 inclusive, default 10. Save on Enter or blur; invalid values
   remain unsaved; Escape restores the saved value. See Q3.
+- Operator added future fork-only draft-PR delivery and the Astra/xhigh final
+  review exception; see Q4 and the specification's delivery amendment.
 
 ## Initial evidence
 
@@ -241,3 +246,68 @@ behavior remains unchanged. This correction was relayed to the Astra spec agent.
 Exclude resetting with completely unused quota and avoid making zero remaining
 the configured trigger. The percentage is an eligibility threshold, not a
 guarantee that a new agent turn can execute or the server will accept redemption.
+
+### Q4: How should the implementer deliver the completed change?
+
+**Resolved**
+
+The operator requested a draft PR in their fork using the official/upstream PR
+template and contributing guide, with Astra/xhigh instead of maximum reasoning
+for the final coding-agent review. The maximum-reasoning checkbox is in
+`.github/pull_request_template.md`, not the current `CONTRIBUTING.md` text.
+
+The operator then chose a dedicated upstream-base branch. The future PR is in
+`agentlehub/codex-desktop-linux`, head `feat/usage-reset`, base
+`base/usage-reset-upstream` pinned to `839dbb50fbd2ad041089981441a82f2460dac455`.
+Preserve fork main and its attachment commit. Create only an absent base or reuse
+an exact matching base; stop on divergence. Final reviews use Astra/xhigh with an
+honest template exception. Leave the ready/non-draft checkbox unchecked.
+
+The operator clarified that the template's opening one-PR-per-contributor note
+is a reminder and must not appear in the actual PR description. Omit that note
+and instructional comments from the body while retaining Summary, Validation,
+and the factual Checklist.
+
+The operator then clarified that the one-PR rule is for the official `ilysenko`
+repository only. Unrelated open PRs in their fork must not block this draft PR.
+The initial interpretation applying that cap to the fork is superseded. Keep
+only same-work/head/base duplicate prevention, preserve unrelated PRs, and do not
+submit to upstream.
+
+Read-only inspection found the fork's inherited contributor-limit workflow
+active on 2026-10-11 (ID `326078947`, no recorded runs; repository-wide Actions
+permissions unavailable). After being told it could automatically close this
+or unrelated PRs, the operator chose to proceed without disabling anything or
+stopping before PR creation. Leave automation unchanged, impose no fork count
+gate, and report actual PR state after creation. Do not auto-reopen or claim
+delivery acceptance if automation closes it.
+
+The operator additionally requires the PR creator to be `kortylokai`, never
+`kamilbeda`. Verify the API identity using the exact credential selection used
+for delivery writes and verify the resulting PR author. Do not infer identity
+from the fork owner, SSH alias or Git author, expose credentials, or fall back
+to another account. Missing/mismatched authentication blocks dependent writes
+until resolved; a same-work PR by another author requires operator resolution.
+This identity gate is distinct from the rejected workflow/count gate.
+
+The operator accepted Nix verification through existing CI: dynamic manifest
+discovery includes the feature in both maximal profiles on x86_64 and ARM64.
+Report actual results, including unavailable/pending/skipped checks. No extra
+local Nix build or new job is planned; these CI checks validate packaging and
+integration, while fake-only feature tests validate reset behavior.
+The operator explicitly requires no Nix installation on this machine. Keep Nix
+verification CI-only; unavailable CI is reported, never a reason to install Nix
+locally or ask the operator to do so.
+For any unknown-cause CI failure, the operator requires implementation to pause
+and report the check/run URL, status and available logs. Do not try speculative
+fixes or rerun loops, change workflows or expand scope. Capture evidence
+read-only and wait for operator direction before resuming dependent work.
+
+**Rationale**
+
+The feature branch starts from upstream main; using fork main as the PR base
+would add the upstream sync and attachment removal to its diff. A dedicated base
+keeps review limited to this feature and related tests/docs. The implementation
+phase may perform the authorized scoped commits, fork branch publication, and
+draft PR after passing its checks. This planning session performs none of those
+actions, and no live resets are authorized.
