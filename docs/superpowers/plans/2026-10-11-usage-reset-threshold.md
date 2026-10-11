@@ -247,7 +247,7 @@ printf 'ASAR executable: %s\n' "$CODEX_ASAR_BIN"
 Expected: known implementation base, all dirt classified, Node 24, tool paths. No commands here mutate Git or installed state.
 
 - [ ] Obtain the latest signed package and static extraction using Task 8's acquisition commands, authorized for acquisition only at this stage. If unavailable, seed narrow fixtures from the recorded baseline excerpts and mark latest-bundle acceptance pending. Copy no full app asset into the repository.
-- [ ] Build `source-contracts.json` with each record `{id,version,architecture,sourcePath,sourceSha256,byteStart,byteEnd,sha256,source,purpose}`. Use UTF-8 byte slices, not JS character offsets. Acquire these bounded slices by semantic search followed by balanced function/object boundaries:
+- [ ] Build `source-contracts.json` as `{version,architecture,sources,records}`, storing shared version/architecture once and the source SHA-256 once per source path in `sources`. Each record retains `{id,sourcePath,byteStart,byteEnd,sha256,source,purpose}`; the test loader resolves shared provenance and rejects missing source paths or invalid source hashes. Use UTF-8 byte slices, not JS character offsets. Acquire these bounded slices by semantic search followed by balanced function/object boundaries:
 
 | Fixture ID | Required exact slice |
 | --- | --- |

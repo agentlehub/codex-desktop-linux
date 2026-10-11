@@ -28,6 +28,20 @@ function verifyRecord(record) {
   return true;
 }
 
+// Shared provenance is resolved for consumers; source hashes are recorded
+// evidence, not authentication of the original package or source files.
+function loadRecords(manifest = require("./source-contracts.json")) {
+  assert.equal(typeof manifest.version, "string", "provenance version");
+  assert.ok(manifest.version.length > 0, "provenance version");
+  assert.ok(["amd64", "arm64"].includes(manifest.architecture), "provenance architecture");
+  return manifest.records.map(record => {
+    assert.ok(Object.hasOwn(manifest.sources, record.sourcePath), `${record.id}: provenance source path`);
+    const resolved = { ...record, version: manifest.version, architecture: manifest.architecture, sourceSha256: manifest.sources[record.sourcePath] };
+    verifyRecord(resolved);
+    return resolved;
+  });
+}
+
 function deferred() {
   let resolve, reject;
   const promise = new Promise((yes, no) => { resolve = yes; reject = no; });
@@ -118,7 +132,7 @@ const registryFixtureBindings = {
 };
 
 function registryFixture(category, registrySource) {
-  const records = require("./source-contracts.json");
+  const records = loadRecords();
   const aliases = registryFixtureBindings[category], adapter = schemaAdapter();
   const bindings = {};
   for (const [role, value] of Object.entries(adapter)) {
@@ -131,7 +145,7 @@ function registryFixture(category, registrySource) {
 }
 
 async function nativeStoreHarness(definition, options = {}) {
-  const records = require("./source-contracts.json");
+  const records = loadRecords();
   const source = id => records.find(record => record.id === id).source;
   const clone = value => JSON.parse(JSON.stringify(value));
   const queue = { key: "fixture-followup", default: "steer", schema: {
@@ -192,7 +206,7 @@ async function nativeStoreHarness(definition, options = {}) {
 // Text-only synthetic assets: real bounded contracts plus explicit scaffolding.
 // No assembled asset is ever executed; runtime tests load declarations above.
 function syntheticFiles() {
-  const records = require("./source-contracts.json");
+  const records = loadRecords();
   const get = id => {
     const value = records.find(record => record.id === id);
     assert.ok(value, `Missing source fixture ${id}`);
@@ -236,7 +250,7 @@ function syntheticFiles() {
     const [local, name] = record.source.split(" as ");
     exportValue(record.sourcePath, name, local);
   }
-  for (const id of ["native-read-export", "native-write-export", "native-registry-export", "ui-group-export"]) {
+  for (const id of ["native-registry-export", "ui-group-export"]) {
     const record = records.find(record => record.id === id);
     if (record) {
       const [local, name] = record.source.split(" as ");
@@ -392,4 +406,4 @@ function usageComponentHarness(generated, options = {}) {
   };
 }
 
-module.exports = { loadSnippet, verifyRecord, deferred, executionHarness, schemaAdapter, registryFixture, nativeStoreHarness, syntheticFiles, writeFixtureTree, hookRunner, elements, usageComponentHarness };
+module.exports = { loadSnippet, verifyRecord, loadRecords, deferred, executionHarness, schemaAdapter, registryFixture, nativeStoreHarness, syntheticFiles, writeFixtureTree, hookRunner, elements, usageComponentHarness };

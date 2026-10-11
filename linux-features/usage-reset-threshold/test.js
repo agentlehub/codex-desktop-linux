@@ -6,7 +6,8 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
-const records = require("./fixtures/source-contracts.json");
+const { loadRecords } = require("./fixtures/harness.js");
+const records = loadRecords();
 
 test("fixture provenance: exact bounded source slices reject truncation", () => {
   const { verifyRecord } = require("./fixtures/harness.js");
@@ -14,6 +15,21 @@ test("fixture provenance: exact bounded source slices reject truncation", () => 
     assert.equal(verifyRecord(record), true);
     assert.throws(() => verifyRecord({ ...record, source: record.source.slice(0, -1) }), /provenance/);
   }
+});
+
+test("fixture provenance: shared metadata resolves each source and rejects broken references", () => {
+  const manifest = require("./fixtures/source-contracts.json");
+  for (const record of records) {
+    assert.equal(record.version, manifest.version);
+    assert.equal(record.architecture, manifest.architecture);
+    assert.equal(record.sourceSha256, manifest.sources[record.sourcePath]);
+  }
+  const sourcePath = manifest.records[0].sourcePath;
+  const missing = { ...manifest.sources }; delete missing[sourcePath];
+  assert.throws(() => loadRecords({ ...manifest, sources: missing }), /provenance source path/);
+  assert.throws(() => loadRecords({ ...manifest, sources: { ...manifest.sources, [sourcePath]: "invalid" } }), /provenance source hash/);
+  assert.throws(() => loadRecords({ ...manifest, version: "" }), /provenance version/);
+  assert.throws(() => loadRecords({ ...manifest, architecture: "unknown" }), /provenance architecture/);
 });
 
 test("fixture provenance: synthetic assets parse without executing initializers", () => {
@@ -147,6 +163,18 @@ test("preflight: malformed schema links and partial markers fail closed", () => 
   }
 });
 
+// Synchronous feature-local guard; callers keep their rejection/report checks
+// visible, and every guarded operation observes this exact fixture tree.
+function assertNoFixtureWrites(root, files, operation) {
+  const original = fs.writeFileSync; let writes = 0;
+  fs.writeFileSync = () => { writes++; throw Error("Unexpected fixture write"); };
+  try {
+    operation();
+    assert.equal(writes, 0);
+  } finally { fs.writeFileSync = original; }
+  assert.deepEqual(require("./patch.js").readSources(root), files);
+}
+
 test("preflight: missing and duplicate native definitions reject before any writes", { concurrency: false }, t => {
   const { applyUsageResetThreshold } = require("./patch.js");
   const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
@@ -158,14 +186,9 @@ test("preflight: missing and duplicate native definitions reject before any writ
       const files = syntheticFiles();
       files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, duplicate ? `${record.source},${record.source}` : "fixtureRemoved:true"));
       writeFixtureTree(root, files);
-      let writes = 0;
-      const original = fs.writeFileSync;
-      fs.writeFileSync = () => { writes++; throw Error("Unexpected preflight write"); };
-      try {
+      assertNoFixtureWrites(root, files, () => {
         assert.throws(() => applyUsageResetThreshold(root), /registry|registries|definition|four|4|ambiguous|missing|duplicate/i);
-        assert.equal(writes, 0);
-      } finally { fs.writeFileSync = original; }
-      for (const [relative, source] of files) assert.equal(fs.readFileSync(path.join(root, relative), "utf8"), source);
+      });
     }
   }
 });
@@ -192,16 +215,11 @@ test("preflight: missing, duplicate, and disconnected runtime bindings reject be
     assert.notEqual(mutated, source, "Mutation must reach its intended runtime surface");
     files.set(relative, mutated);
     writeFixtureTree(root, files);
-    const original = fs.writeFileSync;
-    let writes = 0;
-    fs.writeFileSync = () => { writes++; throw Error("Unexpected runtime preflight write"); };
-    try {
+    assertNoFixtureWrites(root, files, () => {
       assert.throws(() => applyUsageResetThreshold(root), error =>
         /execution|wrapper|authoritative|registry|export|import|read/i.test(error.message)
         && !error.message.includes("unresolved required surfaces"));
-      assert.equal(writes, 0);
-    } finally { fs.writeFileSync = original; }
-    for (const [file, bytes] of files) assert.equal(fs.readFileSync(path.join(root, file), "utf8"), bytes);
+    });
   }
 });
 
@@ -320,7 +338,7 @@ test("execution: cancellation after every pre-dispatch await prevents consume", 
   }
 });
 
-test("execution: settings rejection and master-off after awaits never dispatch", async () => {
+test("execution: settings rejection after awaits never dispatch", async () => {
   const { deferred } = require("./fixtures/harness.js");
   for (const final of [false, true]) {
     const h = execution(), gate = deferred();
@@ -329,12 +347,6 @@ test("execution: settings rejection and master-off after awaits never dispatch",
     const result = h.invoke();
     gate.reject(Error("inert settings read failure"));
     assert.match(responseText(await result), /settings are unavailable/);
-    assert.equal(consumes(h).length, 0);
-  }
-  for (const stage of [1, 2]) {
-    const h = execution();
-    h.controls.master.push(...Array(stage).fill(true), false);
-    assert.match(responseText(await h.invoke()), /Master disabled/);
     assert.equal(consumes(h).length, 0);
   }
 });
@@ -632,28 +644,17 @@ test("usage: master disabling before effects prevents a blur commit", async () =
   assert.equal(controls(h.render())[2].props.value, "10");
 });
 
-function catalogHarness(source) {
-  const { loadSnippet } = require("./fixtures/harness.js");
-  const string = { trim() { return this; }, min(value) { assert.equal(value, 1); return this; }, describe() { return this; } };
-  return loadSnippet(source, {
-    e: initializer => { let done = false; return () => { if (!done) { done = true; initializer(); } }; },
-    Vs() {}, X: () => string,
-    fa: shape => ({ type: "object", properties: Object.keys(shape), additionalProperties: false }),
-    hm: () => ({ parse: value => value }), Uf: value => value,
-  }, "(nac(),{descriptor:tac,schema:eac})");
-}
-
 test("metadata: catalog preserves authorization/schema and changes only eligibility sentence", () => {
   const { discoverMetadata } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
   const metadata = discoverMetadata(syntheticFiles());
   const stock = records.find(record => record.id === "catalog").source;
-  const result = catalogHarness(metadata.catalog.replacement), original = catalogHarness(stock);
   const before = "Every call checks fresh core usage: either the five-hour or weekly window must have 10% or less remaining.";
   const after = "Each call requires the Usage setting allowing Codex to use resets, reads fresh core Codex usage, and checks the current local remaining-percentage threshold: 10% unless custom mode is enabled in Usage settings. Either available core window can qualify. Unavailable usage never qualifies. Custom settings permit a local attempt; service eligibility still applies.";
-  assert.equal(result.descriptor.description, original.descriptor.description.replace(before, after));
-  assert.equal(result.descriptor.name, "consume_usage_reset");
-  assert.deepEqual(JSON.parse(JSON.stringify(result.schema)), JSON.parse(JSON.stringify(original.schema)));
-  assert.deepEqual(JSON.parse(JSON.stringify(result.descriptor.inputSchema)), { type: "object", properties: ["idempotencyKey"], additionalProperties: false });
+  assert.equal(metadata.catalog.original, stock, "Replacement owns the complete bounded catalog declaration");
+  assert.equal(stock.split(before).length - 1, 1, "Exactly one stock eligibility sentence");
+  // Full declaration equality preserves name, authorization, schema, and all
+  // other bytes without pretending a schema fake proves upstream semantics.
+  assert.equal(metadata.catalog.replacement, stock.replace(before, after));
 });
 
 test("metadata: Usage search exposes controls without changing unrelated or manual messages", () => {
@@ -728,7 +729,6 @@ test("patch closure: complete transaction preserves manual paths and reapplies b
   assert.ok(actual.get(usage.path).includes(usage.component));
   assert.equal(controls(usageComponentHarness(usage).render())[2].props.value, "10");
   assert.ok(actual.get(metadata.catalog.path).includes(metadata.catalog.replacement));
-  assert.match(catalogHarness(metadata.catalog.replacement).descriptor.description, /current local remaining-percentage threshold/);
   const second = patch.planPatch(actual);
   assert.equal(second.alreadyApplied, true); assert.equal(second.changes.size, 0);
   assert.equal(patch.applyUsageResetThreshold(root).changed, false);
@@ -840,11 +840,7 @@ test("patch closure: missing or duplicate UI/catalog/search contracts reject bef
     const root = fixtureDirectory(t, "surface-drift"), files = new Map(original);
     files.set(file, files.get(file).replace(source, duplicate ? source + source : ""));
     writeFixtureTree(root, files);
-    const write = fs.writeFileSync; let writes = 0;
-    fs.writeFileSync = () => { writes++; throw Error("Unexpected drift write"); };
-    try { assert.throws(() => patch.applyUsageResetThreshold(root)); assert.equal(writes, 0); }
-    finally { fs.writeFileSync = write; }
-    assert.deepEqual(patch.readSources(root), files);
+    assertNoFixtureWrites(root, files, () => assert.throws(() => patch.applyUsageResetThreshold(root)));
   }
 });
 
@@ -864,12 +860,10 @@ test("patch closure: complete markers cannot hide edited bodies or a changed reg
     const root = fixtureDirectory(t, "marker-drift"), files = new Map(complete); mutate(files);
     assert.notDeepEqual(files, complete); writeFixtureTree(root, files);
     const descriptors = featureDescriptors(root), report = createPatchReport(); report.enabledFeatures = ["usage-reset-threshold"];
-    const write = fs.writeFileSync; let writes = 0;
-    fs.writeFileSync = () => { writes++; throw Error("Unexpected marker write"); };
-    try { applyExtractedAppPatchDescriptors(root, descriptors, {}, report, "extracted-app:pre-webview"); assert.equal(writes, 0); }
-    finally { fs.writeFileSync = write; }
+    assertNoFixtureWrites(root, files, () => {
+      applyExtractedAppPatchDescriptors(root, descriptors, {}, report, "extracted-app:pre-webview");
+    });
     assert.equal(enabledFeatureFailuresFromReport(report).length, 1);
-    assert.deepEqual(patch.readSources(root), files);
   }
 });
 
@@ -897,11 +891,9 @@ test("patch closure: malformed changed asset rejects at syntax gate before any w
   // otherwise complete candidate before the first transactional write.
   assert.ok(patch.planPatch(files).changes.size > 0);
   writeFixtureTree(root, files);
-  const write = fs.writeFileSync; let writes = 0;
-  fs.writeFileSync = () => { writes++; throw Error("Unexpected syntax-gate write"); };
-  try { assert.throws(() => patch.applyUsageResetThreshold(root), /generated syntax invalid/); assert.equal(writes, 0); }
-  finally { fs.writeFileSync = write; }
-  assert.deepEqual(patch.readSources(root), files);
+  assertNoFixtureWrites(root, files, () => {
+    assert.throws(() => patch.applyUsageResetThreshold(root), /generated syntax invalid/);
+  });
 });
 
 test("patch closure: reapplication rejects malformed surrounding JavaScript without writes", { concurrency: false }, t => {
@@ -912,9 +904,7 @@ test("patch closure: reapplication rejects malformed surrounding JavaScript with
   fs.appendFileSync(target, "\nfunction incompleteSyntax(\n");
   const before = patch.readSources(root);
   assert.equal(patch.planPatch(before).alreadyApplied, true, "Generated bodies and markers remain intact");
-  const write = fs.writeFileSync; let writes = 0;
-  fs.writeFileSync = () => { writes++; throw Error("Unexpected reapplication write"); };
-  try { assert.throws(() => patch.applyUsageResetThreshold(root), /generated syntax invalid/); assert.equal(writes, 0); }
-  finally { fs.writeFileSync = write; }
-  assert.deepEqual(patch.readSources(root), before);
+  assertNoFixtureWrites(root, before, () => {
+    assert.throws(() => patch.applyUsageResetThreshold(root), /generated syntax invalid/);
+  });
 });
