@@ -47,5 +47,5 @@ enabled feature's normal build enforcement to reject the candidate. Remove or
 update the feature when upstream fixes or changes this guard.
 
 ```bash
-node --test linux-features/filesystem-root-follow-ups/test.js
+node --test linux-features/filesystem-root-follow-ups/tests/test.js
 ```

@@ -74,5 +74,5 @@ Updater rebuilds reuse the packaged artifacts and never invoke Cargo.
 Validate descriptor ownership and artifact-only staging with:
 
 ```bash
-node --test linux-features/computer-use-linux/test.js linux-features/computer-use-linux/*.test.js
+node --test linux-features/computer-use-linux/tests/test.js linux-features/computer-use-linux/tests/*.test.js
 ```

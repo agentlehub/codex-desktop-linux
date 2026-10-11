@@ -175,5 +175,5 @@ workspaces should be controlled from Settings plus the native viewer.
 Run the feature tests with:
 
 ```bash
-node --test linux-features/agent-workspace/test.js
+node --test linux-features/agent-workspace/tests/test.js
 ```

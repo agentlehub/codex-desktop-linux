@@ -50,5 +50,5 @@ shortcuts cannot be represented by the XDG shortcut format and are rejected
 before registration.
 
 ```bash
-node --test linux-features/global-dictation/test.js
+node --test linux-features/global-dictation/tests/test.js
 ```

@@ -24,5 +24,5 @@ rollout-dependent upstream behavior. Enable it in
 Run the feature tests with:
 
 ```bash
-node --test linux-features/project-task-sort/test.js
+node --test linux-features/project-task-sort/tests/test.js
 ```

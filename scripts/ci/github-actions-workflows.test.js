@@ -76,7 +76,7 @@ test("official Linux validation runs fully on every pull request but not hourly"
   assert.match(signedBaseline, /CODEX_SIGNED_EXTRACTED_APP="\$extracted_asar"/);
   assert.match(signedBaseline, /corePatchDescriptors\(\)/);
   assert.match(signedBaseline, /ciPolicy \}\) => ciPolicy === "required-upstream"/);
-  assert.match(signedBaseline, /path\.join\(path\.dirname\(sourcePath\), "test\.js"\)/);
+  assert.match(signedBaseline, /patchRoot, "tests", path\.relative\(patchRoot, path\.dirname\(sourcePath\)\), "test\.js",/);
   assert.match(signedBaseline, /if \(tests\.length > 0\)/);
   assert.doesNotMatch(signedBaseline, /tests\.length === 0 \|\|/);
   assert.doesNotMatch(
@@ -240,7 +240,7 @@ test("Community profile isolation is validated alone against the signed package"
   assert.match(feature, /\.\/install\.sh "\$package"/);
   assert.match(
     feature,
-    /node --test linux-features\/community-profile-isolation\/test\.js/,
+    /node --test linux-features\/community-profile-isolation\/tests\/test\.js/,
   );
   assert.match(feature, /CODEX_ELECTRON_USER_DATA_PATH/);
 
@@ -255,7 +255,7 @@ test("Community profile isolation is validated alone against the signed package"
   );
   assert.match(
     signedBaseline,
-    /node --test linux-features\/community-profile-isolation\/test\.js/,
+    /node --test linux-features\/community-profile-isolation\/tests\/test\.js/,
   );
 });
 

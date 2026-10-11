@@ -16,5 +16,5 @@ The webview patch is optional, fail-soft, and idempotent. If the upstream
 composer bundle changes shape, the patch warns and leaves the bundle unchanged.
 
 ```bash
-node --test linux-features/persistent-status-panel/test.js
+node --test linux-features/persistent-status-panel/tests/test.js
 ```

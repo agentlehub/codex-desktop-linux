@@ -55,7 +55,7 @@ checks preference resolution and location arguments, not editor-process launch.
 have not been validated for this feature.
 
 ```sh
-node --test linux-features/preferred-editor-file-links/test.js
+node --test linux-features/preferred-editor-file-links/tests/test.js
 ```
 
 Build with this feature alone against the current signed official Linux package.

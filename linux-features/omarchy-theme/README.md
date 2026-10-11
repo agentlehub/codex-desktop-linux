@@ -66,7 +66,7 @@ desired, then run `omarchy theme refresh`.
 ## Test
 
 ```bash
-node --test linux-features/omarchy-theme/test.js
+node --test linux-features/omarchy-theme/tests/test.js
 ```
 
 Manual acceptance checks:

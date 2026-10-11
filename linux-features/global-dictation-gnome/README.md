@@ -177,7 +177,7 @@ already-running helper that chose GNOME does not fall back.
 From the repository root:
 
 ```sh
-node --test linux-features/global-dictation-gnome/test.js
+node --test linux-features/global-dictation-gnome/tests/test.js
 bash -n linux-features/global-dictation-gnome/install-extension.sh
 git --no-pager diff --check -- linux-features/global-dictation-gnome
 ```

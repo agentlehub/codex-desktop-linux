@@ -46,5 +46,5 @@ may reject requests at runtime.
 ## Test
 
 ```bash
-node --test linux-features/api-key-model-visibility/test.js
+node --test linux-features/api-key-model-visibility/tests/test.js
 ```

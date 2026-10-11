@@ -157,5 +157,5 @@ The handler never invokes a shell for response text.
 Validate the UI, Electron bridge, and Kokoro staging behavior with:
 
 ```bash
-node --test linux-features/read-aloud/test.js
+node --test linux-features/read-aloud/tests/test.js
 ```

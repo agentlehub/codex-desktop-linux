@@ -20,7 +20,7 @@
 - Work only in `/home/korty/dev/codex-desktop-linux-update-builder-design`, branch `design/update-builder-payload`, implementation base `839dbb50fbd2ad041089981441a82f2460dac455`. Revalidate before edits. Do not change `/home/korty/dev/agentlehub/codex-desktop-linux`, the usage-reset PR, other worktrees or unrelated changes.
 - Read `AGENTS.md`, `CONTRIBUTING.md`, the source spec, its [review trace](../reviews/2026-10-11-update-builder-test-directories-review.md), and the supporting [current decisions and contract](../../brainstorming/2026-10-11-154818-update-builder-payload.md). Q1 manifest exclusions and Q2 finalization are superseded. The later acceptance exception and plugin-preservation correction govern.
 - Bash, Node.js 20+ (24 matches CI), Git, Python 3, ripgrep, GNU find/sort/timeout, tar and existing test dependencies must be available. No dependency addition is needed. Do not install tools implicitly. Semble was already attempted for this task and failed on the read-only uv cache lock; targeted `rg` and source reads are the established fallback.
-- Before executing tests/builds, allocate a unique disk-backed directory beneath `${XDG_CACHE_HOME:-$HOME/.cache}/codex-desktop-dev/`, export `TMPDIR` beneath it, and confirm its filesystem and free space. Do not use `/tmp` for scratch, extracted packages, app copies, build targets or validation output. Keep Cargo output in the disposable source copy's `target/` and feature-specific existing target locations. Run large builds serially with `MAX_BUILD_THREADS=2` and `CARGO_BUILD_JOBS=2`, increasing only with measured capacity.
+- Before executing tests/builds, allocate a unique disk-backed directory beneath `${XDG_CACHE_HOME:-$HOME/.cache}/codex-desktop-dev/`, export `TMPDIR` beneath it, and confirm its filesystem and free space. The operator later authorized short physical `/tmp` for small bounded unit fixtures only, as recorded below; extracted packages, app copies, build targets and bulky validation output remain disk-backed cache. Keep Cargo output in the disposable source copy's `target/` and feature-specific existing target locations. Run large builds serially with `MAX_BUILD_THREADS=2` and `CARGO_BUILD_JOBS=2`, increasing only with measured capacity.
 - **[MANUAL] Operator where required:** authorize network/build resources, native `amd64` and `arm64` capacity, and CI dispatch. Signed current stable upstream inputs and native package tools (`dpkg-deb`, `rpmbuild`, `rpm2cpio`, `cpio`, `makepkg`, `bsdtar`, `appimagetool`, `unsquashfs`, `readelf`) must be available in suitable disposable environments. Do not spoof architecture or use fake helpers for physical package validation.
 - **[MANUAL] Operator:** provide an authorized hosted Nix output-build lane, or explicitly accept it as unavailable. Existing `ci.yml` Nix runtime/VM checks execute application/runtime probes and must not be dispatched under this task's no-app-launch boundary. Task 8 supplies output-only hosted commands; it does not authorize workflow changes or local Nix installation/builds.
 - Never call real usage-reset tools/RPC/HTTP/UI, even to test rejection. Never load live Codex modules or use live profiles/authentication/sockets/settings. Keep optional native/CLI/official-bundle tests disabled in normal unit runs. No acceptance runner execution, evidence regeneration, install, launch or restart.
@@ -115,9 +115,10 @@ Production `patch.js`, `shell-env.js`, `descriptor.js`, `runner.js`, `engine.js`
 - `scripts/lib/package-common.sh`: only the two exact-root omissions in existing stagers.
 - `scripts/lib/package-common.test.js`: behavioral staging regressions and test-local fixture helpers. Keep existing tests.
 - `scripts/ci/run-node-checks.sh`: tracked relocation discovery only.
+- `scripts/ci/github-actions-workflows.test.js`: existing workflow path expectations matching the relocated core and community-profile test commands.
 - `scripts/ci/container-entrypoint.sh`, `tests/scripts_smoke.sh`, `.github/workflows/ci.yml`: existing exact paths/globs only.
 - `.github/workflows/upstream-build-app.yml`: two community-profile-isolation commands and the required-core-test path derived from descriptor `sourcePath`.
-- `AGENTS.md`, `CONTRIBUTING.md`, `linux-features/README.md`, `docs/linux-features-architecture.md`, `docs/build-and-packaging.md`, `docs/agents/validation-playbook.md`, `docs/linux-chronicle-skysight.md`, `docs/record-and-replay-linux.md`: connected commands/convention only.
+- `AGENTS.md`, `CONTRIBUTING.md`, `linux-features/README.md`, `scripts/patches/core/README.md`, `docs/linux-features-architecture.md`, `docs/build-and-packaging.md`, `docs/agents/validation-playbook.md`, `docs/linux-chronicle-skysight.md`, `docs/record-and-replay-linux.md`: connected commands/convention only.
 - Feature `README.md` files for `account-switcher`, `agent-workspace`, `api-key-model-visibility`, `api-key-service-tier`, `appshots`, `authenticated-proxy`, `authored-message-visibility`, `automation-extensions`, `browser-proxy`, `codex-micro`, `community-profile-isolation`, `computer-use-linux`, `copilot-reasoning-effort`, `directory-only-working-tree-watch`, `filesystem-root-follow-ups`, `frameless-titlebar`, `global-dictation`, `global-dictation-gnome`, `linux-performance-workarounds`, `mcp-helper-reaper`, `model-picker-default-presets`, `nix-store-bundled-marketplace-permissions`, `node-repl-reaper`, `omarchy-theme`, `persistent-status-panel`, `pet-overlay`, `preferred-editor-file-links`, `project-group-last-updated-sort`, `project-task-sort`, `read-aloud`, `read-aloud-mcp`, `record-and-replay`, `remote-control-ui`, `remote-mobile-control`, `shallow-repository-watches`, `shared-app-server-socket`, `start-minimized-to-tray`, `thorium-chrome-plugin`, `tray-usage`, `ui-tweaks`, plus `linux-features/browser-proxy/README.zh-CN.md`. `computer-use-linux/README.md` also has a `*.test.js` command; `copilot-reasoning-effort/README.md` has the all-feature glob. Preserve existing environment setup and opt-in warnings.
 - No expected production edit to `scripts/lib/linux-features.js`, manifests, plugin trees, native builders, Rust updater, Nix or Gentoo implementation. Discovery, descriptor APIs and source-location metadata already support the contract.
 
@@ -133,7 +134,7 @@ Production `patch.js`, `shell-env.js`, `descriptor.js`, `runner.js`, `engine.js`
 
 **Files:** read the file map above; write evidence only to the unique scratch directory. No production edits.
 
-- [ ] Confirm authorization and source status, then inspect current state:
+- [x] Confirm authorization and source status, then inspect current state:
 
 ```bash
 cd /home/korty/dev/codex-desktop-linux-update-builder-design
@@ -146,7 +147,7 @@ git diff --cached --name-status
 
 Expected branch/base above. If HEAD changed, audit the delta and reconcile the plan before coding; do not reset it. Record unrelated dirty paths, index entries and hashes. The drafting-time state had untracked `docs/brainstorming/` and `docs/superpowers/`; do not stage either directory wholesale. After allocating scratch, save `git diff --binary` and `git diff --cached --binary` there so original index/worktree state remains recoverable without resetting it.
 
-- [ ] Create disk-backed evidence and a sanitized test environment. Run future unit commands in this shell:
+- [x] Create disk-backed evidence and a sanitized test environment. Run future unit commands in this shell:
 
 ```bash
 work_cache="${XDG_CACHE_HOME:-$HOME/.cache}/codex-desktop-dev"
@@ -166,7 +167,7 @@ df -h "$validation_root"
 
 Stop on tmpfs or insufficient capacity. Environment changes are task-shell-only. Record the resulting absolute scratch path in implementation progress notes; no live profile/settings are changed.
 
-- [ ] Capture tracked entrypoint paths, fixture/helper hashes, executable modes and acceptance/plugin snapshots before moving. Use `git ls-files -s` and `sha256sum` on the explicit map; retain all acceptance and plugin file hashes, including hidden files. Save the original tracked runner list:
+- [x] Capture tracked entrypoint paths, fixture/helper hashes, executable modes and acceptance/plugin snapshots before moving. Use `git ls-files -s` and `sha256sum` on the explicit map; retain all acceptance and plugin file hashes, including hidden files. Save the original tracked runner list:
 
 ```bash
 git ls-files '*.test.js' 'linux-features/*/test.js' > "$validation_root/node-entrypoints.before"
@@ -189,13 +190,13 @@ sha256sum linux-features/account-switcher/native-probe.js \
 
 `sha256sum -c "$validation_root/preserved-trees.sha256"` must pass after the migration; compare the two relocated resources' destination hashes to their old hashes. Do not derive the actual move set from unrestricted recursion: the approved map has 52 feature entrypoints, six shared entrypoints, one fixture and one helper. Preserve synthetic source strings whose names merely end in `test.js`.
 
-- [ ] Audit actual imports, dynamic `import()`, `__dirname`, fixture copies and embedded subprocess programs in each moved entrypoint. Recheck helper/fixture production consumers with exact `rg`; a newly found production dependency on a proposed test root is a stop condition, not grounds to delete the consumer.
+- [x] Audit actual imports, dynamic `import()`, `__dirname`, fixture copies and embedded subprocess programs in each moved entrypoint. Recheck helper/fixture production consumers with exact `rg`; a newly found production dependency on a proposed test root is a stop condition, not grounds to delete the consumer.
 
 ### Task 2: Add behavioral staging regressions before production changes
 
 **Modify/test:** `scripts/lib/package-common.test.js`. Keep its current `runPackageCommon()` and `copyFeatureHelpers()` callers intact. Do not make every old test require a complete builder source.
 
-- [ ] Add the following test-local helpers. They use existing stagers through the fixture's own shell file, not a source-text assertion or an alternate implementation. Copies contain no checkout Git metadata or private local source.
+- [x] Add the following test-local helpers. They use existing stagers through the fixture's own shell file, not a source-text assertion or an alternate implementation. Copies contain no checkout Git metadata or private local source.
 
 ```js
 function put(root, relative, contents, mode = 0o644) {
@@ -298,7 +299,7 @@ function copyUpdaterRoots(source, destination) {
 
 `treeSnapshot()` is a test fixture assertion, not a production classifier. It records regular-file bytes/modes and symlink identities; generation-two inputs below contain no symlinks. Existing updater bundle-copy symlink rejection is verified from source and remains unchanged; neither this copy helper nor the existing Rust tests establish rejection coverage for bundle copying. No Rust changes are required by this plan.
 
-- [ ] Add the exact-boundary and source-safety regression. It must fail before the two omission lines exist:
+- [x] Add the exact-boundary and source-safety regression. It must fail before the two omission lines exist:
 
 ```js
 test("update-builder omits only repository component test roots", (t) => {
@@ -386,7 +387,7 @@ test("update-builder test-root omission unlinks copied symlinks without touching
 });
 ```
 
-- [ ] Add real-feature coverage as a table-driven staging test at the existing feature-tree staging boundary. Enumerate direct repository feature directories only, excluding `local` before reading manifests. Each case copies only its selected feature and explicit dependencies, plus the existing feature helpers and real compatibility/example configuration. Exclude generated `target` directories during fixture copying and seed a tiny marker to exercise existing pruning. Keep disabled-selection assertions in the synthetic boundary case above. Do not copy all features or use the full builder fixture for these cases.
+- [x] Add real-feature coverage as a table-driven staging test at the existing feature-tree staging boundary. Enumerate direct repository feature directories only, excluding `local` before reading manifests. Each case copies only its selected feature and explicit dependencies, plus the existing feature helpers and real compatibility/example configuration. Exclude generated `target` directories during fixture copying and seed a tiny marker to exercise existing pruning. Keep disabled-selection assertions in the synthetic boundary case above. Do not copy all features or use the full builder fixture for these cases.
 
 ```js
 const repositoryFeatures = fs.readdirSync(path.join(repoRoot, "linux-features"), { withFileTypes: true })
@@ -456,7 +457,7 @@ for (const feature of repositoryFeatures) {
 }
 ```
 
-- [ ] Add one generation-two integration regression. Reuse the helpers above and the following complete fixture, retaining real native source-exclusion, plugin-copy and inventory behavior without executing the fake helpers:
+- [x] Add one generation-two integration regression. Reuse the helpers above and the following complete fixture, retaining real native source-exclusion, plugin-copy and inventory behavior without executing the fake helpers:
 
 ```js
 test("update-builder generation two retains local inputs, consumers, plugins and native grafts", (t) => {
@@ -547,11 +548,11 @@ test("update-builder generation two retains local inputs, consumers, plugins and
 });
 ```
 
-- [ ] Add six separately named missing-native-artifact cases against the existing `stage_enabled_native_feature_artifacts` entrypoint, one for each source/destination mapping in `nativePaths` above. Hoist that mapping and `nativeIds` into shared test constants so successful graft and failure cases use the same fixtures. Each case uses a fresh lightweight temporary source with `copyFeatureHelpers()`, real compatibility/example files, and only the real `feature.json`/`README.md` for those five native IDs. Write `features.json` with those IDs enabled and create the six tiny inert executable source artifacts in its app fixture. Omit exactly the case's source artifact, invoke the native stager via `runPackageCommon()` with explicit fixture feature-root/config and cleared internal enablement, and assert `Missing staged native feature artifact`. Never call `stageFixture()` or copy full feature/plugin trees for this table. Cases run independently of generation-two assertions. Keep successful byte/mode graft checks in both generations and the full updater-disabled and no-native/plugin-disabled cases above.
+- [x] Add six separately named missing-native-artifact cases against the existing `stage_enabled_native_feature_artifacts` entrypoint, one for each source/destination mapping in `nativePaths` above. Hoist that mapping and `nativeIds` into shared test constants so successful graft and failure cases use the same fixtures. Each case uses a fresh lightweight temporary source with `copyFeatureHelpers()`, real compatibility/example files, and only the real `feature.json`/`README.md` for those five native IDs. Write `features.json` with those IDs enabled and create the six tiny inert executable source artifacts in its app fixture. Omit exactly the case's source artifact, invoke the native stager via `runPackageCommon()` with explicit fixture feature-root/config and cleared internal enablement, and assert `Missing staged native feature artifact`. Never call `stageFixture()` or copy full feature/plugin trees for this table. Cases run independently of generation-two assertions. Keep successful byte/mode graft checks in both generations and the full updater-disabled and no-native/plugin-disabled cases above.
 
 The first-generation plugin/source comparison includes hidden files and `.gitkeep`; comparing generations only would miss an omission repeated by both. The second call leaves the copied config untouched (`enabled === null`) and verifies its bytes. Ownership does not consult Git in either generation; provenance may still probe Git as before.
 
-- [ ] Run red with the original production stager, keeping the failure log:
+- [x] Run red with the original production stager, keeping the failure log:
 
 ```bash
 node --test --test-name-pattern='update-builder (omits only|rejects copied|test-root omission|preserves production inputs|generation two)' \
@@ -564,7 +565,7 @@ Expected failures: copied repository/shared `tests/` still exists, and the copie
 
 **Modify:** `scripts/lib/package-common.sh` only.
 
-- [ ] Immediately after `cp -a "$source" "$destination"` in `stage_update_builder_linux_features_tree()`, insert:
+- [x] Immediately after `cp -a "$source" "$destination"` in `stage_update_builder_linux_features_tree()`, insert:
 
 ```bash
         case "$relative_dir" in
@@ -579,7 +580,7 @@ Expected failures: copied repository/shared `tests/` still exists, and the copie
 
 Discovery already emits only direct repository directories or `local/<directory>`; do not infer ownership from `feature_id`, a Git query, a manifest flag or directory existence. It accepts directory symlinks through `fs.statSync`, and `cp -a` preserves them. Consequently, reject a symlink at the copied repository feature destination before the new deletion and before proceeding to the existing exclusion operations. This narrow repository-branch guard protects the deletion's feature-directory ancestor; omitting a trailing slash alone would not. With that ancestor verified, the no-trailing-slash deletion unlinks a symlink at the `tests` leaf without traversing its referent. Keep fresh disposable staging parents and the existing target/acceptance/reaper exclusions in their current order after this block. Leave the `local/*` branch and its existing copying/exclusion behavior unchanged; do not add a discovery change or global validator.
 
-- [ ] Immediately after the recursive `scripts/patches` copy in `stage_update_builder_bundle()`, insert:
+- [x] Immediately after the recursive `scripts/patches` copy in `stage_update_builder_bundle()`, insert:
 
 ```bash
     rm -rf -- "$update_builder_root/scripts/patches/tests"
@@ -587,7 +588,7 @@ Discovery already emits only direct repository directories or `local/<directory>
 
 Do not introduce a shared deletion API for two literal roots. Keep plugin copies, config/provenance, native graft order and `write_update_builder_manifest()` unchanged. `rm -rf` missing-root success is required for generation two.
 
-- [ ] Run focused green and framework regression checks:
+- [x] Run focused green and framework regression checks:
 
 ```bash
 bash -n scripts/lib/package-common.sh
@@ -601,7 +602,7 @@ Expected: all assertions pass, including all isolated features, retained plugin 
 
 **Files:** exact relocation map; ordinary test code only. No acceptance or production resource changes.
 
-- [ ] Move the 52 feature entrypoints and six shared entrypoints with path-scoped `git mv`; create destination parent directories first. Move the UI fixture and account-switcher helper too. Do not move `linux-features/local/`, production files, shared test files outside `scripts/patches/`, or acceptance material.
+- [x] Move the 52 feature entrypoints and six shared entrypoints with path-scoped `git mv`; create destination parent directories first. Move the UI fixture and account-switcher helper too. Do not move `linux-features/local/`, production files, shared test files outside `scripts/patches/`, or acceptance material.
 ```bash
 for file in linux-features/*/test.js linux-features/*/*.test.js; do
   feature_dir="${file%/*}"
@@ -621,8 +622,8 @@ git mv -- linux-features/account-switcher/native-probe.js \
   linux-features/account-switcher/tests/native-probe.js
 ```
 
-- [ ] Perform each mechanical move and its path repairs together, then run the focused green command below. Do not run a deliberately broken intermediate import state; Task 2 retains the meaningful omission/symlink red phase.
-- [ ] Repair feature paths according to their semantic base. Apply these exact transformations to actual module imports/path expressions, not arbitrary strings. Use a local `featureDir`/`FEATURE_DIR` where already present; otherwise direct `path.resolve(__dirname, "..")` is enough. Do not add a shared path abstraction.
+- [x] Perform each mechanical move and its path repairs together, then run the focused green command below. Do not run a deliberately broken intermediate import state; Task 2 retains the meaningful omission/symlink red phase.
+- [x] Repair feature paths according to their semantic base. Apply these exact transformations to actual module imports/path expressions, not arbitrary strings. Use a local `featureDir`/`FEATURE_DIR` where already present; otherwise direct `path.resolve(__dirname, "..")` is enough. Do not add a shared path abstraction.
 
 ```js
 // Feature test imports, including require calls inside callbacks:
@@ -657,7 +658,7 @@ Specific traps:
 - `account-switcher/tests/test.js` still copies `tests/native-probe.js`, and the opt-in runtime override fallback becomes `path.join(__dirname, "../runtime.js")`. Never enable the probe.
 - Directory-watch test uses `path.join(__dirname, "../acceptance")`, `path.resolve(__dirname, "../../..")`, and `../watchbound-artifacts.json`. Preserve all historical path keys, hash literals and assertions at old lines 6040-6075. All acceptance files remain unchanged.
 
-- [ ] Repair shared patch test imports with these exact destination-relative mappings:
+- [x] Repair shared patch test imports with these exact destination-relative mappings:
 
 | New test | Required module paths |
 | --- | --- |
@@ -674,7 +675,7 @@ For example, the moved runner's configuration path is:
 const emptyConfig = path.resolve(__dirname, "../../../linux-features/features.example.json");
 ```
 
-- [ ] Run all moved entrypoints explicitly; fixture/helper are absent from the arguments:
+- [x] Run all moved entrypoints explicitly; fixture/helper are absent from the arguments:
 
 ```bash
 node --test linux-features/*/tests/test.js linux-features/*/tests/*.test.js \
@@ -688,7 +689,7 @@ Expected green with pre-existing optional integrations skipped. UI test imports 
 
 **Files:** the other-edits map above; same migration owner as Task 4.
 
-- [ ] Update the tracked discovery selector in `scripts/ci/run-node-checks.sh`. Preserve `git ls-files` semantics and the existing global `*.test.js` behavior. Add exact reserved-root patterns for `test.js`:
+- [x] Update the tracked discovery selector in `scripts/ci/run-node-checks.sh`. Preserve `git ls-files` semantics and the existing global `*.test.js` behavior. Add exact reserved-root patterns for `test.js`:
 
 ```bash
     done < <(git ls-files '*.test.js' \
@@ -698,7 +699,7 @@ Expected green with pre-existing optional integrations skipped. UI test imports 
 
 Do not switch to `find`, include untracked files, recurse over private inputs, invoke `node --test` on a directory, or select every `.js` under tests. Existing syntax discovery remains `git ls-files '*.js'`. New/moved tracked paths must be in the index before this runner is used; future implementation authorization covers narrow staging, not a commit.
 
-- [ ] Update command operands while preserving each command's existing coverage:
+- [x] Update command operands while preserving each command's existing coverage:
 
 ```text
 linux-features/*/test.js                 -> linux-features/*/tests/test.js
@@ -712,7 +713,7 @@ linux-features/community-profile-isolation/test.js
 
 Apply in `tests/scripts_smoke.sh`, `scripts/ci/container-entrypoint.sh`, `.github/workflows/ci.yml` and the two exact community-profile-isolation commands in `.github/workflows/upstream-build-app.yml`. Preserve all unrelated workflow steps, matrix, environment, permissions and timeout settings.
 
-- [ ] Repair the required-core-test derivation in `.github/workflows/upstream-build-app.yml`, retaining descriptor-driven selection and the existing missing-test failure:
+- [x] Repair the required-core-test derivation in `.github/workflows/upstream-build-app.yml`, retaining descriptor-driven selection and the existing missing-test failure:
 
 ```js
 const patchRoot = path.resolve("scripts/patches");
@@ -725,8 +726,8 @@ const tests = corePatchDescriptors()
 
 The current descriptor `sourcePath` is the production `scripts/patches/core/<id>/patch.js`; this maps to the preserved relative test structure. Do not change production `corePatchDescriptors()` or patch discovery to accommodate test placement.
 
-- [ ] Update each connected README/document command by inserting `/tests/` after the repository feature directory. For `computer-use-linux/README.md`, update both `test.js` and `*.test.js`. Keep private authoring examples (`linux-features/local/my-feature/test.js`) unchanged. Keep historical design/review records, acceptance files and evidence immutable. Do not bulk-rewrite all prose `test.js` tokens.
-- [ ] Add this convention to `linux-features/README.md`'s module layout/testing sections, and concise matching packaging paragraphs in `docs/linux-features-architecture.md` and `docs/build-and-packaging.md`:
+- [x] Update each connected README/document command by inserting `/tests/` after the repository feature directory. For `computer-use-linux/README.md`, update both `test.js` and `*.test.js`. Keep private authoring examples (`linux-features/local/my-feature/test.js`) unchanged. Keep historical design/review records, acceptance files and evidence immutable. Do not bulk-rewrite all prose `test.js` tokens.
+- [x] Add this convention to `linux-features/README.md`'s module layout/testing sections, and concise matching packaging paragraphs in `docs/linux-features-architecture.md` and `docs/build-and-packaging.md`:
 
 ```text
 Repository feature test entrypoints belong in tests/test.js or tests/*.test.js;
@@ -746,32 +747,32 @@ and .gitkeep files, retain their existing staging behavior.
 
 Use the normal all-feature command `node --test linux-features/*/tests/test.js` wherever that command already existed. The focused full relocation verification above explicitly includes supplemental entrypoints; do not silently expand existing lightweight commands to execute acceptance/helpers.
 
-- [ ] Compare old and new discovery before running it. Transform only the moved source paths in `node-entrypoints.before` to their destination paths and compare with the new `git ls-files` selector. Stage only this task's exact newly moved paths/test changes if required; inspect `git diff --cached --name-status` immediately afterward. If the original index contained unrelated edits, retain them and exclude them from review/commit claims. Account explicitly for the two core `test.js` files, previously invoked by CI/smoke but omitted by this runner; they now belong in the reserved-root selector. The ten `*.test.js` feature entrypoints remain covered by the unchanged global selector. No fixture/helper/acceptance entry may appear.
-- [ ] Search active consumers again using Task 1's command, inspect every old-path hit, run `git diff --check`, and read the changed Markdown links relative to their actual file locations. No production path or test fixture byte change is permitted as a shortcut for a failed import.
+- [x] Compare old and new discovery before running it. Transform only the moved source paths in `node-entrypoints.before` to their destination paths and compare with the new `git ls-files` selector. Stage only this task's exact newly moved paths/test changes if required; inspect `git diff --cached --name-status` immediately afterward. If the original index contained unrelated edits, retain them and exclude them from review/commit claims. Account explicitly for the two core `test.js` files, previously invoked by CI/smoke but omitted by this runner; they now belong in the reserved-root selector. The ten `*.test.js` feature entrypoints remain covered by the unchanged global selector. No fixture/helper/acceptance entry may appear.
+- [x] Search active consumers again using Task 1's command, inspect every old-path hit, run `git diff --check`, and read the changed Markdown links relative to their actual file locations. No production path or test fixture byte change is permitted as a shortcut for a failed import.
 
 ### Task 6: Review milestone M1
 
 **Covers:** Tasks 1-5; incremental surface from the verified implementation base, including renames, index and working tree.
 
-- [ ] Confirm red/green evidence, exact relocation coverage, acceptance/helper/fixture hash preservation and tracked discovery comparison.
-- [ ] Dispatch one combined reviewer under the operator's current routing policy: requirements first, then code quality. Include the approved spec and current contract, not superseded Q1/Q2 recommendations. Ask the reviewer to trace every staging caller and compare the two literal omissions against a proposed shared helper; keep the simpler literal operations unless concrete evidence requires more.
-- [ ] Fix material findings, rerun affected checks, and repeat this milestone review. Fix minor findings and verify them without unnecessary full repeats. Stop for new scope/design decisions. Continue directly after a pass; do not ask for routine re-approval.
+- [x] Confirm red/green evidence, exact relocation coverage, acceptance/helper/fixture hash preservation and tracked discovery comparison.
+- [x] Dispatch one combined reviewer under the operator's current routing policy: requirements first, then code quality. Include the approved spec and current contract, not superseded Q1/Q2 recommendations. Ask the reviewer to trace every staging caller and compare the two literal omissions against a proposed shared helper; keep the simpler literal operations unless concrete evidence requires more.
+- [x] Fix material findings, rerun affected checks, and repeat this milestone review. Fix minor findings and verify them without unnecessary full repeats. Stop for new scope/design decisions. Continue directly after a pass; do not ask for routine re-approval.
 
 ### Task 7: Run final source-level verification
 
 **Files:** no new implementation changes unless a diagnosed failure requires an in-scope correction.
 
-- [ ] Revalidate the sanitized Task 1 environment and run the exact commands in `Verification` below. Keep logs and exit statuses, including skips. `run-node-checks.sh` requires moved/new entrypoints narrowly staged; never sweep unrelated untracked docs/private files into the index.
-- [ ] Run the standard PR suite in a disposable **source copy**, not the shared worktree with existing `codex-app/` or `dist/`: it recreates generated output. `./scripts/ci-local.sh pr` is the existing entrypoint and covers core/deb/rpm/pacman; `all` additionally invokes prohibited local Nix and upstream runtime diagnostics, so never use `all` here.
-- [ ] Resource gate for the existing PR runner: `scripts/ci-local.sh` does not forward host `TMPDIR` into its containers, and `container-entrypoint.sh` has `/tmp` paths. Do not assume a host export fixes this. Run this suite only on an authorized environment satisfying the scratch boundary, or report the lane unavailable for explicit acceptance. Do not modify this runner's lifecycle or invent a wrapper/tool solely to bypass the gate. The direct source checks plus Task 8 native builds remain independently executable.
-- [ ] Diagnose any failure from exact output and compare the relevant baseline in a disposable copy if necessary; never weaken assertions, edit acceptance hashes, or fix unrelated code. A changed-path error is in scope. The unreproduced standalone read-aloud gap is not.
+- [x] Revalidate the sanitized Task 1 environment and run the exact commands in `Verification` below. Keep logs and exit statuses, including skips. `run-node-checks.sh` requires moved/new entrypoints narrowly staged; never sweep unrelated untracked docs/private files into the index.
+- [x] Run the standard PR suite in a disposable **source copy**, not the shared worktree with existing `codex-app/` or `dist/`: it recreates generated output. `./scripts/ci-local.sh pr` is the existing entrypoint and covers core/deb/rpm/pacman; `all` additionally invokes prohibited local Nix and upstream runtime diagnostics, so never use `all` here.
+- [x] Resource gate for the existing PR runner: `scripts/ci-local.sh` does not forward host `TMPDIR` into its containers, and `container-entrypoint.sh` has `/tmp` paths. Do not assume a host export fixes this. Run this suite only on an authorized environment satisfying the scratch boundary, or report the lane unavailable for explicit acceptance. Do not modify this runner's lifecycle or invent a wrapper/tool solely to bypass the gate. The direct source checks plus Task 8 native builds remain independently executable.
+- [x] Diagnose any failure from exact output and compare the relevant baseline in a disposable copy if necessary; never weaken assertions, edit acceptance hashes, or fix unrelated code. A changed-path error is in scope. The unreproduced standalone read-aloud gap is not.
 
 ### Task 8: Validate physical outputs and one packaged-builder rebuild
 
 **Files:** generated artifacts and evidence only, beneath disk-backed scratch or authorized hosted storage. No source/workflow changes. This is future execution, not a claim that these lanes are available now.
 
 - [ ] Prepare a disposable copy of the final source snapshot, including all narrowly staged new files and excluding private local inputs/unrelated work. Record the source commit plus binary diff and input hashes so an uncommitted implementation is reproducible. Build each architecture natively on its approved machine/container; record `uname -m`, package tool versions and input package metadata. Do not build from or mutate the primary checkout.
-- [ ] Use two representative profiles plus baseline and no-updater variants. Write these exact JSON files under the disposable validation source's `linux-features/`; use environment-selected config files, not the user's feature configuration:
+- [x] Use two representative profiles plus baseline and no-updater variants. Write these exact JSON files under the disposable validation source's `linux-features/`; use environment-selected config files, not the user's feature configuration:
 
 ```json
 {"enabled":[]}
@@ -831,7 +832,7 @@ export CODEX_INSTALL_DIR="$validation_root/app-$validation_profile"
 export MAX_BUILD_THREADS=2 CARGO_BUILD_JOBS=2
 unset PACMAN_STAGE_ONLY APPIMAGE_STAGE_ONLY UPSTREAM_DEB
 make build-native-feature-helpers
-./install.sh "$verified_upstream_deb"
+CODEX_INSTALL_TRANSACTION_ACTIVE=1 ./install.sh "$verified_upstream_deb"
 export APP_DIR_OVERRIDE="$CODEX_INSTALL_DIR"
 ```
 
@@ -850,7 +851,7 @@ mkdir -p "$DIST_DIR_OVERRIDE"
 
 Use an architecture-specific `validation_root`. Each row must select the matching profile config and `APP_DIR_OVERRIDE` snapshot; the no-updater directory row reuses the directory app without repeating helper/app preparation. Tools/environment unsupported in a selected cell are named unavailable lanes, not architecture overrides. Unset `PACMAN_STAGE_ONLY` and `APPIMAGE_STAGE_ONLY` for physical outputs.
 
-These commands build helpers and extract/patch packages; they do not authorize native runtime probes or app launch. Feature drift must fail closed. Do not add a new baseline compatibility patch to make validation green.
+These commands build helpers and extract/patch packages; they do not authorize native runtime probes or app launch. Use the existing transaction-active inner build path for every disposable app preparation, avoiding the default candidate promotion/acceptance wrapper. Feature drift must fail closed. Do not add a new baseline compatibility patch to make validation green.
 
 - [ ] Inspect **final archives**, not only staging roots. Resolve each actual artifact path from its dedicated output directory, require exactly one matching artifact per format, then extract data only:
 
@@ -917,7 +918,7 @@ Extract the verified upstream data payload into a separate scratch directory wit
 
 For the no-updater packages and AppImages, assert no introduced `opt/codex-desktop/update-builder`, and compare installed feature/plugin/app resources and modes against the corresponding app snapshot. Do not demand tests be absent from Nix source derivations. Preserve existing hook order; a later hook-created inventory difference is reported as the existing limitation, not fixed with a new finalizer.
 
-- [ ] Complete one rebuild from an extracted updater-enabled directory-profile builder on a supported native architecture. Use the existing updater root list from Task 2, exclude `.codex-linux` as the updater does, and copy only those roots into a fresh scratch `rebuild/builder`. Use the packaged updater executable from `usr/bin/codex-update-manager` as `UPDATER_BINARY_SOURCE`; do not execute it. Require the original checkout/disposable source to be inaccessible to this subprocess, use the copied config, and match the verified upstream `.deb` hash before rebuilding:
+- [x] Complete one rebuild from an extracted updater-enabled directory-profile builder on a supported native architecture. Use the existing updater root list from Task 2, exclude `.codex-linux` as the updater does, and copy only those roots into a fresh scratch `rebuild/builder`. Use the packaged updater executable from `usr/bin/codex-update-manager` as `UPDATER_BINARY_SOURCE`; do not execute it. Require the original checkout/disposable source to be inaccessible to this subprocess, use the copied config, and match the verified upstream `.deb` hash before rebuilding:
 
 ```bash
 cd "$rebuild_builder"
@@ -945,21 +946,21 @@ nix build .#codex-desktop-maximal-shallow-watch --no-link --print-out-paths
 
 Inspect each returned store path's `opt/codex-desktop` tree, installed hooks/resources/plugins, symlink targets, modes and ELF architecture. Use the installed-output assertions in `flake.nix`'s `mkRuntimeCheck` as a read-only checklist, excluding every execution/probe assertion. A successful evaluation, a source derivation retaining tests, or an uninspected build is insufficient. No Nix source changes or local fallback. If no suitable hosted lane is available without a new workflow, report that exact gap for acceptance; do not dispatch the broader existing runtime jobs.
 
-- [ ] Preserve Gentoo's current no-updater path. The unchanged `scripts/gentoo-native.test.js`, `scripts/gentoo-install.test.js`, `scripts/lib/gentoo-feature-support.test.js` and moved `ui-tweaks/tests/gentoo-support.test.js` cover connected feature/resource parsing. Record if host Portage parsing is skipped. Do not imply this is a performed Gentoo installation/package-runtime validation.
-- [ ] Produce an evidence table with architecture, profile JSON/hash, signed upstream version/hash, format, artifact hash/path, inspected builder/resources/modes, stage inventory comparison, rebuilt output result and exact unavailable/skipped lane. Retain small logs/metadata; delete only this task's bulky disposable outputs after evidence is saved and no rebuild still references them. Never broad-clean caches.
+- [x] Preserve Gentoo's current no-updater path. The unchanged `scripts/gentoo-native.test.js`, `scripts/gentoo-install.test.js`, `scripts/lib/gentoo-feature-support.test.js` and moved `ui-tweaks/tests/gentoo-support.test.js` cover connected feature/resource parsing. Record if host Portage parsing is skipped. Do not imply this is a performed Gentoo installation/package-runtime validation.
+- [x] Produce an evidence table with architecture, profile JSON/hash, signed upstream version/hash, format, artifact hash/path, inspected builder/resources/modes, stage inventory comparison, rebuilt output result and exact unavailable/skipped lane. Retain small logs/metadata; delete only this task's bulky disposable outputs after evidence is saved and no rebuild still references them. Never broad-clean caches.
 
 ### Task 9: Final whole-implementation review and delivery
 
 **Covers:** complete implementation from the verified base through the current working tree/index, plus verification evidence.
 
-- [ ] Dispatch a dedicated spec-compliance reviewer first. Require A1-A9 mapping, accepted exception and plugin preservation, no added permanent classifier/policy API, exact ownership behavior across both generations, no test loss and accurate package-validation limitations. Resolve material findings and re-review until passed.
-- [ ] Dispatch a separate code-quality reviewer after compliance passes. Trace API callers, fixture setup/isolation, new regression value, path semantics, staging safety and maintenance cost. Challenge unnecessary test helpers/duplication and compare any suggested alternative concretely. Resolve material findings and re-review; run affected checks after every fix. Minor-only corrections need relevant checks but no automatic whole-review repeat.
-- [ ] Reinspect final status/index, `git diff --check` and exact boundary against Task 1. Confirm acceptance/plugin source bytes and unrelated work unchanged. Do not commit, push, publish or modify the other PR.
-- [ ] Report implementation result, exact test/package evidence and any accepted unavailable lanes. If unaccepted required validation remains, report incomplete validation rather than completion. Keep the plan checklist and a concise durable implementation report current; preserve logs outside the repository unless the operator requests checked-in evidence.
+- [x] Dispatch a dedicated spec-compliance reviewer first. Require A1-A9 mapping, accepted exception and plugin preservation, no added permanent classifier/policy API, exact ownership behavior across both generations, no test loss and accurate package-validation limitations. Resolve material findings and re-review until passed.
+- [x] Dispatch a separate code-quality reviewer after compliance passes. Trace API callers, fixture setup/isolation, new regression value, path semantics, staging safety and maintenance cost. Challenge unnecessary test helpers/duplication and compare any suggested alternative concretely. Resolve material findings and re-review; run affected checks after every fix. Minor-only corrections need relevant checks but no automatic whole-review repeat.
+- [x] Reinspect final status/index, `git diff --check` and exact boundary against Task 1. Confirm acceptance/plugin source bytes and unrelated work unchanged. Do not commit, push, publish or modify the other PR.
+- [x] Report implementation result, exact test/package evidence and any accepted unavailable lanes. If unaccepted required validation remains, report incomplete validation rather than completion. Keep the plan checklist and a concise durable implementation report current; preserve logs outside the repository unless the operator requests checked-in evidence.
 
 ## Verification
 
-All commands below are **future execution commands**, not verification performed during drafting. Use Task 1's disk-backed `TMPDIR` and cleared opt-in environment. Do not run acceptance/native/real-CLI integrations.
+All commands below are **future execution commands**, not verification performed during drafting. Use Task 1's disk-backed `TMPDIR` for Cargo/build output and cleared opt-in environment. Small bounded unit fixtures use a short physical `/tmp` directory under the operator's recorded exception, with exact cleanup afterward. Do not run acceptance/native/real-CLI integrations.
 
 ```bash
 bash -n scripts/lib/package-common.sh scripts/ci/run-node-checks.sh \
@@ -1006,3 +1007,46 @@ The operator authorized these plan edits after the focused Astra/high review: bo
 ## Implementation authorization
 
 The operator approved the revised plan and authorized Sol/high implementation after the simplicity corrections. The parent will first commit the six existing planning/review documents. Historical drafting/review statements above describe their earlier state; implementation authority is now satisfied. No local Nix, runtime access, publication or waiver of unavailable validation is authorized. Use the planning commit as the clean execution starting point and retain `839dbb50fbd2ad041089981441a82f2460dac455` as the original source baseline.
+
+## Execution environment clarification
+
+The operator subsequently authorized `/tmp` for small bounded temporary unit-test
+fixtures, cleaned afterward. Use a short physical per-run root to avoid the
+existing service socket pathname limit; do not use a symlink alias. Builds, Cargo
+targets, extracted apps/packages and logs remain disk-backed in the allocated
+cache. Verified Docker container `/tmp` is btrfs-backed overlay with no host
+`/tmp` bind or tmpfs; the existing cached-image PR suite satisfies the physical
+scratch boundary. These bounded corrections supersede historical blanket wording
+only for those test/container environments.
+
+## Verification disposition during execution
+
+Task 7 commands were executed, with unresolved baseline failures recorded in the
+implementation evidence report. A checked execution step is not a passing A7
+claim. The parent authorized independent available amd64 physical validation;
+missing-module and container fixture repairs remain outside scope and unaccepted.
+
+Task 8 executed every available authorized amd64 native lane and one complete
+packaged-builder rebuild: six final archives passed inspection; RPM failed its
+byte-preservation checks because unchanged native RPM post-processing stripped
+payloads. All inventories matched. The diagnosed isolated-rebuild npm cache
+correction/retry preserved source masks and produced the passing final rebuild.
+The signed input and small evidence remain; exact owned bulky roots were removed.
+Source preparations and signed inputs for arm64, both amd64 AppImages, all eight
+selected arm64 cells, and the six hosted output-only Nix cells remain unperformed.
+The unchecked broad Task 8 steps are partial, not forgotten. No failed or
+unavailable required lane has been accepted; A7/A8 and whole-plan validation
+remain incomplete. See the implementation evidence report for exact outcomes.
+
+Final dedicated implementation-source compliance and code-quality reviews passed
+with no material or minor findings. A1-A6 and source scope under A9 pass; the
+completed review/delivery steps do not waive the remaining A7/A8 gates. No
+implementation commit or publication was made.
+
+## Fork PR authorization
+
+After implementation and final source reviews, the operator authorized committing
+and publishing this change as a PR in `agentlehub/codex-desktop-linux`, targeting
+a separate branch that exactly copies upstream `main`. The fork main branch and
+existing usage-reset PR must remain untouched. This supersedes earlier commit/PR
+restrictions for this change only; it does not accept the recorded validation gaps.

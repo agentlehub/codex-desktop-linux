@@ -49,7 +49,7 @@ or delete either profile.
 Run:
 
 ```bash
-node --test linux-features/community-profile-isolation/test.js
+node --test linux-features/community-profile-isolation/tests/test.js
 ```
 
 The suite covers feature conflict selection, Electron bootstrap environment

@@ -60,5 +60,5 @@ then rebuild/reinstall. Logs go to the launcher log
 ## Test
 
 ```bash
-node --test linux-features/node-repl-reaper/test.js
+node --test linux-features/node-repl-reaper/tests/test.js
 ```

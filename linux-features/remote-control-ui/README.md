@@ -18,5 +18,5 @@ Enable it locally in `linux-features/features.json` with:
 Run the feature tests with:
 
 ```bash
-node --test linux-features/remote-control-ui/test.js
+node --test linux-features/remote-control-ui/tests/test.js
 ```

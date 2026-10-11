@@ -92,7 +92,8 @@ Each feature directory must include:
 - optional declarative `resources`, `runtimeHooks`, `packageResources`,
   `packageDependencies`, and `packageHooks`
 - optional `stage.sh` — legacy install/build staging hook
-- optional `test.js` — self-contained tests for the feature
+- optional `tests/test.js` or `tests/*.test.js` - self-contained repository feature tests
+- optional helpers and fixtures beneath the same `tests/` root
 
 Repository-owned build plumbing may set `"internal": true` in `feature.json`.
 Internal features are hidden from the setup wizard and public feature summary,
@@ -165,11 +166,25 @@ They can target `main-bundle`, `extracted-app:pre-webview`, `webview-asset`, or
 `feature:<feature-id>:<descriptor-id>` in patch reports and are optional by
 default.
 
-Feature self-tests live inside each feature directory. Run them with:
+Repository feature self-tests live beneath each feature's `tests/` directory. Run them with:
 
 ```bash
-node --test linux-features/*/test.js
+node --test linux-features/*/tests/test.js
 ```
+
+Repository feature test entrypoints belong in `tests/test.js` or `tests/*.test.js`;
+put their test-only helpers and fixtures beneath the same `tests/` root. Production
+code and resources must remain outside that root. Native update-builder staging
+omits only `linux-features/<repository-directory>/tests/` and `scripts/patches/tests/`.
+Private `linux-features/local/<directory>/` contents keep their existing copying
+rules, including `tests/`, `fixtures/` and `test.js`. Nested production directories
+named `tests` are not globally excluded. The existing directory-watch acceptance
+exclusion is unchanged.
+
+The sorted regular-file inventory is written after staging omissions and native
+helper grafts. It records that staging result; it is not an updater allowlist and
+is not refreshed after package hooks. Plugin templates, including hidden metadata
+and `.gitkeep` files, retain their existing staging behavior.
 
 The default core patch registry is empty. A core compatibility patch requires a
 reproduced blocker on the official Linux package and a regression test. Use

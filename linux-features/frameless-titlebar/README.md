@@ -58,7 +58,7 @@ is recognized as applied and is left unchanged.
 Run the feature's unit tests from the repository root:
 
 ```bash
-node --test linux-features/frameless-titlebar/test.js
+node --test linux-features/frameless-titlebar/tests/test.js
 ```
 
 For a manual check, enable the feature as above, rebuild, fully quit every

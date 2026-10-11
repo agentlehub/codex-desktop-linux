@@ -82,7 +82,7 @@ Privacy and correctness constraints:
 Run the feature self-test:
 
 ```bash
-node --test linux-features/appshots/test.js
+node --test linux-features/appshots/tests/test.js
 ```
 
 To test in the app, enable the feature, rebuild the dev app, open a chat, open

@@ -66,5 +66,5 @@ See the top-level troubleshooting guide for the supported
 Validate the launcher and Electron bridge behavior with:
 
 ```bash
-node --test linux-features/authenticated-proxy/test.js
+node --test linux-features/authenticated-proxy/tests/test.js
 ```
