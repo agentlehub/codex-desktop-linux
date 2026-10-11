@@ -282,7 +282,7 @@ stopping before PR creation. Leave automation unchanged, impose no fork count
 gate, and report actual PR state after creation. Do not auto-reopen or claim
 delivery acceptance if automation closes it.
 
-The operator additionally requires the PR creator to be `kortylokai`, never
+The operator additionally requires the PR creator to be `kortylokai-web`, never
 `kamilbeda`. Verify the API identity using the exact credential selection used
 for delivery writes and verify the resulting PR author. Do not infer identity
 from the fork owner, SSH alias or Git author, expose credentials, or fall back
@@ -311,3 +311,7 @@ keeps review limited to this feature and related tests/docs. The implementation
 phase may perform the authorized scoped commits, fork branch publication, and
 draft PR after passing its checks. This planning session performs none of those
 actions, and no live resets are authorized.
+
+## Operator identity correction - 2026-10-11
+
+During implementation the operator explicitly corrected the required GitHub account from `kortylokai` to `kortylokai-web`. Current delivery instructions and executable checks above use `kortylokai-web`; exact named-credential `/user` verification and final PR-author verification remain mandatory. Historical review records retain their original account wording and are not rewritten. No other delivery scope or safety gate changed.

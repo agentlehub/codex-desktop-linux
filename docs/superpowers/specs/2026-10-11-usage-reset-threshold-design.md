@@ -273,12 +273,12 @@ template and contributing guide, with GPT-6 Astra/xhigh replacing the template's
 maximum-reasoning requirement. The operator selected a dedicated upstream base.
 
 - Repository: `agentlehub/codex-desktop-linux` (`origin`); head `feat/usage-reset`.
-- PR creator must be the GitHub account `kortylokai`, never `kamilbeda`. Verify
+- PR creator must be the GitHub account `kortylokai-web`, never `kamilbeda`. Verify
   the authenticated API login under the same credential selection used for
   delivery writes; repository ownership, Git author and SSH aliases are not
   identity evidence. Missing or mismatched authentication blocks dependent
   writes until resolved. Never expose credentials or silently use another
-  account. Verify the resulting PR author is `kortylokai`; a same-work PR by a
+  account. Verify the resulting PR author is `kortylokai-web`; a same-work PR by a
   different author requires operator resolution rather than a duplicate PR.
 - Base: `base/usage-reset-upstream`, pinned to
   `839dbb50fbd2ad041089981441a82f2460dac455`. Create only if absent; reuse only at
@@ -292,8 +292,10 @@ maximum-reasoning requirement. The operator selected a dedicated upstream base.
   authorized delivery actions. No renewed routine approval is needed for these
   exact actions. The present planning task executes none of them.
 - Follow `CONTRIBUTING.md` and `.github/pull_request_template.md` from the verified
-  upstream-derived checkout. Final whole-implementation coding-agent review uses
-  `gpt-6-astra`/`xhigh`, with the operator exception stated honestly in the PR.
+  upstream-derived checkout. One combined final whole-implementation coding-agent review uses
+  `gpt-6-astra`/`xhigh`, checking spec/requirements/safety first and code
+  quality/design/API contracts and alternatives second, with the operator
+  exception stated honestly in the PR.
   Never claim maximum reasoning or silently downgrade if xhigh is unavailable.
 - Retain Summary, Validation, and Checklist. Leave the no-longer-draft checkbox
   unchecked. Check validation/CI items only with actual evidence. Describe the
@@ -335,7 +337,7 @@ maximum-reasoning requirement. The operator selected a dedicated upstream base.
 - No merge, ready-for-review transition, installation, runtime action, or real
   reset is authorized by this addition.
 
-Delivery acceptance: one verified draft PR authored by `kortylokai` exists in the fork at the specified
+Delivery acceptance: one verified draft PR authored by `kortylokai-web` exists in the fork at the specified
 base/head, its description accurately uses the template and Astra/xhigh exception,
 omits the contributor-limit reminder/instructional comments, and fork main is
 unchanged. This later addition changes delivery scope only;
@@ -348,3 +350,11 @@ Requirements review: the approved master/custom state matrix, default 10, featur
 Design/API review: the native object value avoids split-policy reads; native queued persistence and invalid-load fallback are stated accurately; all four registry copies are covered; renderer and task-host responsibilities are distinct; manual HTTP is preserved; stale catalogs cannot become runtime authority. The alternative designs and failure boundaries are documented. No implementation or live reset path was executed during spec creation.
 
 Document checks verify source/evidence links, current framework paths and CI discovery, metadata coherence, no unresolved placeholders, the complete approved range contract, and whitespace. These are specification checks, not execution of the future acceptance suite. The operator-authorized single combined GPT-6 Astra/high reviewer returned PASS with no findings on 2026-10-11; the linked trace preserves its scope and verification. The operator subsequently added the delivery amendment above; the core feature design is unchanged. The plan review must cover the new delivery contract. The operator subsequently directed committing the spec, then launching a new Astra/high plan writer followed by a separate Astra/high plan reviewer. This spec is approved for that planning work. Both independent plan review and a fresh no-real-reset audit subsequently passed. The operator approved the plan and authorized implementation on 2026-10-11; follow the approved plan and its unchanged safety/delivery boundaries.
+
+## Operator execution amendment - 2026-10-11
+
+The operator requires Astra/high for supporting implementation subagents and one combined Astra/xhigh final reviewer instead of two separate final reviewers. Both review stages remain required: spec/requirements/safety first, then code quality/design/API contracts and alternatives. Fixes and affected re-review obligations, all safety boundaries, and completion criteria are unchanged. Historical review records retain their original verdicts and scope.
+
+## Operator identity correction - 2026-10-11
+
+During implementation the operator explicitly corrected the required GitHub account from `kortylokai` to `kortylokai-web`. Current delivery instructions and executable checks above use `kortylokai-web`; exact named-credential `/user` verification and final PR-author verification remain mandatory. Historical review records retain their original account wording and are not rewritten. No other delivery scope or safety gate changed.
