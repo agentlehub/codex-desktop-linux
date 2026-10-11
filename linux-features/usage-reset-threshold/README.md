@@ -48,8 +48,8 @@ Remove only `usage-reset-threshold` from your enabled feature list, preserving o
 
 Validated against signed stable OpenAI Linux package **26.1007.21434** on **amd64 and arm64**:
 
-- 49 feature tests, 35 feature-framework tests, and 17 packaging tests passed without skips. Runtime tests use bounded source snippets with inert settings, authentication, usage and transport fakes.
-- All 42 official-bundle feature-audit scenarios passed on each architecture.
+- Feature, feature-framework, and packaging tests passed without skips. Runtime tests use bounded source snippets with inert settings, authentication, usage and transport fakes.
+- Official-bundle feature audits passed on each architecture.
 - Feature-enabled and feature-disabled disposable builds passed on both architectures. Complete file-manifest comparisons confirmed that disabled outputs contain only the required `quit-confirmation-focus` core repair, while enabled outputs differ from that core-only baseline in exactly the eight planned feature assets.
 - Built-output syntax/import checks, four-registry inventory, preserved manual/master paths, and byte-identical reapplication passed. Fault tests verify zero writes on failed preflight and restoration of partially written files, including explicit rejection when restoration fails.
 - Update-builder staging retains the feature and its policy module. Disabled-feature tests verify zero module loads, asset probes, and writes.
