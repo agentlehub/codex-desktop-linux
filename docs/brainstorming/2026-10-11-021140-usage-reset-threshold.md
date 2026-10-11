@@ -33,13 +33,18 @@ from community source `839dbb50`, with `computer-use-linux`,
 - Feasibility investigation is complete. The operator subsequently requested a
   commit of this proposal and an Astra/high agent to create the specification.
   This source is approved for that specification work; a separate brainstorming
-  review was not performed. The detailed spec and implementation remain unapproved.
+  review was not performed. The detailed spec subsequently passed an independent
+  Astra/high review and was approved for commit and planning on 2026-10-11.
+  Implementation remains unauthorized.
 - Existing reset permission off: all agent resets remain blocked, regardless of
   the saved custom threshold or custom-mode toggle.
 - Existing reset permission on, custom mode off: stock 10% remaining limit.
 - Both toggles on: use the configured remaining-percentage limit.
 - While the master permission is off, visually disable the custom controls but
   retain their saved values. Neither toggle triggers a reset automatically.
+- Operator resolved the input contract during specification: whole percentages
+  from 1 through 99 inclusive, default 10. Save on Enter or blur; invalid values
+  remain unsaved; Escape restores the saved value. See Q3.
 
 ## Initial evidence
 
@@ -101,13 +106,13 @@ the requirement for user authorization for each reset.
 
 Custom mode off retains the stock 10%; custom mode on reads
 the saved threshold for each attempt, provided the master permission is on.
-The percentage defaults to 10. A proposed range of 0-100 can express
-both conservative limits and permission to attempt at any remaining percentage.
+The percentage defaults to 10 and accepts whole numbers from 1 through 99.
 For a threshold T, the equivalent consumed-percentage comparison is
-`usedPercent >= 100 - T`. Continue to reject unavailable usage data. The 100
-setting would allow an attempt; it cannot promise a server-approved reset when
-there is no eligible window. This changes eligibility, not automatic scheduling
-or authorization to spend credits.
+`usedPercent >= 100 - T`. Continue to reject unavailable usage data. Values 0 and
+100 are deliberately excluded by operator decision. A configured threshold
+permits an attempt; it cannot promise a server-approved reset when there is no
+eligible window. This changes eligibility, not automatic scheduling or
+authorization to spend credits.
 
 | Allow Codex to use resets | Use custom reset threshold | Behavior |
 | --- | --- | --- |
@@ -172,8 +177,10 @@ investigation.
   `cdeb8e9496a915179b7024ea8ca9af026ea47ce2639ed8b634ef629183fa74b6`.
 - No reset tool, account RPC, reset HTTP request, app launch, live module
   execution, UI interaction, install, or setting change was performed.
-- No production source files were changed. Only this analysis note and the
-  separate static evidence directory were created. No commit or push occurred.
+- During the initial investigation, no production source files were changed;
+  only this analysis note and the separate static evidence directory were created.
+  The proposal was subsequently committed as `64ad11f1`; later specification and
+  review documentation were separately authorized. No push occurred.
 - Local runtime tests and successful backend redemption above 10% were not run;
   findings are based on static source and official API documentation.
 
@@ -200,9 +207,10 @@ The existing permission remains authoritative. The new controls only choose the
 local eligibility threshold; they do not enable reset access independently or
 authorize spending a reset. Backend acceptance above 10% remains unverified.
 
-The exact input range/precision and implementation details remain to be finalized;
-0-100 is the investigation's recommendation, not a separately confirmed input
-contract. No implementation, installation, or real reset was requested.
+At this approval, the exact input range/precision remained open; Q3 subsequently
+resolved that contract. The investigation's original 0-100 recommendation is
+superseded by the operator's 1-99 decision. No implementation, installation, or
+real reset was requested.
 
 ### Q2: Commit the proposal and proceed to specification
 
@@ -213,3 +221,23 @@ create a spec for this." This authorizes committing this source and creating a
 specification with GPT-6 Astra at high reasoning. It does not authorize pushing,
 implementing, installing, or consuming a reset. Carry any material unresolved
 product decisions into specification discussion instead of inventing approval.
+
+### Q3: What range and input behavior should the custom threshold use?
+
+**Recommended**
+
+Whole percentages from 0 through 100, default 10, saved on Enter or leaving the
+field. Invalid values stay unsaved, and Escape restores the saved value.
+
+**Resolved**
+
+The operator changed the range to 1 through 99 inclusive: "make it 1% to 99% .
+there is no point on resetting on 100% usage left and there needs to be at least
+some usage for the agent to do the call to reset". The other proposed input
+behavior remains unchanged. This correction was relayed to the Astra spec agent.
+
+**Rationale**
+
+Exclude resetting with completely unused quota and avoid making zero remaining
+the configured trigger. The percentage is an eligibility threshold, not a
+guarantee that a new agent turn can execute or the server will accept redemption.
