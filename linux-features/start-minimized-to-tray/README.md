@@ -98,7 +98,7 @@ or patch these surfaces and continue to preserve the official ASAR.
 ## Testing
 
 ```bash
-node --test linux-features/start-minimized-to-tray/test.js
+node --test linux-features/start-minimized-to-tray/tests/test.js
 ```
 
 Tests cover both preferences' persistence and save failures, login-only priority,

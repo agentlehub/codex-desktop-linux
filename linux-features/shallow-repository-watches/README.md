@@ -45,5 +45,5 @@ programs.codexDesktopLinux.linuxFeatures = [
 Run its tests with:
 
 ```bash
-node --test linux-features/shallow-repository-watches/test.js
+node --test linux-features/shallow-repository-watches/tests/test.js
 ```

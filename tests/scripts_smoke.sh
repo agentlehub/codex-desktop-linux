@@ -208,9 +208,9 @@ NODE
 
 node --test launcher/start.test.js tests/deb-prerm.test.js scripts/lib/upstream-linux-package.test.js \
   scripts/automation/upstream-linux-package-watchdog/test.js \
-  scripts/patch-linux-window-ui.test.js scripts/patches/runner.test.js \
-  scripts/patches/lib/asar-layout.test.js \
-  scripts/patches/core/*/test.js \
+  scripts/patch-linux-window-ui.test.js scripts/patches/tests/runner.test.js \
+  scripts/patches/tests/lib/asar-layout.test.js \
+  scripts/patches/tests/core/*/test.js \
   scripts/lib/linux-features.test.js
 
 echo "[smoke] official Linux-package source, launcher, feature registry, packages, and pins are coherent"

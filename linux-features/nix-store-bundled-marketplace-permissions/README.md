@@ -33,5 +33,5 @@ the current signed official package so drift is repaired before release.
 Run the adjacent regression test with:
 
 ```bash
-node --test linux-features/nix-store-bundled-marketplace-permissions/test.js
+node --test linux-features/nix-store-bundled-marketplace-permissions/tests/test.js
 ```

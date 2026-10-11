@@ -92,6 +92,20 @@ package time. The update-builder includes only enabled descriptors/resources
 and repeats the same validation. Drift in an enabled feature rejects the
 candidate; disabled features are not probed.
 
+Repository feature test entrypoints belong in `tests/test.js` or `tests/*.test.js`;
+put their test-only helpers and fixtures beneath the same `tests/` root. Production
+code and resources must remain outside that root. Native update-builder staging
+omits only `linux-features/<repository-directory>/tests/` and `scripts/patches/tests/`.
+Private `linux-features/local/<directory>/` contents keep their existing copying
+rules, including `tests/`, `fixtures/` and `test.js`. Nested production directories
+named `tests` are not globally excluded. The existing directory-watch acceptance
+exclusion is unchanged.
+
+The sorted regular-file inventory is written after staging omissions and native
+helper grafts. It records that staging result; it is not an updater allowlist and
+is not refreshed after package hooks. Plugin templates, including hidden metadata
+and `.gitkeep` files, retain their existing staging behavior.
+
 ## Local features
 
 User-private modules can be placed under the gitignored
@@ -266,7 +280,7 @@ A retained feature should have:
 Run the framework and all adjacent Node tests with:
 
 ```bash
-node --test scripts/lib/linux-features.test.js linux-features/*/test.js
+node --test scripts/lib/linux-features.test.js linux-features/*/tests/test.js
 ```
 
 An `applied-with-warnings` or optional skip is not evidence that a feature

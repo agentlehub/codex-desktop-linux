@@ -161,9 +161,12 @@ jobs:
           const path = require("node:path");
           const childProcess = require("node:child_process");
           const { corePatchDescriptors } = require("./scripts/patches/runner.js");
+          const patchRoot = path.resolve("scripts/patches");
           const tests = corePatchDescriptors()
             .filter(({ ciPolicy }) => ciPolicy === "required-upstream")
-            .map(({ sourcePath }) => path.join(path.dirname(sourcePath), "test.js"));
+            .map(({ sourcePath }) => path.join(
+              patchRoot, "tests", path.relative(patchRoot, path.dirname(sourcePath)), "test.js",
+            ));
           if (tests.some((testPath) => !fs.existsSync(testPath))) {
             throw new Error(`required core patch regression test missing: ${tests.join(", ")}`);
           }
@@ -186,7 +189,7 @@ jobs:
             "$upstream_root/usr/lib/chatgpt/resources/app.asar" \
             "$extracted_asar"
           CODEX_SIGNED_EXTRACTED_APP="$extracted_asar" \
-            node --test linux-features/community-profile-isolation/test.js
+            node --test linux-features/community-profile-isolation/tests/test.js
       - name: Require signed renderer dependency regression
         env:
           EXPECTED_SIGNED_VERSION: ${{ inputs.version }}
@@ -391,7 +394,7 @@ jobs:
           }
           NODE
           ./install.sh "$package"
-          node --test linux-features/community-profile-isolation/test.js
+          node --test linux-features/community-profile-isolation/tests/test.js
           wrapper="$CODEX_INSTALL_DIR/.codex-linux/features/community-profile-isolation/codex-cli-wrapper.sh"
           test -x "$wrapper"
           grep -R -F 'CODEX_HOME="$HOME/.codex-community"' "$CODEX_INSTALL_DIR/.codex-linux/env.d"

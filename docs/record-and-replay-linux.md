@@ -110,7 +110,7 @@ provider; Tesseract remains the safe local fallback.
 
 After rebuilding the feature, Josh can verify the branch with:
 
-1. `node --test linux-features/chronicle-skysight/test.js linux-features/record-and-replay/test.js`
+1. `node --test linux-features/chronicle-skysight/tests/test.js linux-features/record-and-replay/tests/test.js`
 2. A rebuild/install of the app or feature bundle.
 3. A live `skysight status` check that reports the resource root.
 4. `skysight pause`, `skysight resume`, and `skysight stop` through the

@@ -38,7 +38,9 @@ run_node_tests() {
 
     while IFS= read -r file; do
         test_files+=("$file")
-    done < <(git ls-files '*.test.js' 'linux-features/*/test.js')
+    done < <(git ls-files '*.test.js' \
+        ':(glob)linux-features/*/tests/test.js' \
+        ':(glob)scripts/patches/tests/core/*/test.js')
 
     if [ "${#test_files[@]}" -eq 0 ]; then
         return 0

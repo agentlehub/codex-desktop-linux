@@ -32,7 +32,7 @@ sidebar semantics. Enable it in `linux-features/features.json`:
 Run the feature tests with:
 
 ```bash
-node --test linux-features/project-group-last-updated-sort/test.js
+node --test linux-features/project-group-last-updated-sort/tests/test.js
 ```
 
 The patch targets only the current upstream Projects sidebar chunk. Upstream

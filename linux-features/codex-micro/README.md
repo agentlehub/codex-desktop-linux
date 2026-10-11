@@ -14,5 +14,5 @@ Enable `codex-micro` in the gitignored `linux-features/features.json`, rebuild,
 reconnect the device, and verify Settings → Codex Micro.
 
 ```bash
-node --test linux-features/codex-micro/test.js
+node --test linux-features/codex-micro/tests/test.js
 ```

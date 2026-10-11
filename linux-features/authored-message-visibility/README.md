@@ -19,7 +19,7 @@ Disable the feature and rebuild, or update the patch for the current package.
 ## Validation
 
 ```sh
-node --test linux-features/authored-message-visibility/test.js
+node --test linux-features/authored-message-visibility/tests/test.js
 ```
 
 Build with this feature alone against the signed official package. Check that

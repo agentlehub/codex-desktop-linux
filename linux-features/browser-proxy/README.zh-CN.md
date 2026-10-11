@@ -65,5 +65,5 @@ URL policy 和用户授权检查。
 wrapper 确实属于该功能，cleanup hook 会恢复原始 `node_repl`。
 
 ```bash
-node --test linux-features/browser-proxy/test.js
+node --test linux-features/browser-proxy/tests/test.js
 ```
