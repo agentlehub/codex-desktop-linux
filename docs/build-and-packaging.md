@@ -198,6 +198,17 @@ required build helpers, and already staged release executables for enabled
 native features. It excludes the full repository, Cargo workspaces, and
 disabled features, and never contains an app-runtime Node installation.
 
+Native update-builders exclude repository feature test roots
+(`linux-features/<directory>/tests/`) and shared patch tests (`scripts/patches/tests/`).
+This test exclusion does not apply to private features under `linux-features/local/`
+or nested production directories named `tests`. See
+[Testing and drift](linux-features-architecture.md#testing-and-drift) for the
+feature test layout.
+
+The sorted regular-file inventory is written after staging omissions and native
+helper grafts. It records that staging result; it is not an updater allowlist and
+is not refreshed after package hooks.
+
 ## Cross-format validation
 
 Payload, launcher, updater, feature framework, or package-common changes affect

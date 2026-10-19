@@ -173,6 +173,14 @@ stage_update_builder_linux_features_tree() {
         [ -d "$source" ] || error "Missing enabled Linux feature: $feature_id ($source)"
         mkdir -p "$(dirname "$destination")"
         cp -a "$source" "$destination"
+        case "$relative_dir" in
+            local/*) ;;
+            *)
+                [ ! -L "$destination" ] || \
+                    error "Refusing to prune tests through a repository feature symlink: $feature_id ($destination)"
+                rm -rf -- "$destination/tests"
+                ;;
+        esac
         find "$destination" -type d -name target -prune -exec rm -rf {} +
         if [ "$feature_id" = "directory-only-working-tree-watch" ]; then
             rm -rf "$destination/acceptance"
@@ -964,6 +972,7 @@ stage_update_builder_bundle() {
     cp "$REPO_DIR/scripts/build-pacman.sh" "$update_builder_root/scripts/build-pacman.sh"
     cp "$REPO_DIR/scripts/patch-linux-window-ui.js" "$update_builder_root/scripts/patch-linux-window-ui.js"
     cp -a "$REPO_DIR/scripts/patches/." "$update_builder_root/scripts/patches/"
+    rm -rf -- "$update_builder_root/scripts/patches/tests"
 
     for relative in \
         asar-patch.sh \

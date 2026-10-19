@@ -15,5 +15,5 @@ The feature patches current upstream webview assets and therefore may require
 an update when those private bundle shapes change. Validate it with:
 
 ```bash
-node --test linux-features/automation-extensions/test.js
+node --test linux-features/automation-extensions/tests/test.js
 ```

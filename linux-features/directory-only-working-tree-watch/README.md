@@ -313,5 +313,5 @@ staging, the current OpenAI Parcel-route handoff, native-policy wiring, Git
 policy, logical invalidation mapping, root recovery choice, and teardown.
 
 ```bash
-node --test linux-features/directory-only-working-tree-watch/test.js
+node --test linux-features/directory-only-working-tree-watch/tests/test.js
 ```

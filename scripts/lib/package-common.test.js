@@ -449,6 +449,393 @@ test("update-builder stages only plugin templates consumed by enabled feature ho
   );
 });
 
+function put(root, relative, contents, mode = 0o644) {
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, contents, { mode });
+  fs.chmodSync(file, mode);
+}
+
+function treeSnapshot(root) {
+  const result = {};
+  function visit(dir, prefix = "") {
+    for (const name of fs.readdirSync(dir).sort()) {
+      const relative = prefix ? `${prefix}/${name}` : name;
+      const file = path.join(dir, name);
+      const stat = fs.lstatSync(file);
+      if (stat.isSymbolicLink()) {
+        result[relative] = { link: fs.readlinkSync(file) };
+      } else if (stat.isDirectory()) {
+        visit(file, relative);
+      } else {
+        result[relative] = { bytes: fs.readFileSync(file).toString("hex"), mode: stat.mode & 0o777 };
+      }
+    }
+  }
+  visit(root);
+  return result;
+}
+
+function builderFixture(t) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-builder-tests-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const source = path.join(root, "source");
+  const app = path.join(root, "app");
+  fs.mkdirSync(source);
+  fs.mkdirSync(app);
+  for (const relative of ["install.sh", "launcher", "scripts/lib", "scripts/patches",
+    "scripts/build-deb.sh", "scripts/build-rpm.sh", "scripts/build-pacman.sh",
+    "scripts/patch-linux-window-ui.js", "packaging/linux", "assets",
+    "plugins/openai-bundled/plugins/computer-use", "plugins/openai-bundled/plugins/read-aloud"]) {
+    const target = path.join(source, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.cpSync(path.join(repoRoot, relative), target, { recursive: true, verbatimSymlinks: true });
+  }
+  for (const name of ["features.example.json", "compatibility.json"]) {
+    put(source, `linux-features/${name}`, fs.readFileSync(path.join(repoRoot, "linux-features", name)));
+  }
+  return { root, source, app };
+}
+
+function fixtureFeature(source, directory, id, files = {}, extra = {}) {
+  const relative = `linux-features/${directory}`;
+  put(source, `${relative}/feature.json`, JSON.stringify({ id, defaultEnabled: false, ...extra }));
+  put(source, `${relative}/README.md`, `${id}\n`);
+  for (const [name, contents] of Object.entries(files)) put(source, `${relative}/${name}`, contents);
+}
+
+function stageFixture(source, app, stage, enabled, extraEnv = {}) {
+  if (enabled !== null) put(source, "linux-features/features.json", JSON.stringify({ enabled }));
+  const env = { ...process.env };
+  for (const key of ["CODEX_LINUX_FEATURES_ROOT", "CODEX_LINUX_FEATURES_CONFIG",
+    "CODEX_INTERNAL_LINUX_FEATURE_IDS", "GIT_DIR", "GIT_WORK_TREE"]) delete env[key];
+  childProcess.execFileSync("bash", ["-c", [
+    "set -euo pipefail",
+    '. "$REPO_DIR/scripts/lib/package-common.sh"',
+    'stage_optional_update_builder_bundle "$STAGE_ROOT"',
+  ].join("\n")], {
+    cwd: source, encoding: "utf8",
+    env: { ...env, REPO_DIR: source, APP_DIR: app, STAGE_ROOT: stage,
+      PACKAGE_NAME: "codex-desktop", PACKAGE_WITH_UPDATER: "1", ...extraEnv },
+  });
+  return path.join(stage, "opt/codex-desktop/update-builder");
+}
+
+function assertInventory(builder) {
+  const manifest = ".codex-linux/update-builder-manifest.txt";
+  const files = Object.entries(treeSnapshot(builder))
+    .filter(([relative, entry]) => relative !== manifest && !entry.link)
+    .map(([relative]) => relative).sort();
+  assert.equal(fs.readFileSync(path.join(builder, manifest), "utf8"), `${files.join("\n")}\n`);
+}
+
+function copyUpdaterRoots(source, destination) {
+  // updater/src/builder.rs REQUIRED_BUNDLE_ENTRIES and OPTIONAL_BUNDLE_ENTRIES.
+  // This fixture checks packaging generation two; it is not a replacement updater.
+  const required = ["install.sh", "launcher", "scripts/build-deb.sh", "scripts/build-rpm.sh",
+    "scripts/build-pacman.sh", "scripts/patch-linux-window-ui.js", "scripts/lib",
+    "scripts/patches", "packaging/linux", "assets", "linux-features"];
+  const optional = ["target", "global-dictation-linux", "plugins"];
+  for (const relative of [...required, ...optional]) {
+    const from = path.join(source, relative);
+    if (!fs.existsSync(from) && optional.includes(relative)) continue;
+    assert.equal(fs.existsSync(from), true, relative);
+    const to = path.join(destination, relative);
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    fs.cpSync(from, to, { recursive: true, verbatimSymlinks: true });
+  }
+}
+
+
+
+const nativeIds = ["computer-use-linux", "global-dictation", "mcp-helper-reaper",
+  "read-aloud-mcp", "chronicle-skysight"];
+const nativePaths = [
+  ["resources/plugins/openai-bundled/plugins/unified-computer-use/bin/codex-computer-use-linux", "target/release/codex-computer-use-linux"],
+  ["resources/plugins/openai-bundled/plugins/unified-computer-use/bin/codex-computer-use-cosmic", "target/release/codex-computer-use-cosmic"],
+  ["resources/plugins/openai-bundled/plugins/unified-computer-use/bin/codex-computer-use-indicator", "target/release/codex-computer-use-indicator"],
+  ["resources/native/codex-global-dictation-linux", "global-dictation-linux/target/release/codex-global-dictation-linux"],
+  [".codex-linux/mcp-helper-reaper/codex-mcp-helper-reaper", "linux-features/mcp-helper-reaper/reaper/target/release/codex-mcp-helper-reaper"],
+  ["resources/plugins/openai-bundled/plugins/read-aloud/bin/codex-read-aloud-linux", "target/release/codex-read-aloud-linux"],
+  ["resources/native/codex-record-replay-linux", "target/release/codex-record-replay-linux"],
+];
+
+
+test("update-builder omits only repository component test roots", (t) => {
+  const { root, source, app } = builderFixture(t);
+  fixtureFeature(source, "repository-directory", "different-repository-id", {
+    "tests/test.js": "throw new Error('must not execute');\n",
+    "test.js": "production filename\n",
+    "fixtures/data.json": "{}\n",
+    "resources/tests/data.json": "nested production data\n",
+  });
+  fixtureFeature(source, "local/private-directory", "different-private-id", {
+    "tests/data.json": "private production data\n", "test.js": "private production entry\n",
+    "fixtures/data.json": "private fixture-named data\n",
+  });
+  fixtureFeature(source, "no-test-root", "no-test-root");
+  fixtureFeature(source, "disabled", "disabled", { "tests/test.js": "disabled\n" });
+  put(source, "scripts/patches/tests/sentinel.txt", "omit shared root\n");
+  put(source, "scripts/patches/impl/resources/tests/data.json", "retain nested shared data\n");
+  put(source, "linux-features/features.json", JSON.stringify({
+    enabled: ["different-repository-id", "different-private-id", "no-test-root"],
+  }));
+  const before = treeSnapshot(source);
+  const builder = stageFixture(source, app, path.join(root, "stage"),
+    ["different-repository-id", "different-private-id", "no-test-root"]);
+  assert.equal(fs.existsSync(path.join(builder, "linux-features/repository-directory/tests")), false);
+  assert.equal(fs.existsSync(path.join(builder, "scripts/patches/tests")), false);
+  assert.equal(fs.existsSync(path.join(builder, "linux-features/disabled")), false);
+  for (const relative of ["linux-features/repository-directory/test.js",
+    "linux-features/repository-directory/fixtures/data.json",
+    "linux-features/repository-directory/resources/tests/data.json",
+    "linux-features/local/private-directory/tests/data.json",
+    "linux-features/local/private-directory/test.js",
+    "linux-features/local/private-directory/fixtures/data.json",
+    "scripts/patches/impl/resources/tests/data.json"]) {
+    assert.deepEqual(treeSnapshot(builder)[relative], before[relative], relative);
+  }
+  assert.deepEqual(treeSnapshot(source), before);
+  assertInventory(builder);
+});
+
+test("update-builder rejects copied repository feature-directory symlinks before pruning", (t) => {
+  const { root, source, app } = builderFixture(t);
+  const outside = path.join(root, "outside-feature");
+  put(outside, "feature.json", JSON.stringify({ id: "linked-feature", defaultEnabled: false }));
+  put(outside, "README.md", "External disposable feature\n");
+  put(outside, "tests/keep.txt", "external test input must survive\n", 0o640);
+  fs.chmodSync(outside, 0o750);
+  fs.chmodSync(path.join(outside, "tests"), 0o750);
+  const sourceLink = path.join(source, "linux-features/linked-directory");
+  fs.symlinkSync(outside, sourceLink);
+  put(source, "linux-features/features.json", JSON.stringify({ enabled: ["linked-feature"] }));
+  const sourceBefore = treeSnapshot(source);
+  const outsideBefore = treeSnapshot(outside);
+  const linkModeBefore = fs.lstatSync(sourceLink).mode;
+  const directoryModesBefore = ["", "tests"].map((relative) =>
+    fs.statSync(path.join(outside, relative)).mode & 0o777);
+  assert.throws(
+    () => stageFixture(source, app, path.join(root, "stage"), ["linked-feature"]),
+    /Refusing to prune tests through a repository feature symlink/,
+  );
+  assert.deepEqual(treeSnapshot(source), sourceBefore);
+  assert.deepEqual(treeSnapshot(outside), outsideBefore);
+  assert.equal(fs.lstatSync(sourceLink).isSymbolicLink(), true);
+  assert.equal(fs.lstatSync(sourceLink).mode, linkModeBefore);
+  assert.equal(fs.readlinkSync(sourceLink), outside);
+  assert.deepEqual(["", "tests"].map((relative) =>
+    fs.statSync(path.join(outside, relative)).mode & 0o777), directoryModesBefore);
+});
+
+test("update-builder test-root omission unlinks copied symlinks without touching referents", (t) => {
+  const { root, source, app } = builderFixture(t);
+  fixtureFeature(source, "linked", "linked");
+  const outside = path.join(root, "outside");
+  put(outside, "keep.txt", "outside\n");
+  fs.symlinkSync(outside, path.join(source, "linux-features/linked/tests"));
+  fs.rmSync(path.join(source, "scripts/patches/tests"), { recursive: true, force: true });
+  fs.symlinkSync(outside, path.join(source, "scripts/patches/tests"));
+  const before = treeSnapshot(outside);
+  const builder = stageFixture(source, app, path.join(root, "stage"), ["linked"]);
+  for (const relative of ["linux-features/linked/tests", "scripts/patches/tests"]) {
+    assert.equal(fs.existsSync(path.join(builder, relative)), false);
+    assert.equal(fs.lstatSync(path.join(source, relative)).isSymbolicLink(), true);
+  }
+  assert.deepEqual(treeSnapshot(outside), before);
+});
+
+const repositoryFeatures = fs.readdirSync(path.join(repoRoot, "linux-features"), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && entry.name !== "local" &&
+    fs.existsSync(path.join(repoRoot, "linux-features", entry.name, "feature.json")))
+  .map((entry) => {
+    const dir = path.join(repoRoot, "linux-features", entry.name);
+    const manifest = JSON.parse(fs.readFileSync(path.join(dir, "feature.json"), "utf8"));
+    return { dir, relativeDir: entry.name, id: manifest.id, manifest };
+  }).sort((left, right) => left.id.localeCompare(right.id));
+const dependencies = { "record-and-replay": ["chronicle-skysight"],
+  "global-dictation-gnome": ["global-dictation"] };
+
+for (const feature of repositoryFeatures) {
+  test(`update-builder preserves production inputs for ${feature.id}`, (t) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-feature-staging-"));
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const source = path.join(root, "source");
+    copyFeatureHelpers(repoRoot, source);
+    for (const name of ["features.example.json", "compatibility.json"]) {
+      put(source, `linux-features/${name}`, fs.readFileSync(path.join(repoRoot, "linux-features", name)));
+    }
+    const enabled = [feature.id, ...(dependencies[feature.id] || [])];
+    const selected = enabled.map((id) => {
+      const candidate = repositoryFeatures.find((entry) => entry.id === id);
+      assert.ok(candidate, `Missing fixture dependency: ${id}`);
+      return candidate;
+    });
+    for (const candidate of selected) {
+      const destination = path.join(source, "linux-features", candidate.relativeDir);
+      fs.cpSync(candidate.dir, destination, {
+        recursive: true, verbatimSymlinks: true,
+        filter: (file) => !(path.basename(file) === "target" && fs.lstatSync(file).isDirectory()),
+      });
+      put(destination, "tests/staging-sentinel", "omit\n");
+      put(destination, "generated/target/staging-sentinel", "omit generated\n");
+    }
+    put(source, "linux-features/features.json", JSON.stringify({ enabled: [feature.id] }));
+    const builder = path.join(root, "tree");
+    const before = treeSnapshot(path.join(source, "linux-features"));
+    const internal = selected.filter((entry) => entry.manifest.internal).map((entry) => entry.id).join(",");
+    // Only tree staging: never graft or execute real native helpers here.
+    runPackageCommon(
+      `export CODEX_LINUX_FEATURES_ROOT=${JSON.stringify(path.join(source, "linux-features"))}\n` +
+      `export CODEX_LINUX_FEATURES_CONFIG=${JSON.stringify(path.join(source, "linux-features/features.json"))}\n` +
+      `export CODEX_INTERNAL_LINUX_FEATURE_IDS=${JSON.stringify(internal)}\n` +
+      `stage_update_builder_linux_features_tree ${JSON.stringify(builder)}`,
+      root, source,
+    );
+    for (const candidate of selected) {
+      const staged = path.join(builder, "linux-features", candidate.relativeDir);
+      const original = treeSnapshot(path.join(source, "linux-features", candidate.relativeDir));
+      const expected = Object.fromEntries(Object.entries(original).filter(([relative]) => {
+        const parts = relative.split("/");
+        if (parts[0] === "tests" || parts.includes("target")) return false;
+        if (candidate.id === "directory-only-working-tree-watch" && parts[0] === "acceptance") return false;
+        if (candidate.id === "mcp-helper-reaper" &&
+          (relative.startsWith("reaper/src/") || ["reaper/Cargo.toml", "reaper/Cargo.lock"].includes(relative))) return false;
+        return true;
+      }));
+      assert.deepEqual(treeSnapshot(staged), expected, candidate.id);
+      assert.equal(fs.existsSync(path.join(staged, "tests")), false);
+      assert.equal(fs.existsSync(path.join(staged, "generated/target")), false);
+    }
+    assert.deepEqual(treeSnapshot(path.join(source, "linux-features")), before);
+  });
+}
+
+test("update-builder generation two retains local inputs, consumers, plugins and native grafts", (t) => {
+  const { root, source, app } = builderFixture(t);
+  for (const id of nativeIds) {
+    fs.cpSync(path.join(repoRoot, "linux-features", id), path.join(source, "linux-features", id),
+      { recursive: true, verbatimSymlinks: true,
+        filter: (file) => !(path.basename(file) === "target" && fs.lstatSync(file).isDirectory()) });
+    put(source, `linux-features/${id}/tests/sentinel`, "omit\n");
+    put(source, `linux-features/${id}/generated/target/debug/cache`, "omit cache\n");
+  }
+  for (const [from] of nativePaths) put(app, from, `#!/bin/sh\n# ${from}\nexit 97\n`, 0o755);
+  for (const name of ["kokoro-stdin", "kokoro_stdin.py"]) {
+    put(app, `resources/plugins/openai-bundled/plugins/read-aloud/bin/${name}`,
+      `retained MCP runner: ${name}\n`, name === "kokoro-stdin" ? 0o755 : 0o644);
+  }
+  fixtureFeature(source, "owned-directory", "owned-id", {
+    "tests/test.js": "throw new Error('not production');\n",
+    "patch.js": 'const helper = require("./helper.js"); module.exports = [{id:"owned-fixture",phase:"main-bundle",apply:helper}];\n',
+    "helper.js": 'const fs=require("node:fs");const path=require("node:path");module.exports=source=>source+JSON.parse(fs.readFileSync(path.join(__dirname,"labels.json"))).suffix;\n',
+    "labels.json": '{"suffix":" retained"}\n',
+    "skills/example/SKILL.md": "retained skill\n",
+    "hook.sh": '#!/bin/sh\nset -eu\ncat "$(dirname "$0")/skills/example/SKILL.md" > "$INSTALL_DIR/hook-result"\n',
+  }, { entrypoints: { patchDescriptors: "./patch.js", stageHook: "./hook.sh" } });
+  fs.chmodSync(path.join(source, "linux-features/owned-directory/hook.sh"), 0o755);
+  fixtureFeature(source, "local/private-directory", "private-id", {
+    "tests/data.json": "private tests data\n", "fixtures/data.json": "private fixtures data\n",
+    "test.js": "private production filename\n",
+  });
+  const enabled = [...nativeIds, "owned-id", "private-id"];
+  const first = stageFixture(source, app, path.join(root, "stage-one"), enabled);
+  assertInventory(first);
+  for (const id of ["computer-use", "read-aloud"]) {
+    const relative = `plugins/openai-bundled/plugins/${id}`;
+    const expected = treeSnapshot(path.join(source, relative));
+    if (id === "read-aloud") {
+      const stagedPlugin = treeSnapshot(path.join(app, "resources", relative));
+      for (const name of ["kokoro-stdin", "kokoro_stdin.py"]) {
+        expected[`bin/${name}`] = stagedPlugin[`bin/${name}`];
+      }
+    }
+    assert.deepEqual(treeSnapshot(path.join(first, relative)), expected);
+  }
+  const copied = path.join(root, "updater-copy");
+  copyUpdaterRoots(first, copied);
+  assert.equal(fs.existsSync(path.join(copied, ".git")), false);
+  assert.equal(fs.existsSync(path.join(copied, ".codex-linux")), false);
+  // Make the original fixture unavailable before invoking copied scripts/config.
+  fs.renameSync(source, path.join(root, "source-unavailable"));
+  const copiedConfig = fs.readFileSync(path.join(copied, "linux-features/features.json"));
+  assert.deepEqual(new Set(JSON.parse(copiedConfig).enabled), new Set(enabled));
+  const second = stageFixture(copied, app, path.join(root, "stage-two"), null);
+  assert.deepEqual(fs.readFileSync(path.join(copied, "linux-features/features.json")), copiedConfig);
+  for (const builder of [first, second]) {
+    assertInventory(builder);
+    assert.equal(fs.existsSync(path.join(builder, "scripts/patches/tests")), false);
+    for (const directory of [...nativeIds, "owned-directory"]) {
+      assert.equal(fs.existsSync(path.join(builder, "linux-features", directory, "tests")), false);
+      assert.equal(fs.existsSync(path.join(builder, "linux-features", directory, "generated/target")), false);
+    }
+    for (const relative of ["reaper/src", "reaper/Cargo.toml", "reaper/Cargo.lock"]) {
+      assert.equal(fs.existsSync(path.join(builder, "linux-features/mcp-helper-reaper", relative)), false);
+    }
+    for (const [from, to] of nativePaths) {
+      assert.deepEqual(fs.readFileSync(path.join(builder, to)), fs.readFileSync(path.join(app, from)));
+      assert.equal(fs.statSync(path.join(builder, to)).mode & 0o777, 0o755);
+    }
+    assert.deepEqual(treeSnapshot(path.join(builder, "plugins")), treeSnapshot(path.join(copied, "plugins")));
+    const privateFiles = treeSnapshot(path.join(builder, "linux-features/local/private-directory"));
+    assert.equal(Buffer.from(privateFiles["tests/data.json"].bytes, "hex").toString(), "private tests data\n");
+    assert.equal(Buffer.from(privateFiles["fixtures/data.json"].bytes, "hex").toString(), "private fixtures data\n");
+    assert.equal(Buffer.from(privateFiles["test.js"].bytes, "hex").toString(), "private production filename\n");
+    const framework = require(path.join(builder, "scripts/lib/linux-features.js"));
+    const options = { featuresRoot: path.join(builder, "linux-features"),
+      featuresConfigPath: path.join(builder, "linux-features/features.json"), enabledFeatureIds: ["owned-id"] };
+    assert.equal(framework.loadLinuxFeaturePatchDescriptors(options)[0].apply("inert"), "inert retained");
+    const [hook] = framework.enabledLinuxFeatureStageHooks(options);
+    const inertApp = path.join(root, builder === first ? "consumer-one" : "consumer-two");
+    fs.mkdirSync(inertApp, { recursive: true });
+    childProcess.execFileSync("bash", [hook.path], { env: { ...process.env, INSTALL_DIR: inertApp } });
+    assert.equal(fs.readFileSync(path.join(inertApp, "hook-result"), "utf8"), "retained skill\n");
+  }
+  const withoutUpdater = stageFixture(copied, app, path.join(root, "disabled"), enabled,
+    { PACKAGE_WITH_UPDATER: "0" });
+  assert.equal(fs.existsSync(withoutUpdater), false);
+  const disabledNative = stageFixture(copied, app, path.join(root, "no-native"), ["owned-id", "private-id"]);
+  for (const [, to] of nativePaths) assert.equal(fs.existsSync(path.join(disabledNative, to)), false);
+  assert.equal(fs.existsSync(path.join(disabledNative, "plugins")), false);
+});
+
+for (const [missingSource] of nativePaths) {
+  test(`update-builder rejects missing native artifact ${path.basename(missingSource)}`, (t) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-native-staging-"));
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const source = path.join(root, "source");
+    const app = path.join(root, "app");
+    const builder = path.join(root, "builder");
+    copyFeatureHelpers(repoRoot, source);
+    for (const name of ["features.example.json", "compatibility.json"]) {
+      put(source, `linux-features/${name}`, fs.readFileSync(path.join(repoRoot, "linux-features", name)));
+    }
+    for (const id of nativeIds) {
+      for (const name of ["feature.json", "README.md"]) {
+        put(source, `linux-features/${id}/${name}`,
+          fs.readFileSync(path.join(repoRoot, "linux-features", id, name)));
+      }
+    }
+    put(source, "linux-features/features.json", JSON.stringify({ enabled: nativeIds }));
+    for (const [from] of nativePaths) {
+      if (from !== missingSource) put(app, from, `#!/bin/sh\n# ${from}\nexit 97\n`, 0o755);
+    }
+    for (const name of ["kokoro-stdin", "kokoro_stdin.py"]) {
+      put(app, `resources/plugins/openai-bundled/plugins/read-aloud/bin/${name}`, "inert runner\n");
+    }
+    assert.throws(
+      () => runPackageCommon(
+        `export CODEX_LINUX_FEATURES_ROOT=${JSON.stringify(path.join(source, "linux-features"))}\n` +
+        `export CODEX_LINUX_FEATURES_CONFIG=${JSON.stringify(path.join(source, "linux-features/features.json"))}\n` +
+        'export CODEX_INTERNAL_LINUX_FEATURE_IDS=""\n' +
+        `stage_enabled_native_feature_artifacts ${JSON.stringify(builder)}`,
+        app, source,
+      ),
+      /Missing staged native feature artifact/,
+    );
+  });
+}
+
 const readAloudPluginPath = "resources/plugins/openai-bundled/plugins/read-aloud";
 const readAloudRunnerPaths = ["bin/kokoro-stdin", "bin/kokoro_stdin.py", "install-kokoro-runtime.sh"];
 const shellQuote = (value) => `'${value.replaceAll("'", "'\\''")}'`;

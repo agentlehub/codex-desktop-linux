@@ -37,5 +37,5 @@ location.
 ## Testing
 
 ```bash
-node --test linux-features/tray-usage/test.js
+node --test linux-features/tray-usage/tests/test.js
 ```

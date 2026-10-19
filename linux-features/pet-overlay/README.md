@@ -163,7 +163,7 @@ and locked gravity can continue to sync through the same opt-in feature.
 Run the feature unit tests from the repository root:
 
 ```bash
-node --test linux-features/pet-overlay/test.js
+node --test linux-features/pet-overlay/tests/test.js
 ```
 
 For a manual check, enable the feature, rebuild, and launch the app:

@@ -107,5 +107,5 @@ compatibility audit and the local composer resolver.
 ## Test
 
 ```bash
-node --test linux-features/model-picker-default-presets/test.js
+node --test linux-features/model-picker-default-presets/tests/test.js
 ```

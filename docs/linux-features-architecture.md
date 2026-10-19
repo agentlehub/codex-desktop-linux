@@ -261,6 +261,12 @@ an orphan helper crate when its last feature consumer is removed.
 
 ## Testing and drift
 
+Repository feature test entrypoints belong in `tests/test.js` or `tests/*.test.js`.
+Keep test-only helpers and fixtures beneath the same `tests/` root, and production
+code and resources outside it. See
+[Update-builder payload](build-and-packaging.md#update-builder-payload) for
+packaging exclusions.
+
 A retained feature should have:
 
 1. manifest validation tests;
@@ -273,7 +279,8 @@ A retained feature should have:
 Run the framework and all adjacent Node tests with:
 
 ```bash
-node --test scripts/lib/linux-features.test.js linux-features/*/test.js
+node --test scripts/lib/linux-features.test.js \
+  linux-features/*/tests/test.js linux-features/*/tests/*.test.js
 ```
 
 An `applied-with-warnings` or optional skip is not evidence that a feature

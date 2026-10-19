@@ -164,13 +164,13 @@ not run independently of Desktop.
 Run focused tests with:
 
 ```bash
-node --test linux-features/shared-app-server-socket/test.js
+node --test linux-features/shared-app-server-socket/tests/test.js
 ```
 
 Set `CODEX_CLI_PATH` to include the stock authority/socket/proxy lifecycle test:
 
 ```bash
-CODEX_CLI_PATH="/absolute/path/to/real/codex" node --test linux-features/shared-app-server-socket/test.js
+CODEX_CLI_PATH="/absolute/path/to/real/codex" node --test linux-features/shared-app-server-socket/tests/test.js
 ```
 
 The feature depends on upstream's current local transport factory, WebSocket

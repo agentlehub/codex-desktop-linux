@@ -137,7 +137,7 @@ may also require the system package that provides `libGL.so.1`.
 
 ## Verification After Rebuild
 
-1. Run `node --test linux-features/chronicle-skysight/test.js linux-features/record-and-replay/test.js`.
+1. Run `node --test linux-features/chronicle-skysight/tests/test.js linux-features/record-and-replay/tests/test.js`.
 2. Rebuild and reinstall the feature bundle.
 3. Confirm the bridge exposes `linux-record-replay-skysight-pause` and
    `linux-record-replay-skysight-resume`.

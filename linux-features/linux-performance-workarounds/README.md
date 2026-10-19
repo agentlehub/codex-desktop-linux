@@ -19,5 +19,5 @@ These are upstream-bundle patches, not baseline compatibility code. Retest the
 measured regression and run:
 
 ```bash
-node --test linux-features/linux-performance-workarounds/test.js
+node --test linux-features/linux-performance-workarounds/tests/test.js
 ```

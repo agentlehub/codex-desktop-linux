@@ -79,7 +79,7 @@ fallback.
 ## Validate
 
 ```bash
-node linux-features/read-aloud-mcp/test.js
+node linux-features/read-aloud-mcp/tests/test.js
 node --test scripts/lib/package-common.test.js
 cargo check -p codex-read-aloud-linux
 cargo test -p codex-read-aloud-linux

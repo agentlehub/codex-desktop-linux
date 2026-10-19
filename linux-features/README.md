@@ -92,7 +92,7 @@ Each feature directory must include:
 - optional declarative `resources`, `runtimeHooks`, `packageResources`,
   `packageDependencies`, and `packageHooks`
 - optional `stage.sh` — legacy install/build staging hook
-- optional `test.js` — self-contained tests for the feature
+- optional `tests/` - repository feature tests and test-only support files
 
 Repository-owned build plumbing may set `"internal": true` in `feature.json`.
 Internal features are hidden from the setup wizard and public feature summary,
@@ -165,11 +165,14 @@ They can target `main-bundle`, `extracted-app:pre-webview`, `webview-asset`, or
 `feature:<feature-id>:<descriptor-id>` in patch reports and are optional by
 default.
 
-Feature self-tests live inside each feature directory. Run them with:
+Run repository feature tests from the repository root:
 
 ```bash
-node --test linux-features/*/test.js
+node --test linux-features/*/tests/test.js linux-features/*/tests/*.test.js
 ```
+
+See [Testing and drift](../docs/linux-features-architecture.md#testing-and-drift)
+for the test layout and validation requirements.
 
 The default core patch registry is empty. A core compatibility patch requires a
 reproduced blocker on the official Linux package and a regression test. Use

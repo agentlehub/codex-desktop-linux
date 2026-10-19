@@ -36,13 +36,13 @@ feature to the generated app.
 Run the feature tests with:
 
 ```bash
-node --test linux-features/copilot-reasoning-effort/test.js
+node --test linux-features/copilot-reasoning-effort/tests/test.js
 ```
 
 Or run all feature tests with:
 
 ```bash
-node --test linux-features/*/test.js
+node --test linux-features/*/tests/test.js
 ```
 
 The patch is fail-soft. If the upstream minified bundle shape changes, the

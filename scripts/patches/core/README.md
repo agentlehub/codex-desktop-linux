@@ -51,8 +51,9 @@ required patch selects the focused visible window, then the visible primary
 window, then another visible live window; it opens a parented asynchronous
 dialog and guards duplicate `before-quit` events until the user responds.
 
-The adjacent regression tests cover approval, cancellation, reentrancy,
-window selection, shell deferral, compound fail-closed semantic matching, and
-application to the signed campaign bundle. Retire the relevant repair when the
-signed stable bundle resolves its blocker; split the descriptor only if the
-clean-build policy explicitly approves multiple required core mutations.
+The regression tests in `scripts/patches/tests/core/` cover approval,
+cancellation, reentrancy, window selection, shell deferral, compound fail-closed
+semantic matching, and application to the signed campaign bundle. Retire the
+relevant repair when the signed stable bundle resolves its blocker; split the
+descriptor only if the clean-build policy explicitly approves multiple required
+core mutations.

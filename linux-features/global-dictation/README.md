@@ -75,7 +75,7 @@ Escape cancellation uses the application's Electron path; global Escape delivery
 on native Wayland is outside this feature's modifier-plus-key portal support.
 
 ```bash
-node --test linux-features/global-dictation/test.js
-node --test scripts/patches/lib/global-shortcuts-portal.test.js
+node --test linux-features/global-dictation/tests/test.js
+node --test scripts/patches/tests/lib/global-shortcuts-portal.test.js
 cargo test --manifest-path global-dictation-linux/Cargo.toml
 ```

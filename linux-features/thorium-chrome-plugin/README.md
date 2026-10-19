@@ -32,5 +32,5 @@ against Chrome-only constants in individual plugin scripts.
 Run the focused tests with:
 
 ```bash
-node --test linux-features/thorium-chrome-plugin/test.js
+node --test linux-features/thorium-chrome-plugin/tests/test.js
 ```

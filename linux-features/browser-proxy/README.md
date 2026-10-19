@@ -78,5 +78,5 @@ wrapper.
 Run the regression tests with:
 
 ```bash
-node --test linux-features/browser-proxy/test.js
+node --test linux-features/browser-proxy/tests/test.js
 ```

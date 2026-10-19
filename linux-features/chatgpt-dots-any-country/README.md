@@ -27,5 +27,5 @@ has already been loaded.
 ## Validate
 
 ```bash
-node --test linux-features/chatgpt-dots-any-country/test.js
+node --test linux-features/chatgpt-dots-any-country/tests/test.js
 ```

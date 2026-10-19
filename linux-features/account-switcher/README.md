@@ -86,7 +86,7 @@ this version. This feature does not clear system keyring entries when disabled.
 ```bash
 test_tmp="${XDG_CACHE_HOME:-$HOME/.cache}/codex-desktop-dev/tmp"
 mkdir -p "$test_tmp"
-TMPDIR="$test_tmp" node --test linux-features/account-switcher/test.js
+TMPDIR="$test_tmp" node --test linux-features/account-switcher/tests/test.js
 ```
 
 Set `CODEX_ACCOUNT_SWITCHER_NATIVE_APP` to an extracted official application

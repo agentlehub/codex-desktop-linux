@@ -309,5 +309,5 @@ Keychain diagnostics:
 Run the feature tests with:
 
 ```bash
-node --test linux-features/remote-mobile-control/test.js
+node --test linux-features/remote-mobile-control/tests/test.js
 ```

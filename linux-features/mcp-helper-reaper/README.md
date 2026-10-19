@@ -75,5 +75,5 @@ available.
 
 ```bash
 rtk cargo test --manifest-path linux-features/mcp-helper-reaper/reaper/Cargo.toml
-node --test linux-features/mcp-helper-reaper/test.js
+node --test linux-features/mcp-helper-reaper/tests/test.js
 ```

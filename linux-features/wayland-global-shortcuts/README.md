@@ -44,6 +44,6 @@ KDE's saved bindings can be edited or removed in its shortcut settings.
 Validation:
 
 ```bash
-node --test linux-features/wayland-global-shortcuts/test.js scripts/patches/lib/global-shortcuts-portal.test.js
+node --test linux-features/wayland-global-shortcuts/tests/test.js scripts/patches/tests/lib/global-shortcuts-portal.test.js
 cargo test --manifest-path global-dictation-linux/Cargo.toml
 ```

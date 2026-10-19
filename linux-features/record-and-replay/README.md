@@ -125,5 +125,5 @@ All helper invocations use `execFile` with fixed command shapes. The bridge does
 not expose a shell or arbitrary argv surface.
 
 ```bash
-node --test linux-features/record-and-replay/test.js
+node --test linux-features/record-and-replay/tests/test.js
 ```
