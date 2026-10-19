@@ -210,6 +210,7 @@ node --test launcher/start.test.js tests/deb-prerm.test.js scripts/lib/upstream-
   scripts/automation/upstream-linux-package-watchdog/test.js \
   scripts/patch-linux-window-ui.test.js scripts/patches/tests/runner.test.js \
   scripts/patches/tests/lib/asar-layout.test.js \
+  scripts/patches/tests/lib/global-shortcuts-portal.test.js \
   scripts/patches/tests/core/*/test.js \
   scripts/lib/linux-features.test.js
 

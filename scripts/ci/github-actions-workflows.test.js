@@ -247,7 +247,7 @@ test("Community profile isolation is validated alone against the signed package"
   const signedBaseline = job(workflow, "signed-baseline");
   assert.match(
     signedBaseline,
-    /Test Community profile isolation against the signed bootstrap/,
+    /Test profile isolation, Computer Use and account menu against the signed bundle/,
   );
   assert.match(
     signedBaseline,
@@ -256,6 +256,10 @@ test("Community profile isolation is validated alone against the signed package"
   assert.match(
     signedBaseline,
     /node --test linux-features\/community-profile-isolation\/tests\/test\.js/,
+  );
+  assert.match(
+    signedBaseline,
+    /node --test linux-features\/computer-use-linux\/tests\/unified\.test\.js \\\s+linux-features\/computer-use-linux\/tests\/resume\.test\.js \\\s+linux-features\/account-switcher\/tests\/test\.js/,
   );
 });
 

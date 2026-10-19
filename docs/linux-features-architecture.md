@@ -132,6 +132,13 @@ as `feature:<feature-id>:<descriptor-id>`. Supported phases are
 `extracted-app:post-webview`. Descriptors must be idempotent and fail softly
 unless the feature deliberately declares a required acceptance surface.
 
+Features may share ordinary patch libraries in `scripts/patches/lib/`. For
+example, `global-dictation` and `wayland-global-shortcuts` each install an
+idempotent portal backend from that directory and select their own command IDs.
+Either feature stages the same prebuilt helper through its staging hook. The
+update-builder carries the shared patch libraries and staging utility together
+with the selected feature directories.
+
 The core registry contains only required compatibility patches. Features must
 be self-contained and must not compose with deleted core IDs. A generic core extension point may be
 added only when unavoidable and must remain feature-agnostic.
@@ -200,10 +207,10 @@ bits are rejected.
 Gentoo support is opt-in per feature and separate from the disabled-by-default
 user configuration. Do not mark a feature supported without its adjacent tests,
 an official-bundle build, and acceptance for the environments it claims.
-`ui-tweaks` currently declares Gentoo support; other repository features require
-their own audit and declaration. This framework adds no systemd-specific
-integration. Native validation uses amd64 OpenRC; Gentoo ARM64 and systemd
-runtime environments have not been tested.
+`ui-tweaks` and `remote-mobile-control` currently declare Gentoo support; other
+repository features require their own audit and declaration. This framework adds
+no systemd-specific integration. Native validation uses amd64 OpenRC; Gentoo
+ARM64 and systemd runtime environments have not been tested.
 
 ```json
 {
