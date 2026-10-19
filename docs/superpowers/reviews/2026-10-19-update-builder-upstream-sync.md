@@ -1,6 +1,6 @@
 # Update-builder upstream synchronization
 
-Status: integration implemented and source verification passed; requested reviews pending.
+Status: integration and current source checks complete; both requested independent reviews passed. Physical validation remains outstanding on the new upstream revision.
 
 ## Prerequisites
 
@@ -46,3 +46,12 @@ Evidence root: `/home/korty/.cache/codex-desktop-dev/test-directory-sync-4xp_i14
 - New fixture bytes match upstream; protected acceptance/plugin source trees and all native/updater/Cargo/Make/Nix files match upstream exactly. The production packaging diff is the original nine lines.
 - First Node run found one incorrect expected-plugin fixture overlay: it included the backend executable although upstream grafts that separately. The expectation now overlays only the two actual retained runners. Initial failure is preserved in `node.log`; no production change was needed.
 - No local Nix, real app/profile/reset access, new archive builds or hosted dispatch performed. Prior archive evidence is historical and does not establish validation on this new upstream revision.
+
+## Requested independent reviews
+
+Both reviewed the immutable integrated source at `8f03d49c273acb654ac7ab6b8832403ff36ed954`.
+
+- Sol/high focused integration review: **PASS**, no actionable findings. Independently checked merge resolutions, imports, all 82 mapped entrypoints, new fixture bytes, native fixture completeness and preserved upstream Read Aloud regressions. Report: evidence root `review-high.md`.
+- Subsequent Sol/xhigh full PR diff review against `8c2eb74e`: **PASS**, no actionable findings. Independently checked original staging/test design plus upstream compatibility, all 82 selected entrypoints, rename modes, protected trees, consumer contracts and documentation consistency. Report: evidence root `review-xhigh.md`.
+- No review-driven source fixes were needed. This record and PR-description refresh are documentation-only deltas after the reviewed and tested source.
+- Both verdicts concern source correctness; neither waives archive/AppImage/arm64/hosted Nix/current packaged-builder validation. Previous physical outcomes remain historical. No local Nix was used.
