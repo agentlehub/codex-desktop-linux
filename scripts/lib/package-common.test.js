@@ -449,6 +449,76 @@ test("update-builder stages only plugin templates consumed by enabled feature ho
   );
 });
 
+test("update-builder omits test-only files without changing private features or sources", (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "codex-update-builder-test-files-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const source = path.join(root, "source");
+  for (const relative of ["install.sh", "scripts", "launcher", "packaging/linux", "assets"]) {
+    fs.cpSync(path.join(repoRoot, relative), path.join(source, relative), { recursive: true });
+  }
+  const features = path.join(source, "linux-features");
+  fs.mkdirSync(features);
+  for (const name of ["features.example.json", "compatibility.json"]) {
+    fs.copyFileSync(path.join(repoRoot, "linux-features", name), path.join(features, name));
+  }
+  fs.writeFileSync(path.join(features, "features.json"), JSON.stringify({ enabled: ["public-fixture", "private-fixture"] }));
+  const trees = ["linux-features/public-fixture", "linux-features/local/private-fixture", "scripts/patches/filter-fixture"];
+  const omitted = ["test.js", "nested/example.test.js", "nested/example.test-helpers.js", "fixtures/input.json", "nested/fixtures/input.json"];
+  const retained = ["patch.js", "nested/runtime.js", "fixtures.json", "nested/tests/runtime.js"];
+  const original = new Map();
+  for (const relative of trees) {
+    const dir = path.join(source, relative);
+    for (const name of [...omitted, ...retained]) {
+      const file = path.join(dir, name);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, `${relative}/${name}\n`, { mode: 0o640 });
+      original.set(file, { bytes: fs.readFileSync(file), mode: fs.statSync(file).mode & 0o777 });
+    }
+  }
+  for (const [relative, id] of [[trees[0], "public-fixture"], [trees[1], "private-fixture"]]) {
+    fs.writeFileSync(path.join(source, relative, "feature.json"), JSON.stringify({ id, defaultEnabled: false }));
+    fs.writeFileSync(path.join(source, relative, "README.md"), `${id}\n`);
+  }
+  const external = path.join(root, "external");
+  fs.mkdirSync(path.join(external, "fixtures"), { recursive: true });
+  fs.writeFileSync(path.join(external, "fixtures/test.js"), "external test data\n");
+  for (const relative of trees) {
+    fs.symlinkSync(external, path.join(source, relative, "linked-directory"));
+    fs.symlinkSync(path.join(external, "fixtures/test.js"), path.join(source, relative, "linked.test.js"));
+  }
+
+  const packageRoot = path.join(root, "package");
+  runPackageCommon([
+    "unset CODEX_LINUX_FEATURES_ROOT CODEX_LINUX_FEATURES_CONFIG",
+    "PACKAGE_NAME=codex-desktop",
+    `stage_update_builder_bundle ${JSON.stringify(packageRoot)}`,
+  ].join("\n"), root, source);
+  const builder = path.join(packageRoot, "opt/codex-desktop/update-builder");
+  for (const relative of trees) {
+    const privateFeature = relative.startsWith("linux-features/local/");
+    for (const name of omitted) {
+      assert.equal(fs.existsSync(path.join(builder, relative, name)), privateFeature, `${relative}/${name}`);
+    }
+    for (const name of privateFeature ? [...omitted, ...retained] : retained) {
+      const expected = original.get(path.join(source, relative, name));
+      const staged = path.join(builder, relative, name);
+      assert.deepEqual(fs.readFileSync(staged), expected.bytes, staged);
+      assert.equal(fs.statSync(staged).mode & 0o777, expected.mode, staged);
+    }
+    assert.equal(fs.readlinkSync(path.join(builder, relative, "linked-directory")), external);
+    assert.equal(fs.existsSync(path.join(builder, relative, "linked.test.js")), privateFeature);
+  }
+  for (const [file, expected] of original) {
+    assert.deepEqual(fs.readFileSync(file), expected.bytes, file);
+    assert.equal(fs.statSync(file).mode & 0o777, expected.mode, file);
+  }
+  assert.equal(fs.readFileSync(path.join(external, "fixtures/test.js"), "utf8"), "external test data\n");
+  const inventory = fs.readFileSync(path.join(builder, ".codex-linux/update-builder-manifest.txt"), "utf8").split("\n");
+  assert.equal(inventory.includes("linux-features/public-fixture/test.js"), false);
+  assert.equal(inventory.includes("linux-features/local/private-fixture/test.js"), true);
+  assert.equal(inventory.includes("scripts/patches/filter-fixture/nested/example.test.js"), false);
+});
+
 const readAloudPluginPath = "resources/plugins/openai-bundled/plugins/read-aloud";
 const readAloudRunnerPaths = ["bin/kokoro-stdin", "bin/kokoro_stdin.py", "install-kokoro-runtime.sh"];
 const shellQuote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
