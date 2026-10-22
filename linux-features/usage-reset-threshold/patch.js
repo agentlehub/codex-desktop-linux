@@ -402,7 +402,7 @@ function discoverMetadata(files) {
   const record = "\\{defaultMessage:\x60(?:[^\x60\\\\]|\\\\[\\s\\S])*\x60,id:\x60[^\x60]+\x60\\}";
   const search = uniqueSurface(files, `\\busage:\\[(?:${record})(?:,${record})*\\]`, "Usage search section", match => match[0].includes("settings.usage.resets.agentEnabled.label"));
   one(files.get(search.path), "export\\{[^}]*\\bas settingsSearchDocuments\\}", "settings search export");
-  const stockHelp = one(search.original, "\\{defaultMessage:\x60Give codex the ability to use a reset when you explicitly request it during a conversation, and your current limit has 10% or less remaining\\. Resets are never used automatically\\.\x60,id:\x60settings\\.usage\\.resets\\.agentEnabled\\.description\x60\\}", "Usage stock help record")[0];
+  const stockHelp = one(search.original, "\\{defaultMessage:\x60Allow your assistant to use a reset only when you explicitly request it during a conversation and your current limit has 10% or less remaining\\. Resets are never used automatically\\.\x60,id:\x60settings\\.usage\\.resets\\.agentEnabled\\.description\x60\\}", "Usage stock help record")[0];
   one(search.original, "id:\x60settings\\.usage\\.resets\\.agentEnabled\\.label\x60", "Usage master search label");
   const entry = (id, text) => `{defaultMessage:${JSON.stringify(text)},id:${JSON.stringify(`codexLinux.usageResetThreshold.${id}`)}}`;
   const added = [entry("masterHelp", MASTER_HELP), entry("customLabel", "Use custom reset threshold"), entry("fieldLabel", "Reset threshold (% remaining)"), entry("searchHelp", `Standard threshold: 10% remaining. Custom mode uses the saved whole percentage. ${POLICY_HELP}`)].join(",");

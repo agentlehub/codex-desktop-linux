@@ -12,6 +12,7 @@ require("./dock-icon.test.js");
 require("./gentoo-support.test.js");
 require("./custom-font-input.test.js");
 require("./selected-text-more-details.test.js");
+require("./selected-text-annotation-submit.test.js");
 
 const {
   discoverLinuxFeatureManifests,
@@ -59,7 +60,7 @@ const {
 
 function projectBundleFixture() {
   return [
-    `var actionAttributes={sidebarProjectRow:\`${PROJECT_ROW_ATTRIBUTE}\`};`,
+    `var actionAttributes={sidebarProjectLabel:\`data-app-action-sidebar-project-label\`,sidebarProjectRow:\`${PROJECT_ROW_ATTRIBUTE}\`};`,
     "var selectors={sidebarProjectRow:`[${actionAttributes.sidebarProjectRow}]`};",
     "var actions={sidebarProjectRow:({collapsed:e,label:t,projectId:n})=>({collapsed:e,label:t,projectId:n})};",
     "function marquee(e){return(0,Iy.jsx)(`span`,{...e,\"data-marquee-text\":!0})}",
@@ -274,6 +275,7 @@ test("ui-tweaks is discoverable and disabled until listed in features.json", () 
         ["feature:ui-tweaks:home-suggested-prompts-content", "webview-asset", "optional"],
         ["feature:ui-tweaks:appearance-custom-font-input", "webview-asset", "optional"],
         ["feature:ui-tweaks:selected-text-more-details", "extracted-app:post-webview", "optional"],
+        ["feature:ui-tweaks:selected-text-annotation-submit", "extracted-app:post-webview", "optional"],
       ],
     );
     const modelPickerDescriptors = descriptors.filter((descriptor) =>
@@ -762,20 +764,21 @@ test("English reasoning effort labels can be disabled", () => {
 
 test("sidebar project descriptor targets only the current project sidebar asset", () => {
   assert.match("app-shared-BTphDPeq.js", PROJECTS_SIDEBAR_ASSET_PATTERN);
-  assert.doesNotMatch("app-initial-BTphDPeq.js", PROJECTS_SIDEBAR_ASSET_PATTERN);
-  assert.doesNotMatch(
+  assert.match("app-initial-BTphDPeq.js", PROJECTS_SIDEBAR_ASSET_PATTERN);
+  assert.match(
     "app-initial~app-main~page-kMhXWEru.js",
     PROJECTS_SIDEBAR_ASSET_PATTERN,
   );
-  assert.doesNotMatch(
+  assert.match(
     "app-initial~app-main~automations-page-BcHjEK7e.js",
     PROJECTS_SIDEBAR_ASSET_PATTERN,
   );
-  assert.doesNotMatch("projects-index-page-TFjtVwC4.js", PROJECTS_SIDEBAR_ASSET_PATTERN);
-  assert.doesNotMatch(
+  assert.match("projects-index-page-TFjtVwC4.js", PROJECTS_SIDEBAR_ASSET_PATTERN);
+  assert.match(
     "app-initial~app-main~remote-conversation-page~projects-index-page-By2_tGIM.js",
     PROJECTS_SIDEBAR_ASSET_PATTERN,
   );
+  assert.doesNotMatch("app-initial-BTphDPeq.css", PROJECTS_SIDEBAR_ASSET_PATTERN);
 });
 
 test("patch injects sidebar project-name stylesheet runtime once", () => {

@@ -205,6 +205,8 @@ async function nativeStoreHarness(definition, options = {}) {
 
 // Text-only synthetic assets: real bounded contracts plus explicit scaffolding.
 // No assembled asset is ever executed; runtime tests load declarations above.
+// Historical contracts retain their original provenance. The current signed
+// help record replaces its historical counterpart only in synthetic text.
 function syntheticFiles() {
   const records = loadRecords();
   const get = id => {
@@ -242,7 +244,11 @@ function syntheticFiles() {
   add("native-store", "const ", ";");
   add("agent-write", "const fixtureAgentRoute={", "};");
   add("master-gate", "const fixtureMainGate={", "};");
-  add("search", "var t={", "};export{t as settingsSearchDocuments};");
+  const search = get("search");
+  const [currentHelp] = loadRecords(require("./current-usage-help.json"));
+  const previousHelp = search.source.match(/\{defaultMessage:`[^`]*`,id:`settings\.usage\.resets\.agentEnabled\.description`\}/g);
+  assert.equal(previousHelp?.length, 1, "Exactly one historical Usage help record");
+  append(search.sourcePath, `var t={${search.source.replace(previousHelp[0], currentHelp.source)}};export{t as settingsSearchDocuments};`);
   for (const id of ["ui-react-ref", "ui-react-id", "ui-react-state"])
     add(id, `const fixture_${id.replaceAll("-", "_")}=`, ";");
   append(get("usage-row").sourcePath, "var nl,rl,Xc,Zc,Qc;");

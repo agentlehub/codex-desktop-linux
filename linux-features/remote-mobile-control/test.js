@@ -11,9 +11,12 @@ const path = require("node:path");
 const test = require("node:test");
 const vm = require("node:vm");
 
+require("./gentoo-support.test.js");
+
 const {
   enabledLinuxFeatureStageHooks,
   loadLinuxFeaturePatchDescriptors,
+  stageEnabledLinuxFeatureInstall,
 } = require("../../scripts/lib/linux-features.js");
 const {
   createPatchReport,
@@ -68,8 +71,8 @@ const OLD_REMOTE_LOAD_GATE_ASSET =
 const OLD_REMOTE_CONVERSATION_STATUS_ASSET =
   "app-initial~app-main~projects-index-page~remote-conversation-page-test.js";
 const CURRENT_REMOTE_CONVERSATION_STATUS_ASSET = "app-primary-a0bff570446b.js";
-const CURRENT_REMOTE_REASONING_SUMMARY_ASSET = "app-shared-5c3eff50f08d.js";
-const CURRENT_REMOTE_CONVERSATION_HYDRATION_ASSET = CURRENT_REMOTE_REASONING_SUMMARY_ASSET;
+const CURRENT_REMOTE_REASONING_SUMMARY_ASSET = "app-initial-currentHash.js";
+const CURRENT_REMOTE_CONVERSATION_HYDRATION_ASSET = "app-initial-currentHash.js";
 const VALID_DEVICE_KEY_NONCE = Buffer.alloc(32, 1).toString("base64url");
 const VALID_DEVICE_KEY_DIGEST = Buffer.alloc(32, 2).toString("base64url");
 
@@ -617,6 +620,12 @@ test("remote mobile stage hook preserves official single-instance and browser RP
       applyLinuxRemoteMobileAppServerRemoteControlPatch(syntheticCurrentLocalAppServerLaunchBundle()),
     );
 
+    const featuresConfigPath = path.join(tempRoot, "features.json");
+    fs.writeFileSync(featuresConfigPath, JSON.stringify({ enabled: ["remote-mobile-control"] }));
+    stageEnabledLinuxFeatureInstall(installDir, {
+      featuresRoot: path.join(REPO_ROOT, "linux-features"),
+      featuresConfigPath,
+    });
     const first = runStageHook(env);
     const second = runStageHook(env);
 
@@ -907,26 +916,23 @@ test("remote mobile cold-start hook does not bypass a present disabled systemd u
   }
 });
 
-test("remote mobile cold-start hook removes dead daemon pid files when Desktop app-server owns remote-control", () => {
+test("remote mobile cold-start hook removes dead pid files from both daemon namespaces when Desktop owns remote-control", () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-remote-mobile-cold-start-"));
   try {
     const home = path.join(tempRoot, "home");
     const codexHome = path.join(tempRoot, "codex-home");
     const daemonDir = path.join(codexHome, "app-server-daemon");
     const appDir = path.join(tempRoot, "package", "share", "codex-desktop", "app");
+    const pidFiles = ["app-server.pid", "app-server-updater.pid", "daemon.pid", "daemon-updater.pid"]
+      .map((name) => path.join(daemonDir, name));
 
     fs.mkdirSync(home, { recursive: true });
     fs.mkdirSync(daemonDir, { recursive: true });
     fs.mkdirSync(appDir, { recursive: true });
     writeDesktopAppServerRemoteControlMarker(appDir);
-    fs.writeFileSync(
-      path.join(daemonDir, "app-server.pid"),
-      JSON.stringify({ pid: 999999, processStartTime: "fixture" }),
-    );
-    fs.writeFileSync(
-      path.join(daemonDir, "app-server-updater.pid"),
-      JSON.stringify({ pid: 999998, processStartTime: "fixture" }),
-    );
+    for (const pidFile of pidFiles) {
+      fs.writeFileSync(pidFile, JSON.stringify({ pid: 999999, processStartTime: "fixture" }));
+    }
 
     const result = runColdStartHook({
       CODEX_HOME: codexHome,
@@ -935,8 +941,9 @@ test("remote mobile cold-start hook removes dead daemon pid files when Desktop a
     });
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
-    assert.equal(fs.existsSync(path.join(daemonDir, "app-server.pid")), false);
-    assert.equal(fs.existsSync(path.join(daemonDir, "app-server-updater.pid")), false);
+    for (const pidFile of pidFiles) {
+      assert.equal(fs.existsSync(pidFile), false, pidFile);
+    }
     assert.match(result.stdout, /Removed stale remote mobile control daemon pid file/);
     assert.match(result.stdout, /owner: desktop \(app-server launches with remote-control enabled\)/);
   } finally {
@@ -944,20 +951,24 @@ test("remote mobile cold-start hook removes dead daemon pid files when Desktop a
   }
 });
 
-test("remote mobile cold-start hook preserves live daemon pid files when Desktop app-server owns remote-control", () => {
+test("remote mobile cold-start hook preserves live pid files from both daemon namespaces when Desktop owns remote-control", () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "codex-remote-mobile-cold-start-"));
   try {
     const home = path.join(tempRoot, "home");
     const codexHome = path.join(tempRoot, "codex-home");
     const daemonDir = path.join(codexHome, "app-server-daemon");
     const appDir = path.join(tempRoot, "package", "share", "codex-desktop", "app");
-    const pidFile = path.join(daemonDir, "app-server.pid");
+    const pidFiles = ["app-server.pid", "app-server-updater.pid", "daemon.pid", "daemon-updater.pid"]
+      .map((name) => path.join(daemonDir, name));
+    const pidRecord = JSON.stringify({ pid: process.pid, processStartTime: "fixture" });
 
     fs.mkdirSync(home, { recursive: true });
     fs.mkdirSync(daemonDir, { recursive: true });
     fs.mkdirSync(appDir, { recursive: true });
     writeDesktopAppServerRemoteControlMarker(appDir);
-    fs.writeFileSync(pidFile, JSON.stringify({ pid: process.pid, processStartTime: "fixture" }));
+    for (const pidFile of pidFiles) {
+      fs.writeFileSync(pidFile, pidRecord);
+    }
 
     const result = runColdStartHook({
       CODEX_HOME: codexHome,
@@ -966,7 +977,9 @@ test("remote mobile cold-start hook preserves live daemon pid files when Desktop
     });
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
-    assert.equal(fs.existsSync(pidFile), true);
+    for (const pidFile of pidFiles) {
+      assert.equal(fs.readFileSync(pidFile, "utf8"), pidRecord, pidFile);
+    }
     assert.doesNotMatch(result.stdout, /Removed stale remote mobile control daemon pid file/);
     assert.match(result.stdout, /owner: desktop \(app-server launches with remote-control enabled\)/);
   } finally {
@@ -1023,14 +1036,16 @@ test("remote mobile control feature exposes opt-in main-bundle and webview patch
     );
     assert.ok(reasoningSummaryDescriptor);
     assert.equal(reasoningSummaryDescriptor.pattern.test(CURRENT_REMOTE_REASONING_SUMMARY_ASSET), true);
-    assert.equal(reasoningSummaryDescriptor.pattern.test(CURRENT_REMOTE_RUNTIME_ASSET), false);
+    assert.equal(reasoningSummaryDescriptor.pattern.test(CURRENT_REMOTE_RUNTIME_ASSET), true);
+    assert.equal(reasoningSummaryDescriptor.pattern.test("app-initial-currentHash.css"), false);
 
     const hydrationDescriptor = descriptors.find((descriptor) =>
       descriptor.id === "feature:remote-mobile-control:linux-remote-mobile-conversation-hydration"
     );
     assert.ok(hydrationDescriptor);
     assert.equal(hydrationDescriptor.pattern.test(CURRENT_REMOTE_CONVERSATION_HYDRATION_ASSET), true);
-    assert.equal(hydrationDescriptor.pattern.test(CURRENT_REMOTE_RUNTIME_ASSET), false);
+    assert.equal(hydrationDescriptor.pattern.test(CURRENT_REMOTE_RUNTIME_ASSET), true);
+    assert.equal(hydrationDescriptor.pattern.test("app-initial-currentHash.css"), false);
     const hydrationOwner = syntheticCurrentConversationHydrationBundle();
     const patchedHydrationOwner = applyLinuxRemoteMobileConversationHydrationPatch(hydrationOwner);
     assert.equal(

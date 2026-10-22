@@ -43,7 +43,7 @@ function currentModelFixture() {
 }
 
 function currentGateFixture() {
-  return "function gate(e){let t=(0,cache.c)(10),n=read(localHost),r=e?.hostId??n,i=getHost(r),a=i?.authMethod===`chatgpt`||i?.authMethod===`personalAccessToken`,o=i?.authMethod??null,s;t[0]!==r||t[1]!==o?(s={authMethod:o,hostId:r},t[0]=r,t[1]=o,t[2]=s):s=t[2];let{data:c,isPending:l}=query(requirementsQuery,s),u=!!i?.isLoading||a&&l,d;t[3]!==c||t[4]!==u||t[5]!==a?(d=a&&!u&&c!=null?resolveAccess(c):null,t[3]=c,t[4]=u,t[5]=a,t[6]=d):d=t[6];let f=d,p;return t[7]!==u||t[8]!==f?(p={serviceTierAccess:f,isLoading:u},t[7]=u,t[8]=f,t[9]=p):p=t[9],p}";
+  return "function gate(e){let t=(0,cache.c)(10),n=read(localHost),r=e?.hostId??n,i=getHost(r),a=i?.authMethod===`chatgpt`||i?.authMethod===`personalAccessToken`||i?.authMethod===`amazonBedrock`,o=i?.authMethod??null,s;t[0]!==r||t[1]!==o?(s={authMethod:o,hostId:r},t[0]=r,t[1]=o,t[2]=s):s=t[2];let{data:c,isPending:l}=query(requirementsQuery,s),u=!!i?.isLoading||a&&l,d;t[3]!==c||t[4]!==u||t[5]!==a?(d=a&&!u&&c!=null?resolveAccess(c):null,t[3]=c,t[4]=u,t[5]=a,t[6]=d):d=t[6];let f=d,p;return t[7]!==u||t[8]!==f?(p={serviceTierAccess:f,isLoading:u},t[7]=u,t[8]=f,t[9]=p):p=t[9],p}";
 }
 
 function gateHarness(source) {
@@ -109,7 +109,7 @@ test("api-key-service-tier stays disabled until listed in features.json", () => 
   });
 });
 
-test("current package descriptors use semantic app-initial and app-shared owners", () => {
+test("current package descriptors use semantic owners without binding the moved fallback to a chunk", () => {
   assert.deepEqual(
     descriptors.map((descriptor) => descriptor.id),
     [
@@ -119,12 +119,18 @@ test("current package descriptors use semantic app-initial and app-shared owners
       "api-key-service-tier-fallback",
     ],
   );
-  const sharedIds = new Set(["api-key-service-tier-resolver", "api-key-service-tier-fallback"]);
-  assert.ok(descriptors.filter((descriptor) => !sharedIds.has(descriptor.id))
+  const sharedIds = new Set(["api-key-service-tier-resolver"]);
+  assert.ok(descriptors.filter((descriptor) =>
+    ["api-key-service-tier-gate", "api-key-service-tier-model"].includes(descriptor.id))
     .every((descriptor) => descriptor.pattern.test("app-initial-Bd3Z1bES.js")));
   assert.ok(descriptors.filter((descriptor) => sharedIds.has(descriptor.id))
     .every((descriptor) => descriptor.pattern.test("app-shared-d9439dc9e73f.js")));
-  assert.ok(descriptors.every((descriptor) => !descriptor.pattern.test("projects-index-page-DjNy92Xe.js")));
+  const fallback = descriptors.find((descriptor) => descriptor.id === "api-key-service-tier-fallback");
+  assert.equal(fallback.pattern.test("app-initial-newHash.js"), true);
+  assert.equal(fallback.pattern.test("app-shared-newHash.js"), true);
+  assert.equal(fallback.assetMatch("function unrelated(){}"), false);
+  assert.ok(descriptors.filter((descriptor) => descriptor !== fallback)
+    .every((descriptor) => !descriptor.pattern.test("projects-index-page-DjNy92Xe.js")));
 });
 
 test("current target wrappers warn when an exact contract disappears", () => {
@@ -258,7 +264,7 @@ test("current service-tier access allows API-key Fast without enabling Ultrafast
 
 test("current gate preserves account requirements and pending state", () => {
   const driver = gateHarness(applyApiKeyServiceTierGatePatch(currentGateFixture()));
-  for (const authMethod of ["chatgpt", "personalAccessToken"]) {
+  for (const authMethod of ["chatgpt", "personalAccessToken", "amazonBedrock"]) {
     driver.setHost({authMethod, isLoading: false});
     const access = {fast: false, ultrafast: true};
     driver.setRequirements({access});
@@ -269,7 +275,7 @@ test("current gate preserves account requirements and pending state", () => {
     driver.setRequirements(null);
     assert.deepEqual(driver.gate(), {serviceTierAccess: null, isLoading: false});
   }
-  assert.equal(driver.calls(), 2);
+  assert.equal(driver.calls(), 3);
 });
 
 test("memoized current gate recomputes access when API-key authentication changes", () => {

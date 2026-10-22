@@ -1,0 +1,19 @@
+{
+  "version": "26.1016.61520",
+  "architecture": "amd64",
+  "packageSha256": "9add622916c5fa3861afd95081af77e25488c108ca9c543e1f67560b390d28d4",
+  "sources": {
+    "webview/assets/_virtual_settings-search-documents-c229b8f25f3e.js": "2fd72bacef280659e9bc6c4023bbd026922688fb0503ba087c1cce542bb1b33c"
+  },
+  "records": [
+    {
+      "id": "usage-master-help",
+      "sourcePath": "webview/assets/_virtual_settings-search-documents-c229b8f25f3e.js",
+      "byteStart": 514271,
+      "byteEnd": 514522,
+      "sha256": "4b239bafbdc87f85bd452b9e06a27ceda8826830058b32489789ce068cdda971",
+      "source": "{defaultMessage:`Allow your assistant to use a reset only when you explicitly request it during a conversation and your current limit has 10% or less remaining. Resets are never used automatically.`,id:`settings.usage.resets.agentEnabled.description`}",
+      "purpose": "Current signed Usage help metadata record; source text only, never module execution."
+    }
+  ]
+}

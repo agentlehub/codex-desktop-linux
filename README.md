@@ -57,15 +57,17 @@ cd codex-desktop-linux
 | Fedora | `make bootstrap-native` | Builds and installs an RPM |
 | openSUSE | `make bootstrap-native` | Builds and installs an RPM |
 | Arch, Manjaro, EndeavourOS | `make bootstrap-native` | Builds and installs a pacman package |
-| Gentoo | `make bootstrap-native` | Builds a local ebuild and installs through Portage; supports `ui-tweaks`, no updater |
+| Gentoo | `make bootstrap-native` | Builds a local ebuild and installs through Portage; supports `ui-tweaks` and `remote-mobile-control`, no updater |
 | NixOS or another Nix system | `nix run github:ilysenko/codex-desktop-linux` | Builds and runs the flake output; see [Nix](docs/nix.md) |
 | Atomic desktops or another distribution | `make build-app && make appimage` | Produces a local AppImage without the native updater |
 
 Gentoo's application merge ignores `EMERGE_DEFAULT_OPTS` to install through the
 generated ebuild rather than reuse a binary package. Global Portage settings are unchanged.
 Gentoo has a phase-aware dependency and package-resource framework for audited
-features. `ui-tweaks` is supported and remains disabled by default; other
-repository features require their own support declarations. See the
+features. `ui-tweaks` and `remote-mobile-control` are supported and remain
+disabled by default; other repository features require their own support
+declarations. Remote mobile control uses the existing Desktop-owned app-server;
+the ebuild does not install or enable a remote-control service. See the
 [Gentoo feature contract](docs/linux-features-architecture.md#gentoo-feature-contract).
 Gentoo's local ebuild path has been tested on OpenRC; a Gentoo systemd
 environment has not been tested. See [Gentoo validation scope](docs/native-setup.md#gentoo-local-ebuild).
@@ -264,6 +266,9 @@ requirements, known limitations, configuration, and tests.
 | `authenticated-proxy` | Username/password support for HTTP proxies | [Docs](linux-features/authenticated-proxy/README.md) |
 | `automation-extensions` | Multi-time schedules and eager `automation_update` exposure | [Docs](linux-features/automation-extensions/README.md) |
 | `browser-proxy` | Pass explicit proxy settings to Browser Use network helpers | [Docs](linux-features/browser-proxy/README.md) |
+| `chatgpt-dil-markdown-fallback` | Show saved Markdown when an interactive ChatGPT reply cannot render | [Docs](linux-features/chatgpt-dil-markdown-fallback/README.md) |
+| `chatgpt-dots-any-country` | Keep ChatGPT Dots entry points visible when the account response is country-gated | [Docs](linux-features/chatgpt-dots-any-country/README.md) |
+| `chatgpt-sidebar-separate-history` | Default the ChatGPT history filter to Chat and remember Chat / Work / All selections | [Docs](linux-features/chatgpt-sidebar-separate-history/README.md) |
 | `chronicle-skysight` | Opt-in Linux desktop activity memory and restricted Skysight MCP tools | [Docs](linux-features/chronicle-skysight/README.md) |
 | `codex-micro` | Work Louder Codex Micro hotplug and hidraw policy using upstream `node-hid` | [Docs](linux-features/codex-micro/README.md) |
 | `community-profile-isolation` | Isolate Community Codex/Electron state and child CLI resolution from official ChatGPT | [Docs](linux-features/community-profile-isolation/README.md) |
@@ -274,6 +279,7 @@ requirements, known limitations, configuration, and tests.
 | `flatpak-chrome-native-messaging` | Bridge the official Chrome extension into Flatpak Google Chrome | [Docs](linux-features/flatpak-chrome-native-messaging/README.md) |
 | `frameless-titlebar` | Hide official Linux overlay buttons for compositor-managed decorations | [Docs](linux-features/frameless-titlebar/README.md) |
 | `global-dictation` | X11 and XDG portal global dictation hotkeys | [Docs](linux-features/global-dictation/README.md) |
+| `wayland-global-shortcuts` | Native Wayland support for the app's Popout, Mini/Pet and other global shortcuts; independent of dictation | [Docs](linux-features/wayland-global-shortcuts/README.md) |
 | `global-dictation-gnome` | Optional GNOME Shell paste companion without RemoteDesktop sessions; requires `global-dictation` and explicit extension activation | [Docs](linux-features/global-dictation-gnome/README.md) |
 | `linux-performance-workarounds` | Measured renderer workarounds for affected systems | [Docs](linux-features/linux-performance-workarounds/README.md) |
 | `mcp-helper-reaper` | Reap orphaned MCP helpers without touching live sessions | [Docs](linux-features/mcp-helper-reaper/README.md) |
@@ -287,6 +293,7 @@ requirements, known limitations, configuration, and tests.
 | `project-task-sort` | Restore Created ordering for alternate Projects tasks | [Docs](linux-features/project-task-sort/README.md) |
 | `read-aloud` | Add Linux read-aloud controls to assistant responses | [Docs](linux-features/read-aloud/README.md) |
 | `read-aloud-mcp` | Let the agent speak through the Linux Read Aloud backend | [Docs](linux-features/read-aloud-mcp/README.md) |
+| `reasoning-visibility` | Add a translated, default-off General setting to show reasoning summaries; changes apply after restart | [Docs](linux-features/reasoning-visibility/README.md) |
 | `record-and-replay` | Record a Linux demonstration and turn it into a reusable skill | [Docs](linux-features/record-and-replay/README.md) |
 | `remote-control-ui` | Expose experimental remote-control settings on Linux | [Docs](linux-features/remote-control-ui/README.md) |
 | `remote-mobile-control` | Experimental Linux remote-host and outbound-control flows | [Docs](linux-features/remote-mobile-control/README.md) |
@@ -333,9 +340,15 @@ The optional `ui-tweaks` sub-option `tweaks.selection.moreDetails.enabled`
 restores **More details** in the Codex reply selection menu, asking ChatGPT
 Quick Chat to explain the selected text with its source context. It is disabled
 by default; see the [UI Tweaks configuration](linux-features/ui-tweaks/README.md#selectionmoredetails).
+
 When testing a local build, launch `codex-app/start.sh` with the same Electron
 flags as your normal desktop entry, including any required `--proxy-server=...`
 argument. Quick Chat becomes available after ChatGPT account initialization.
+
+The optional `ui-tweaks` sub-option `tweaks.selection.annotationSubmit.enabled`
+makes Ctrl+Enter send the active selected-text annotation editor's text without
+being intercepted by the regular composer; it is disabled by default.
+See the [annotation submit configuration](linux-features/ui-tweaks/README.md#selectionannotationsubmit).
 
 ## Configure optional features
 

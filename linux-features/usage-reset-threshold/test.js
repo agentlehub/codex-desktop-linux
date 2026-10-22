@@ -11,7 +11,7 @@ const records = loadRecords();
 
 test("fixture provenance: exact bounded source slices reject truncation", () => {
   const { verifyRecord } = require("./fixtures/harness.js");
-  for (const record of records) {
+  for (const record of [...records, ...loadRecords(require("./fixtures/current-usage-help.json"))]) {
     assert.equal(verifyRecord(record), true);
     assert.throws(() => verifyRecord({ ...record, source: record.source.slice(0, -1) }), /provenance/);
   }
@@ -660,6 +660,8 @@ test("metadata: catalog preserves authorization/schema and changes only eligibil
 test("metadata: Usage search exposes controls without changing unrelated or manual messages", () => {
   const { discoverMetadata } = require("./patch.js"), { syntheticFiles, loadSnippet } = require("./fixtures/harness.js");
   const result = discoverMetadata(syntheticFiles()).search;
+  const [currentHelp] = loadRecords(require("./fixtures/current-usage-help.json"));
+  assert.ok(result.original.includes(currentHelp.source));
   const before = loadSnippet("", {}, `({${result.original}}).usage`);
   const after = loadSnippet("", {}, `({${result.replacement}}).usage`);
   const stockId = "settings.usage.resets.agentEnabled.description";

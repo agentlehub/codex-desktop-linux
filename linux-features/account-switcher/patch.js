@@ -10,6 +10,19 @@ function unique(source, pattern) {
   return matches.length === 1 ? matches[0] : null;
 }
 
+function menuItemImport(source, localName) {
+  const bindings = [];
+  for (const declaration of source.matchAll(/\bimport\s*\{([^{}]+)\}\s*from\s*(["'])[^"']+\2/g)) {
+    for (const specifier of declaration[1].split(",")) {
+      const binding = specifier.trim().match(new RegExp(`^(${IDENT})(?:\\s+as\\s+(${IDENT}))?$`));
+      if (binding && (binding[2] ?? binding[1]) === localName) {
+        bindings.push({ index: declaration.index + declaration[0].indexOf("{") + 1, exported: binding[1] });
+      }
+    }
+  }
+  return bindings.length === 1 ? bindings[0] : null;
+}
+
 function applyMain(source) {
   if (source.includes(MAIN_MARKER)) return source;
   const bridge = unique(source, new RegExp(
@@ -43,28 +56,43 @@ function applyMain(source) {
 
 function applyUi(source) {
   if (source.includes(UI_MARKER)) return source;
-  const identity = unique(source, new RegExp(
-    `function ${IDENT}\\(${IDENT}\\)\\{let ${IDENT}=\\(0,${IDENT}\\.c\\)\\(\\d+\\),\\{sidebarFooter:${IDENT},ambientUsage:${IDENT},hideUsage:${IDENT},open:${IDENT},onClose:(${IDENT})\\}=${IDENT},[^;]{0,200}?(${IDENT})=(${IDENT})\\((${IDENT})\\)`, "g"));
   const dispatch = unique(source, new RegExp(`(${IDENT})\\.dispatchMessage\\(\\\`avatar-overlay-open\\\`,\\{\\}\\)`, "g"));
-  const jsx = unique(source, new RegExp(`\\(0,(${IDENT})\\.jsx\\)\\((${IDENT}),\\{accountIcon:${IDENT},accountSwitcher:${IDENT},additionalItems:(${IDENT}),`, "g"));
-  const regular = unique(source, new RegExp(`children:\\[(${IDENT}),(${IDENT}),(${IDENT}),null,(${IDENT}),(${IDENT}),null,null,`, "g"));
-  const settings = unique(source, new RegExp(`\\(0,${IDENT}\\.jsx\\)\\((${IDENT}),\\{leftIconAsset:${IDENT},keyboardShortcut:${IDENT},onClick:${IDENT},children:${IDENT}\\}\\)`, "g"));
+  const jsx = unique(source, new RegExp(
+    `\\(0,(${IDENT})\\.jsx\\)\\((${IDENT}),\\{accountIcon:${IDENT},accountSwitcher:${IDENT},additionalItems:(${IDENT}),` +
+      `[\\s\\S]{0,500}?onCloseMenu:(${IDENT}),`, "g"));
+  const settings = unique(source, new RegExp(
+    `let (${IDENT});[\\s\\S]{0,350}?codex\\.profileDropdown\\.settingsPage[\\s\\S]{0,350}?` +
+      `let (${IDENT});[\\s\\S]{0,350}?\\2=\\(0,${IDENT}\\.jsx\\)\\((${IDENT}),` +
+      `\\{leftIconAsset:${IDENT},keyboardShortcut:${IDENT},onClick:${IDENT},children:\\1\\}\\)`, "g"));
   const intl = unique(source, new RegExp(`(${IDENT})\\.formatMessage\\(\\{id:\\\`codex\\.profileDropdown\\.copyUserIdForEmail\\\``, "g"));
-  if (!identity || !dispatch || !jsx || !regular || !settings || !intl || !source.includes("codex.profileDropdown.settingsPage")) {
+  const regular = settings == null ? null : unique(source, new RegExp(
+    `children:\\[(${IDENT}),(${IDENT}),${settings[2]}\\]`, "g"));
+  if (!dispatch || !jsx || !regular || !settings || !intl) {
     console.warn("WARN: Account switcher profile-menu contract drifted - skipping patch");
     return source;
   }
-  const [, close] = identity;
-  const [, jsxAlias, , additional] = jsx;
-  const [, menuItem] = settings;
-  const row = `(0,${jsxAlias}.jsx)(${menuItem},{onClick:()=>{${close}();${dispatch[1]}.dispatchMessage(\`mcp-request\`,{hostId:\`local\`,request:{id:\`community-account-switcher-\`+Date.now(),method:\`community/accountSwitcher\`,params:{locale:${intl[1]}.locale}}})},children:${intl[1]}.locale?.startsWith(\`pl\`)?\`Przełącz konto…\`:${intl[1]}.locale?.startsWith(\`zh\`)?\`切换账户…\`:\`Switch account…\`})`;
+  const [, jsxAlias, , additional, close] = jsx;
+  const menuItem = settings[3];
+  const binding = menuItemImport(source, menuItem);
+  if (!binding) {
+    console.warn("WARN: Account switcher menu-item import contract drifted - skipping patch");
+    return source;
+  }
+  // Minifiers reuse import aliases inside nested scopes. In the sidebar branch
+  // the settings component's alias can instead name the pet's onClick callback.
+  // A fresh ESM binding keeps the component's identity in both layouts without
+  // eagerly reading an import or depending on the current minified symbol names.
+  let component = "codexLinuxAccountSwitcherMenuItem";
+  for (let suffix = 1; source.includes(component); suffix++) component = `codexLinuxAccountSwitcherMenuItem${suffix}`;
+  source = source.slice(0, binding.index) + `${binding.exported} as ${component},` + source.slice(binding.index);
+  const row = `(0,${jsxAlias}.jsx)(${component},{onClick:()=>{${close}();${dispatch[1]}.dispatchMessage(\`mcp-request\`,{hostId:\`local\`,request:{id:\`community-account-switcher-\`+Date.now(),method:\`community/accountSwitcher\`,params:{locale:${intl[1]}.locale}}})},children:${intl[1]}.locale?.startsWith(\`pl\`)?\`Przełącz konto…\`:${intl[1]}.locale?.startsWith(\`zh\`)?\`切换账户…\`:\`Switch account…\`})`;
   // Keep the existing React memo dependencies: the action references the same
   // onClose callback as the adjacent settings items and contains no account data.
   source = source.replace(jsx[0], jsx[0].replace(`additionalItems:${additional},`,
     `additionalItems:(0,${jsxAlias}.jsxs)(${jsxAlias}.Fragment,{children:[${additional},${row}]}),/*${UI_MARKER}*/`));
   source = source.replace(regular[0], regular[0].replace(
-    `children:[${regular[1]},${regular[2]},${regular[3]},null,`,
-    `children:[${regular[1]},${regular[2]},${regular[3]},${row},`));
+    `children:[${regular[1]},${regular[2]},${settings[2]}]`,
+    `children:[${regular[1]},${regular[2]},${settings[2]},${row}]`));
   return source;
 }
 

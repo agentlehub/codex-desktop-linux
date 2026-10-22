@@ -46,7 +46,9 @@ Remove only `usage-reset-threshold` from your enabled feature list, preserving o
 
 ## Validation
 
-Validated against signed stable OpenAI Linux package **26.1007.21434** on **amd64 and arm64**:
+Current compatibility checks use signed stable OpenAI Linux package **26.1016.61520** on **amd64 and arm64**. Feature-only disposable app builds passed, including extraction, patching, ASAR repacking, and layout verification. Checks on fresh source and the built ASARs passed for emitted JavaScript syntax, four-registry discovery, preservation of manual-reset and permission-gate code, and byte-identical reapplication. The newer Usage help wording is covered by a bounded signed-source fixture; older behavioral fixtures retain their original provenance. Feature, framework, packaging, and patch-engine tests passed without skips. The upstream update-builder filter omits this feature's tests and fixtures while retaining its production inputs.
+
+These current checks did not produce native package archives, install or launch the app, or repeat hosted Nix validation. Earlier feature-enabled and feature-disabled build comparisons used signed stable OpenAI Linux package **26.1007.21434** on **amd64 and arm64**:
 
 - Feature, feature-framework, and packaging tests passed without skips. Runtime tests use bounded source snippets with inert settings, authentication, usage and transport fakes.
 - Official-bundle feature audits passed on each architecture.
