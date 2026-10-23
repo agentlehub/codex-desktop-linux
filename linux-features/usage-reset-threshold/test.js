@@ -534,6 +534,9 @@ test("usage: write failures and malformed reads never create rollback writes or 
   assert.equal(h.writes.length, 1);
   assert.equal(h.controller.snapshot().draft, "10");
   assert.match(h.controller.snapshot().error, /Couldn't apply reset threshold setting/);
+  h.controller.sync(true, { enabled: true, remainingPercent: 25 });
+  assert.equal(h.controller.snapshot().draft, "25");
+  assert.match(h.controller.snapshot().error, /Couldn't apply reset threshold setting/);
   h.controller.sync(true, null);
   assert.equal(h.controller.snapshot().fieldDisabled, true);
   assert.equal(h.controller.snapshot().switchDisabled, true);
@@ -590,6 +593,36 @@ test("usage: emitted component exposes accessible controls and immediate master 
   }
 });
 
+test("usage: emitted custom switch applies both modes and preserves the saved percentage", async () => {
+  const h = usageComponent({ policy: { enabled: false, remainingPercent: 37 } });
+  for (const enabled of [true, false]) {
+    await controls(h.render())[1].props.onChange(enabled);
+    const tree = h.render(), [, custom, input] = controls(tree);
+    assert.equal(custom.props.checked, enabled);
+    assert.equal(input.props.disabled, !enabled);
+    assert.equal(input.props.value, "37");
+    assert.ok(treeText(tree).includes(enabled ? "Custom threshold: 37% remaining." : "Standard threshold: 10% remaining."));
+  }
+  assert.deepEqual(JSON.parse(JSON.stringify(h.writes.map(({ key, value }) => ({ key, value })))), [
+    { key: "codex-linux-agent-usage-reset-policy", value: { enabled: true, remainingPercent: 37 } },
+    { key: "codex-linux-agent-usage-reset-policy", value: { enabled: false, remainingPercent: 37 } },
+  ]);
+  assert.equal(h.state.master, true);
+});
+
+test("usage: emitted input commits and normalizes an edit on blur without Enter", async () => {
+  const h = usageComponent();
+  const input = controls(h.render())[2];
+  input.props.onFocus();
+  input.props.onChange({ target: { value: "037" } });
+  await controls(h.render())[2].props.onBlur();
+  assert.deepEqual(JSON.parse(JSON.stringify(h.writes.map(({ key, value }) => ({ key, value })))), [
+    { key: "codex-linux-agent-usage-reset-policy", value: { enabled: true, remainingPercent: 37 } },
+  ]);
+  assert.equal(controls(h.render())[2].props.value, "37");
+  assert.equal(h.state.master, true);
+});
+
 test("usage: emitted input keeps invalid drafts and connects the inline error", async () => {
   const h = usageComponent();
   let input = controls(h.render())[2];
@@ -607,6 +640,27 @@ test("usage: emitted input keeps invalid drafts and connects the inline error", 
   assert.equal(h.writes.length, 0);
   await input.props.onKeyDown({ key: "Escape", preventDefault() {} });
   assert.equal(controls(h.render())[2].props.value, "10");
+});
+
+test("usage: native updates clear errors for discarded drafts but preserve focused edits", async () => {
+  const h = usageComponent();
+  let input = controls(h.render())[2];
+  input.props.onFocus();
+  input.props.onChange({ target: { value: "invalid" } });
+  await input.props.onKeyDown({ key: "Enter", preventDefault() {} });
+  h.state.policy = { enabled: true, remainingPercent: 25 };
+  input = controls(h.render())[2];
+  assert.equal(input.props.value, "invalid");
+  assert.equal(input.props["aria-invalid"], true);
+  await input.props.onBlur();
+  h.state.policy = { enabled: true, remainingPercent: 30 };
+  const tree = h.render(); input = controls(tree)[2];
+  assert.equal(input.props.value, "30");
+  assert.equal(input.props["aria-invalid"], false);
+  assert.equal(input.props["aria-describedby"], undefined);
+  const { elements } = require("./fixtures/harness.js");
+  assert.ok(!elements(tree).some(element => element.props.role === "alert"));
+  assert.equal(h.writes.length, 0);
 });
 
 test("usage: emitted writes are nonoptimistic, master stays available, unmount stops notifications", async () => {

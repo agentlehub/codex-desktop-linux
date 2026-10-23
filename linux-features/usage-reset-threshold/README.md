@@ -22,7 +22,7 @@ The percentage is a whole number from 1 through 99, default 10. Either available
 
 Enter or blur applies an edit. Trimmed decimal digits are accepted; leading zeros normalize. Empty text, signs, fractions, exponent notation, nonfinite values and out-of-range values remain visible with an inline error and are not applied. Escape restores the latest accepted value. Invalid draft text does not change the accepted runtime policy.
 
-Turning either switch off discards unsent draft text and retains the accepted percentage. Both custom controls are disabled while a write is pending; the master switch stays available. A submitted preference write can finish after the master is turned off, but cannot authorize a reset. Cross-window subscriptions update the accepted value; a focused dirty draft remains until committed or discarded.
+Turning either switch off discards unsent draft text and retains the accepted percentage. Both custom controls are disabled while a write is pending; the master switch stays available. A submitted preference write can finish after the master is turned off, but cannot authorize a reset. Cross-window subscriptions update the accepted value; a focused dirty draft remains until committed or discarded. Replacing an unfocused draft clears its validation error, but a previous write-failure message remains visible.
 
 ## Permission and reset behavior
 

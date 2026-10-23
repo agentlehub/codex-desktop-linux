@@ -199,6 +199,7 @@ function discoverExecution(files, registries = discoverRegistries(files)) {
 // This component-local state machine is serialized verbatim for the renderer.
 // Only its caller owns native I/O and the render notification lifetime.
 function createUsageResetController({ read, write, changed }, policy) {
+  const invalidDraftError = "Enter a whole percentage from 1 to 99. This value has not been applied.";
   let master = false, accepted = { enabled: false, remainingPercent: 10 };
   let draft = "10", focused = false, dirty = false, pending = false, available = true, error = null;
   let nativeValue, nativeRevision = 0;
@@ -218,7 +219,11 @@ function createUsageResetController({ read, write, changed }, policy) {
     available = policy.isPolicy(next);
     if (available) accepted = { enabled: next.enabled, remainingPercent: next.remainingPercent };
     if (!master || !accepted.enabled) discard();
-    else if (!(focused && dirty)) draft = String(accepted.remainingPercent);
+    else if (!(focused && dirty)) {
+      draft = String(accepted.remainingPercent);
+      dirty = false;
+      if (error === invalidDraftError) error = null;
+    }
     if (!available) error = "Usage reset settings are unavailable or invalid.";
     else if (error === "Usage reset settings are unavailable or invalid.") error = null;
     notify();
@@ -253,7 +258,7 @@ function createUsageResetController({ read, write, changed }, policy) {
     if (snapshot().fieldDisabled || !dirty) return;
     const value = policy.parseRemainingText(draft);
     if (value === null) {
-      error = "Enter a whole percentage from 1 to 99. This value has not been applied.";
+      error = invalidDraftError;
       notify();
       return;
     }
