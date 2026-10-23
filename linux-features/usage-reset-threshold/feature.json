@@ -1,0 +1,7 @@
+{
+  "id": "usage-reset-threshold",
+  "title": "Usage reset threshold",
+  "description": "User-configurable local remaining-quota threshold for explicitly authorized agent reset attempts.",
+  "defaultEnabled": false,
+  "entrypoints": { "patchDescriptors": "./patch.js" }
+}

@@ -303,6 +303,7 @@ requirements, known limitations, configuration, and tests.
 | `thorium-chrome-plugin` | Add Thorium to the official bundled Chrome integration | [Docs](linux-features/thorium-chrome-plugin/README.md) |
 | `tray-usage` | Show usage remaining in the Linux system-tray menu | [Docs](linux-features/tray-usage/README.md) |
 | `ui-tweaks` | Optional visual and interaction customizations | [Docs](linux-features/ui-tweaks/README.md) |
+| `usage-reset-threshold` | Set the local remaining-quota threshold for explicitly requested agent usage resets | [Docs](linux-features/usage-reset-threshold/README.md) |
 
 For GNOME Wayland dictation without RemoteDesktop permission prompts, select
 both `global-dictation` and `global-dictation-gnome` with `make setup-native`,
