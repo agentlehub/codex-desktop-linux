@@ -42,8 +42,13 @@ The adapter combines native inventory with upstream's public browser APIs so
 Later `getAXState()`
 calls omit an unchanged compact projection; pass `disableDiffing: true` for a fresh
 compact tree or `compact: false` for the complete backend node metadata. Bound
-tree traversal with `maxNodes` (1–2000) and `maxDepth` (0–64). The equivalent
+tree traversal with `maxNodes` (1–10000) and `maxDepth` (0–64). The equivalent
 `max_nodes` and `max_depth` spellings are accepted for direct backend parity.
+When the backend returns a large tree as its leading nodes, the host service pages
+the rest from the backend's cached snapshot with `get_tree_page` and returns the
+whole tree. If it would not fit the host bridge, the result keeps what fits, sets
+`accessibility_tree_truncated`, and says so in `accessibility_tree_note`.
+`accessibility_tree_truncated` is also set when traversal itself stopped early.
 
 Screenshot methods emit their image, so do not emit the returned bytes again.
 They accept `maxWidth`, `maxHeight`, `maxBytes`, `scale`, `format`, and `quality`;
@@ -64,6 +69,14 @@ NodeREPL's native-pipe bridge; the agent JavaScript kernel remains sandboxed.
 The separate `computer-use` component stores the Any App setting and exposes no
 MCP tools. Upstream owns browser control. Missing or ambiguous bundle contracts
 abort an enabled build.
+
+The current signed app's `nativeApplications` service supplies the native app
+picker. On Linux this feature uses the running-window backend and desktop-entry
+icons. It returns at most 20 running apps. Default and usage ordering put focused
+apps first; display-name ordering sorts that inventory alphabetically. It does
+not provide an installed-app catalog, usage history, or date-based filtering.
+The service preserves its array, nullable lookup, and icon-size contracts.
+The macOS and Windows implementations remain upstream-owned.
 
 `make install-native` builds `codex-computer-use-linux` and
 `codex-computer-use-cosmic` and `codex-computer-use-indicator` once before staging the package. Direct

@@ -205,8 +205,8 @@ async function nativeStoreHarness(definition, options = {}) {
 
 // Text-only synthetic assets: real bounded contracts plus explicit scaffolding.
 // No assembled asset is ever executed; runtime tests load declarations above.
-// Historical contracts retain their original provenance. The current signed
-// help record replaces its historical counterpart only in synthetic text.
+// Historical contracts retain their original provenance. Current signed
+// contracts are rebound only in this explicitly synthetic, never-executed tree.
 function syntheticFiles() {
   const records = loadRecords();
   const get = id => {
@@ -286,6 +286,40 @@ function syntheticFiles() {
     }
     append(file, `export{${[...entries].map(([name, local]) => `${local} as ${name}`).join(",")}};`);
   }
+  return refreshSyntheticContracts(files, records);
+}
+
+function refreshSyntheticContracts(files, historical) {
+  const current = loadRecords(require("./current-source-contracts.json"));
+  const get = id => current.find(record => record.id === id).source;
+  const old = id => historical.find(record => record.id === id);
+  const rename = (source, bindings) => source.replace(/[A-Za-z_$][\w$]*/g, name => bindings[name] ?? name);
+  const number = get("number-type"), numberHead = number.match(/^([\w$]+)=([\w$]+)\(`ZodNumber`,\(e,t\)=>\{([\w$]+)\.init/);
+  const numberHelper = get("number-properties").match(/^function ([\w$]+)/)[1];
+  const mergeHelper = get("descriptor-merge").match(/^function ([\w$]+)/)[1];
+  const strictNever = get("strict-method").match(/catchall:([\w$]+)\(\)/)[1];
+  for (const category of Object.keys(registryFixtureBindings)) {
+    const prior = old(`schema-${category}-number-type`), head = prior.source.match(/^([\w$]+)=([\w$]+)\(`ZodNumber`,\(e,t\)=>\{([\w$]+)\.init/);
+    const bindings = { [numberHead[1]]: head[1], [numberHead[2]]: head[2], [numberHead[3]]: head[3], [numberHelper]: "fixtureNumberProperties" };
+    files.set(prior.sourcePath, files.get(prior.sourcePath).replace(prior.source, rename(number, bindings)));
+    const object = old(`schema-${category}-object-type`), never = object.source.match(/strict\(\)\{return this\.clone\(\{\.\.\.this\._zod\.def,catchall:([\w$]+)\(\)/)[1];
+    files.set(object.sourcePath, files.get(object.sourcePath).replace(/strict\(\)\{return this\.clone\(\{\.\.\.this\._zod\.def,catchall:[\w$]+\(\)\}\)\}/,
+      rename(get("strict-method"), { [mergeHelper]: "fixtureDescriptorMerge", [strictNever]: never })));
+    files.set(prior.sourcePath, files.get(prior.sourcePath) + "\n" + rename(get("number-properties"), { [numberHelper]: "fixtureNumberProperties" }) + "\n" + rename(get("descriptor-merge"), { [mergeHelper]: "fixtureDescriptorMerge" }));
+  }
+  const reader = get("native-read"), readerName = reader.match(/^async function ([\w$]+)/)[1];
+  const native = reader.match(/if\(([\w$]+)\?\.settings/)[1], request = get("request-wrapper").match(/^async function ([\w$]+)/)[1];
+  const previous = old("native-read"), oldName = previous.source.match(/^async function ([\w$]+)/)[1];
+  files.set(previous.sourcePath, files.get(previous.sourcePath).replace(previous.source, rename(reader, { [readerName]: oldName, [native]: "e6", [request]: "fixtureAwaitRequest" })) + "\n" + rename(get("request-wrapper"), { [request]: "fixtureAwaitRequest" }));
+
+  const style = old("ui-numeric-style"), stylePath = "webview/assets/settings-form-fixture.js";
+  files.set(style.sourcePath, files.get(style.sourcePath).replace(style.source, `import{fixtureStyle}from"./settings-form-fixture.js";`));
+  files.set(stylePath, get("numeric-style") + "\nconst fixtureStyle=0;export{fixtureStyle};");
+
+  const catalog = old("catalog"), catalogPath = "webview/assets/reset-catalog-fixture.js";
+  const catalogName = catalog.source.match(/^var [\w$]+,[\w$]+,([\w$]+);/)[1];
+  files.set(catalog.sourcePath, files.get(catalog.sourcePath).replace(catalog.source, `import{fixtureCatalog as ${catalogName}}from"./reset-catalog-fixture.js";`));
+  files.set(catalogPath, catalog.source + `\nexport{${catalogName} as fixtureCatalog};`);
   return files;
 }
 

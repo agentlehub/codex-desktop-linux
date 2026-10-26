@@ -98,7 +98,10 @@ function verifySchema(files, file, source, aliases) {
   const numberType = schemaConstructor(number.source, number.name, "number");
   const numberBase = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${IDENT}\\(\x60ZodNumber\x60,\\((${IDENT}),(${IDENT})\\)=>\\{(${IDENT})\\.init\\(\\1,\\2\\),`, "native number type")[3];
   one(number.source, `(?:^|[^\\w$])${escape(numberBase)}=${IDENT}\\(\x60\\$ZodNumber\x60,[\\s\\S]{0,350}?if\\(typeof (${IDENT})==\x60number\x60&&!Number\\.isNaN\\(\\1\\)&&Number\\.isFinite\\(\\1\\)\\)return ${IDENT};`, "native finite number parser");
-  const methods = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${IDENT}\\(\x60ZodNumber\x60,\\((${IDENT}),(${IDENT})\\)=>\\{[\\s\\S]{0,250}?${IDENT}\\(\\1,\x60ZodNumber\x60,\\{([\\s\\S]{0,1500}?)\\}\\);`, "native number methods")[3];
+  const methodSurface = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${IDENT}\\(\x60ZodNumber\x60,\\((${IDENT}),(${IDENT})\\)=>\\{[\\s\\S]{0,250}?\\1\\.isFinite=!0\\},(${IDENT})\\(\\{([\\s\\S]{0,700}?)\\},\\{([\\s\\S]{0,1500}?)\\}\\)\\)`, "native number methods");
+  one(number.source, `function ${escape(methodSurface[3])}\\((${IDENT}),(${IDENT})\\)\\{for\\(let (${IDENT}) in \\1\\)\\{let (${IDENT})=\\1\\[\\3\\];Object\\.defineProperty\\(\\2,\\3,\\{configurable:!0,enumerable:!0,get\\(\\)\\{return (${IDENT})\\(this,\\3,\\4\\(this\\)\\)\\},set\\((${IDENT})\\)\\{\\5\\(this,\\3,\\6\\)\\}\\}\\)\\}return \\2\\}`, "native number property helper");
+  one(methodSurface[4], `^minValue:(${IDENT})=>\\{let\\{minimum:(${IDENT}),exclusiveMinimum:(${IDENT})\\}=(${IDENT})\\(\\1\\);return Math\\.max\\(\\2\\?\\?-1/0,\\3\\?\\?-1/0\\)\\},maxValue:(${IDENT})=>\\{let\\{maximum:(${IDENT}),exclusiveMaximum:(${IDENT})\\}=\\4\\(\\5\\);return Math\\.min\\(\\6\\?\\?1/0,\\7\\?\\?1/0\\)\\},isInt:(${IDENT})=>\\{let\\{isInt:(${IDENT}),multipleOf:(${IDENT})\\}=\\4\\(\\8\\);return!!\\9\\|\\|!!\\10\\?\\.some\\(Number\\.isSafeInteger\\)\\},format:(${IDENT})=>\\4\\(\\11\\)\\.format\\?\\?null$`, "native number computed properties");
+  const methods = methodSurface[5];
   for (const [method, equivalent] of [["min", "gte"], ["max", "lte"]]) {
     const bounded = one(methods, `${method}\\((${IDENT}),(${IDENT})\\)\\{return this\\.check\\((${IDENT})\\(\\1,\\2\\)\\)\\}`, `native number ${method} bound`);
     one(methods, `${equivalent}\\((${IDENT}),(${IDENT})\\)\\{return this\\.check\\(${escape(bounded[3])}\\(\\1,\\2\\)\\)\\}`, `native number inclusive ${method} bound`);
@@ -107,8 +110,9 @@ function verifySchema(files, file, source, aliases) {
   one(methods, `safe\\((${IDENT})\\)\\{return this\\.check\\(${escape(integer)}\\(\\1\\)\\)\\}`, "native safe integer method");
   const objectFunction = one(object.source, `function ${escape(object.name)}\\((${IDENT}),(${IDENT})\\)\\{(?:return new (${IDENT})\\(\\{type:\x60object\x60,shape:\\1\\?\\?\\{\\},\\.\\.\\.${IDENT}\\(\\2\\)\\}\\)|let (${IDENT})=\\{type:\x60object\x60,shape:\\1\\?\\?\\{\\},\\.\\.\\.${IDENT}\\(\\2\\)\\};return new (${IDENT})\\(\\4\\))\\}`, "native object constructor");
   const objectType = objectFunction[3] || objectFunction[5];
-  const strict = one(object.source, `(?:^|[^\\w$])${escape(objectType)}=${IDENT}\\(\x60ZodObject\x60,[\\s\\S]{0,700}?strict\\(\\)\\{return this\\.clone\\(\\{\\.\\.\\.this\\._zod\\.def,catchall:(${IDENT})\\(\\)\\}\\)\\}`, "native strict object method");
-  const neverType = schemaConstructor(object.source, strict[1], "strict never");
+  const strict = one(object.source, `(?:^|[^\\w$])${escape(objectType)}=${IDENT}\\(\x60ZodObject\x60,[\\s\\S]{0,700}?strict\\(\\)\\{return this\\.clone\\((${IDENT})\\(this\\._zod\\.def,\\{catchall:(${IDENT})\\(\\)\\}\\)\\)\\}`, "native strict object method");
+  one(object.source, `function ${escape(strict[1])}\\(\\.\\.\\.(${IDENT})\\)\\{let (${IDENT})=\\{\\};for\\(let (${IDENT}) of \\1\\)\\{let (${IDENT})=Object\\.getOwnPropertyDescriptors\\(\\3\\);Object\\.assign\\(\\2,\\4\\)\\}return Object\\.defineProperties\\(\\{\\},\\2\\)\\}`, "native strict descriptor merge");
+  const neverType = schemaConstructor(object.source, strict[2], "strict never");
   one(object.source, `(?:^|[^\\w$])${escape(neverType)}=${IDENT}\\(\x60ZodNever\x60,`, "native strict never type");
   return { boolean: boolean.name, number: number.name, object: object.name, schemaPath: object.path };
 }
@@ -180,6 +184,13 @@ function discoverRegistries(files) {
   return inventory;
 }
 
+// Native request disposal must preserve the read result and propagate failure.
+function nativeSettingReader(source, name) {
+  const reader = one(source, `async function (${name ? escape(name) : IDENT})\\((${IDENT})\\)\\{if\\((${IDENT})\\?\\.settings!=null\\)return\\(await (${IDENT})\\(\\3\\.settings\\.read\\(\\2\\.key\\)\\)\\)\\.effective;throw Error\\(\x60Settings are unavailable on this host\x60\\)\\}`, "authoritative desktop setting reader");
+  one(source, `async function ${escape(reader[4])}\\((${IDENT}),(${IDENT})\\)\\{let (${IDENT})=!1,(${IDENT})=\\(\\)=>\\{\\3\\|\\|\\(\\3=!0,\\1\\[Symbol\\.dispose\\]\\?\\.\\(\\)\\)\\};\\2\\?\\.addEventListener\\(\x60abort\x60,\\4,\\{once:!0\\}\\);try\\{\\2\\?\\.throwIfAborted\\(\\);let (${IDENT})=await \\1;return \\2\\?\\.throwIfAborted\\(\\),\\5\\}finally\\{\\2\\?\\.removeEventListener\\(\x60abort\x60,\\4\\),\\4\\(\\)\\}\\}`, "native setting request wrapper");
+  return reader[1];
+}
+
 function discoverExecution(files, registries = discoverRegistries(files)) {
   const candidates = [...files].filter(([, source]) => source.includes("requires a nonempty idempotencyKey and no other arguments."));
   if (candidates.length !== 1) fail(`execution asset: expected exactly one, found ${candidates.length}`);
@@ -192,7 +203,7 @@ function discoverExecution(files, registries = discoverRegistries(files)) {
   const definitions = importedBinding(files, file, setting[2]);
   const renderer = registries.find(entry => entry.category === "renderer");
   if (definitions.path !== renderer.path || definitions.local !== renderer.registryName) fail("execution definition import does not resolve to native registry");
-  one(reader.source, `async function ${escape(reader.local)}\\((${IDENT})\\)\\{return (${IDENT})\\?\\.settings==null\\?\\(await ${IDENT}\\(\x60get-setting\x60,\\{params:\\{key:\\1\\.key\\}\\}\\)\\)\\.value\\?\\?\\1\\.default:\\(await \\2\\.settings\\.read\\(\\1\\.key\\)\\)\\.effective\\}`, "authoritative desktop setting reader");
+  nativeSettingReader(reader.source, reader.local);
   return { path: file, handler: handler[0], wrapper: wrapper[0], generated: executionSources(handler[0], wrapper[0]), policySource: policySource() };
 }
 
@@ -328,14 +339,17 @@ function discoverUsage(files, registries = discoverRegistries(files)) {
   if (reactBindings.length !== 1) fail("Usage initialized React namespace is missing or ambiguous");
   const react = reactBindings[0];
 
-  const styleMap = one(source, `(${IDENT})=\\{fields:${IDENT},actions:${IDENT},primaryActions:${IDENT},field:${IDENT},label:(${IDENT}),helper:(${IDENT}),inputContainer:(${IDENT}),input:(${IDENT}),endContent:(${IDENT})\\}`, "Usage native numeric style map");
-  const styleInitializers = initializers.filter(item => item[2].includes(styleMap[0]));
+  const styleSurface = uniqueSurface(files, `(${IDENT})=\\{fields:${IDENT},actions:${IDENT},primaryActions:${IDENT},field:${IDENT},label:(${IDENT}),helper:(${IDENT}),inputContainer:(${IDENT}),input:(${IDENT}),endContent:(${IDENT})\\}`, "Usage native numeric style map");
+  const styleImports = matches(source, 'import\\{([^}]+)\\}from"([^"\\n]+)"').filter(statement => path.posix.normalize(path.posix.join(path.posix.dirname(file), statement[2])) === styleSurface.path);
+  if (styleImports.length !== 1) fail("Usage numeric style import is missing or ambiguous");
+  const styleMap = styleSurface.match;
+  const styleInitializers = matches(files.get(styleSurface.path), `function (${IDENT})\\(\\)\\{return\\(\\1=${IDENT}\\(\\(\\(\\)=>\\{([\\s\\S]{0,1500}?)\\}\\)\\)\\)\\(\\)\\}`).filter(item => item[2].includes(styleMap[0]));
   if (styleInitializers.length !== 1) fail("Usage numeric style initializer is missing or ambiguous");
   const styles = {};
   for (const [index, role] of ["label", "helper", "inputContainer", "input", "endContent"].entries())
     styles[role] = one(styleInitializers[0][2], `(?:^|,)${escape(styleMap[index + 2])}=\x60([^\x60]+)\x60`, `Usage ${role} class`)[1];
 
-  const reader = one(native.source, `async function (${IDENT})\\((${IDENT})\\)\\{return (${IDENT})\\?\\.settings==null\\?\\(await ${IDENT}\\(\x60get-setting\x60,\\{params:\\{key:\\2\\.key\\}\\}\\)\\)\\.value\\?\\?\\2\\.default:\\(await \\3\\.settings\\.read\\(\\2\\.key\\)\\)\\.effective\\}`, "Usage authoritative native reader")[1];
+  const reader = nativeSettingReader(native.source);
   const readerExports = [];
   for (const statement of matches(native.source, "export\\{([^}]+)\\}")) {
     for (const raw of statement[1].split(",")) {
@@ -420,7 +434,9 @@ function discoverMetadata(files) {
   const auth = one(availability.original, `authMethod:(${IDENT}),agentUsageResetEnabled:(${IDENT})=!1,`, "catalog auth/master aliases");
   const loading = one(availability.original, `isAuthLoading:(${IDENT}),isTabAvailable:`, "catalog auth loading alias")[1];
   const all = one(availability.original, `let (${IDENT})=(${IDENT})===\x60all\x60,`, "catalog all-mode alias")[1];
-  one(availability.original, `\\.\\.\\.${escape(availability.match[2])}&&!${escape(loading)}&&${escape(auth[1])}===\x60chatgpt\x60\\?\\[${IDENT},\\.\\.\\.${escape(all)}\\|\\|${escape(auth[2])}\\?\\[${escape(catalog.match[3])}\\]:\\[\\]\\]:\\[\\]`, "catalog desktop/auth/master/all availability");
+  const availableCatalog = one(availability.original, `\\.\\.\\.${escape(availability.match[2])}&&!${escape(loading)}&&${escape(auth[1])}===\x60chatgpt\x60\\?\\[${IDENT},\\.\\.\\.${escape(all)}\\|\\|${escape(auth[2])}\\?\\[(${IDENT})\\]:\\[\\]\\]:\\[\\]`, "catalog desktop/auth/master/all availability");
+  const availableCatalogBinding = importedBinding(files, availability.path, availableCatalog[1]);
+  if (availableCatalogBinding.path !== catalog.path || availableCatalogBinding.local !== catalog.match[3]) fail("catalog availability import does not resolve to reset catalog");
   return { catalog, search, availability };
 }
 

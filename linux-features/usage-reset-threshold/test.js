@@ -11,10 +11,21 @@ const records = loadRecords();
 
 test("fixture provenance: exact bounded source slices reject truncation", () => {
   const { verifyRecord } = require("./fixtures/harness.js");
-  for (const record of [...records, ...loadRecords(require("./fixtures/current-usage-help.json"))]) {
+  for (const record of [...records, ...loadRecords(require("./fixtures/current-usage-help.json")), ...loadRecords(require("./fixtures/current-source-contracts.json"))]) {
     assert.equal(verifyRecord(record), true);
     assert.throws(() => verifyRecord({ ...record, source: record.source.slice(0, -1) }), /provenance/);
   }
+});
+
+test("preflight: current signed schema and split-chunk contracts patch and reapply", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const files = syntheticFiles(), plan = planPatch(files);
+  assert.equal(plan.changes.size, 8);
+  assert.equal(plan.inventory.registries.length, 4);
+  for (const [file, source] of plan.changes) files.set(file, source);
+  const again = planPatch(files);
+  assert.equal(again.alreadyApplied, true);
+  assert.equal(again.changes.size, 0);
 });
 
 test("fixture provenance: shared metadata resolves each source and rejects broken references", () => {
@@ -153,7 +164,6 @@ test("preflight: malformed schema links and partial markers fail closed", () => 
   const mutations = [
     ["schema-main-export-O", record => record.source.replace('return Qd', 'return fixtureMissing')],
     ["registry-renderer-appearance", record => record.source.replace('contrast:xu()', 'contrast:fixtureMissing()')],
-    ["schema-worker-object-type", record => record.source.replace('strict()', 'fixtureMissing()')],
     ["handler", record => `/*codex-linux-usage-reset-threshold:partial*/${record.source}`],
   ];
   for (const [id, transform] of mutations) {
@@ -174,6 +184,34 @@ function assertNoFixtureWrites(root, files, operation) {
   } finally { fs.writeFileSync = original; }
   assert.deepEqual(require("./patch.js").readSources(root), files);
 }
+
+test("preflight: current helper semantics and chunk imports reject drift before writes", { concurrency: false }, t => {
+  const { applyUsageResetThreshold } = require("./patch.js");
+  const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
+  const root = fixtureDirectory(t, "current-contract-drift");
+  const schema = records.find(record => record.id === "schema-main-number-type").sourcePath;
+  const shared = records.find(record => record.id === "native-read").sourcePath;
+  const usage = records.find(record => record.id === "usage-row").sourcePath;
+  const catalog = records.find(record => record.id === "catalog").sourcePath;
+  const mutations = [
+    [schema, source => source.replace(/(function fixtureNumberProperties[\s\S]*?)return t\}/, "$1return e}")],
+    [schema, source => source.replace("format:e=>q(e).format??null", "min:e=>q(e).format??null")],
+    [schema, source => source.replace("Object.assign(t,e)", "Object.assign(e,t)")],
+    [schema, source => source.replace("strict()", "fixtureMissing()")],
+    [shared, source => source.replace(".effective;throw Error(`Settings are unavailable on this host`)", ".stored;throw Error(`Settings are unavailable on this host`)")],
+    [shared, source => source.replace("return t?.throwIfAborted(),n", "return t?.throwIfAborted(),null")],
+    [usage, source => source.replace('from"./settings-form-fixture.js"', 'from"./missing-settings-form-fixture.js"')],
+    [catalog, source => source.replace("fixtureCatalog as tac", "fixtureMissingCatalog as tac")],
+  ];
+  for (const [file, mutate] of mutations) {
+    const files = syntheticFiles(), source = files.get(file), changed = mutate(source);
+    assert.notEqual(changed, source, "Mutation reaches its contract");
+    files.set(file, changed);
+    assert.throws(() => require("./patch.js").planPatch(files), /number|merge|strict|reader|request|style|catalog|export|import/i);
+    writeFixtureTree(root, files);
+    assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /number|merge|strict|reader|request|style|catalog|export|import/i));
+  }
+});
 
 test("preflight: missing and duplicate native definitions reject before any writes", { concurrency: false }, t => {
   const { applyUsageResetThreshold } = require("./patch.js");
@@ -733,8 +771,7 @@ test("metadata: stock catalog availability retains desktop/auth/master and all-m
   const { discoverMetadata } = require("./patch.js"), { syntheticFiles, loadSnippet } = require("./fixtures/harness.js");
   const files = syntheticFiles(), metadata = discoverMetadata(files);
   const availability = records.find(record => record.id === "catalog-availability").source;
-  const patched = files.get(metadata.catalog.path).replace(metadata.catalog.original, metadata.catalog.replacement);
-  assert.ok(patched.includes(availability));
+  assert.ok(files.get(metadata.availability.path).includes(availability));
   const clause = availability.match(/\.\.\.(e&&!C&&l===`chatgpt`\?\[Zic,\.\.\.ee\|\|u\?\[tac\]:\[\]\]:\[\])/);
   assert.ok(clause, "bounded stock availability clause");
   for (const desktop of [false, true]) for (const loading of [false, true])
