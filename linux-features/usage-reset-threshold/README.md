@@ -28,7 +28,7 @@ Turning either switch off discards unsent draft text and retains the accepted pe
 
 Each reset still requires explicit user authorization. Neither changing the percentage nor either switch spends or schedules a reset. There is no automatic reset, retry, credit selection, new tool argument, or HTTP fallback. The tool retains its original idempotency key, outcomes, task-host transport and independent main-process master-permission gate.
 
-Each invocation reads fresh core usage and the controlling desktop's current policy, then rechecks policy, master permission and cancellation before dispatch. The final policy read defines that invocation's snapshot. A later preference edit applies to later attempts; this is not an atomic transaction across the renderer, main process and service.
+Each invocation reads fresh core usage, then reads the controlling desktop's native policy once and checks eligibility once. It retains the stock initial and final master-permission checks and checks cancellation after pre-dispatch awaits. The native policy read defines that invocation's threshold snapshot: edits while usage is pending are included, and later preference edits apply to later invocations. This is not an atomic transaction across the renderer, main process and service.
 
 Existing tasks may retain earlier stock 10% tool instructions until their normal catalog refresh or a new task. A fresh catalog describes standard and custom mode. Tool instructions do not override runtime enforcement.
 

@@ -340,10 +340,24 @@ test("execution: permission, auth, strict arguments, and unknown policy block di
   }
 });
 
-test("execution: final policy tightening blocks without another usage read", async () => {
-  const h = execution({ usage: { rateLimits: { primary: { usedPercent: 30 } } } });
-  h.controls.policy.push({ enabled: true, remainingPercent: 80 }, { enabled: true, remainingPercent: 10 });
-  const result = await h.invoke();
+test("execution: a successful invocation reads one policy snapshot and the stock master pair", async () => {
+  const h = execution();
+  assert.equal((await h.invoke()).success, true);
+  assert.deepEqual(h.settingsReads, ["master", "policy", "master"]);
+  assert.equal(consumes(h).length, 1);
+});
+
+test("execution: policy edits while fresh usage is pending apply to this invocation", async () => {
+  const { deferred } = require("./fixtures/harness.js"), gate = deferred();
+  const options = { policy: { enabled: true, remainingPercent: 80 } }, h = execution(options);
+  h.controls.usage.push(gate.promise);
+  const pending = h.invoke();
+  for (let turns = 0; h.controls.usage.length > 0 && turns < 100; turns++) await Promise.resolve();
+  assert.equal(h.controls.usage.length, 0);
+  assert.deepEqual(h.settingsReads, ["master"]);
+  options.policy = { enabled: true, remainingPercent: 10 };
+  gate.resolve({ rateLimits: { primary: { usedPercent: 30 } } });
+  const result = await pending;
   assert.match(responseText(result), /More than 10%/);
   assert.match(responseText(result), /earlier attempt was uncertain/);
   assert.equal(h.calls.length, 1);
@@ -361,7 +375,7 @@ test("execution: original outcomes survive refresh failures without retries", as
 
 test("execution: cancellation after every pre-dispatch await prevents consume", async () => {
   const { deferred } = require("./fixtures/harness.js");
-  for (const [kind, index] of [["master", 0], ["auth", 0], ["usage", 0], ["policy", 0], ["master", 1], ["policy", 1], ["master", 2]]) {
+  for (const [kind, index] of [["master", 0], ["auth", 0], ["usage", 0], ["policy", 0], ["master", 1]]) {
     const h = execution(), gate = deferred();
     const value = kind === "master" ? true : kind === "auth" ? "chatgpt" : kind === "policy"
       ? { enabled: false, remainingPercent: 10 } : { rateLimits: { primary: { usedPercent: 90 } } };
@@ -376,17 +390,13 @@ test("execution: cancellation after every pre-dispatch await prevents consume", 
   }
 });
 
-test("execution: settings rejection after awaits never dispatch", async () => {
-  const { deferred } = require("./fixtures/harness.js");
-  for (const final of [false, true]) {
-    const h = execution(), gate = deferred();
-    if (final) h.controls.policy.push({ enabled: false, remainingPercent: 10 });
-    h.controls.policy.push(gate.promise);
-    const result = h.invoke();
-    gate.reject(Error("inert settings read failure"));
-    assert.match(responseText(await result), /settings are unavailable/);
-    assert.equal(consumes(h).length, 0);
-  }
+test("execution: settings read rejection prevents dispatch", async () => {
+  const { deferred } = require("./fixtures/harness.js"), gate = deferred(), h = execution();
+  h.controls.policy.push(gate.promise);
+  const result = h.invoke();
+  gate.reject(Error("inert settings read failure"));
+  assert.match(responseText(await result), /settings are unavailable/);
+  assert.equal(consumes(h).length, 0);
 });
 
 test("execution: uncertain and concurrent calls retain keys without internal replay", async () => {
@@ -437,7 +447,7 @@ test("execution: wrapper reads desktop policy while auth and transport keep the 
 
 test("execution: each call reads current policy and unavailable usage never qualifies", async () => {
   const h = execution({ usage: { rateLimits: { primary: { usedPercent: 63 } } } });
-  h.controls.policy.push({ enabled: true, remainingPercent: 37 }, { enabled: true, remainingPercent: 37 }, { enabled: false, remainingPercent: 37 });
+  h.controls.policy.push({ enabled: true, remainingPercent: 37 }, { enabled: false, remainingPercent: 37 });
   assert.equal((await h.invoke()).success, true);
   assert.match(responseText(await h.invoke()), /More than 10%/);
   assert.equal(consumes(h).length, 1);
@@ -459,7 +469,7 @@ test("execution: bounded edits preserve the stock consume/outcome/refresh tail",
 
 test("execution: master-off during each pre-dispatch await prevents consume", async () => {
   const { deferred } = require("./fixtures/harness.js");
-  for (const [kind, index] of [["master", 0], ["auth", 0], ["usage", 0], ["policy", 0], ["master", 1], ["policy", 1], ["master", 2]]) {
+  for (const [kind, index] of [["master", 0], ["auth", 0], ["usage", 0], ["policy", 0], ["master", 1]]) {
     const options = { master: true }, h = execution(options), gate = deferred();
     const value = kind === "master" ? true : kind === "auth" ? "chatgpt" : kind === "policy"
       ? { enabled: false, remainingPercent: 10 } : { rateLimits: { primary: { usedPercent: 90 } } };
