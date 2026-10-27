@@ -373,7 +373,7 @@ function usageComponentSource(b, original) {
   const message = (id, text, description) => element(b.message, `id:${JSON.stringify(`codexLinux.usageResetThreshold.${id}`)},defaultMessage:${JSON.stringify(text)},description:${JSON.stringify(description)}`);
   const masterHelp = message("masterHelp", MASTER_HELP, "Explains explicit authorization and the active local threshold for agent resets");
   const effective = element(b.message, `id:!${master}?"codexLinux.usageResetThreshold.disabled":codexLinuxResetCurrent.enabled?"codexLinux.usageResetThreshold.customEffective":"codexLinux.usageResetThreshold.standardEffective",defaultMessage:!${master}?"Agent resets are disabled.":codexLinuxResetCurrent.enabled?"Custom threshold: {threshold}% remaining.":"Standard threshold: 10% remaining.",values:{threshold:codexLinuxResetEffective},description:"Shows the currently accepted local agent reset threshold"`);
-  const help = message("help", POLICY_HELP, "Explains qualification, service eligibility, no automatic reset, and existing task metadata");
+  const help = message("help", POLICY_HELP, "Explains the custom threshold, no automatic reset, and existing task metadata");
   const masterRow = element(b.row, `label:${label},description:${masterHelp},control:${controlParameter}=>${element(b.switch, `...${controlParameter},checked:${master},${masterHandler}`)}`);
   const customRow = element(b.row, `label:${message("customLabel", "Use custom reset threshold", "Label for opting into a custom local agent reset threshold")},description:${effective},control:props=>${element(b.switch, "...props,checked:codexLinuxResetCurrent.enabled,disabled:codexLinuxResetSwitchDisabled,onChange:value=>{if(!codexLinuxResetSwitchDisabled)return codexLinuxResetController.current.toggle(value)}")}`);
   const error = element("\"div\"", `id:codexLinuxResetErrorId,className:${JSON.stringify(b.styles.helper)},role:"alert",children:codexLinuxResetError`);
@@ -397,9 +397,9 @@ return ${group}}
 }
 
 const CATALOG_STOCK_THRESHOLD = "Every call checks fresh core usage: either the five-hour or weekly window must have 10% or less remaining.";
-const CATALOG_CURRENT_THRESHOLD = "Each call requires the Usage setting allowing Codex to use resets, reads fresh core Codex usage, and checks the current local remaining-percentage threshold: 10% unless custom mode is enabled in Usage settings. Either available core window can qualify. Unavailable usage never qualifies. Custom settings permit a local attempt; service eligibility still applies.";
-const MASTER_HELP = "Codex can use a reset only when you explicitly request it, subject to the active local threshold. Resets are never used automatically.";
-const POLICY_HELP = "Either available core Codex window can qualify. Custom thresholds permit an earlier local attempt; service eligibility still applies. Changing this setting does not spend or schedule a reset. Existing tasks may retain earlier tool instructions until their catalog refreshes.";
+const CATALOG_CURRENT_THRESHOLD = "Each call requires the Usage setting allowing Codex to use resets, reads fresh core Codex usage, and checks the remaining-percentage threshold: 10% unless custom mode is enabled in Usage settings. Custom mode uses the saved threshold from 1% to 99%, allowing resets above the standard 10% remaining limit. Either available core window can qualify. Unavailable usage never qualifies.";
+const MASTER_HELP = "Codex can use a reset only when you explicitly request it and usage meets the active threshold. Resets are never used automatically.";
+const POLICY_HELP = "Either available core Codex window can qualify. Custom mode uses your saved threshold instead of the standard 10% remaining limit. Changing this setting does not spend or schedule a reset. Existing tasks may retain earlier tool instructions until their catalog refreshes.";
 
 function uniqueSurface(files, pattern, label, accept = () => true) {
   const found = [];

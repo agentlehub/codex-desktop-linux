@@ -665,7 +665,7 @@ test("usage: emitted component exposes accessible controls and immediate master 
     assert.deepEqual([input.props.min, input.props.max, input.props.step], [1, 99, 1]);
     assert.ok(treeText(tree).includes(master ? enabled ? "Custom threshold: 37% remaining." : "Standard threshold: 10% remaining." : "Agent resets are disabled."));
     assert.ok(!treeText(tree).includes("STALE TEN PERCENT"));
-    assert.match(treeText(tree), /service eligibility still applies/);
+    assert.match(treeText(tree), /Custom mode uses your saved threshold/);
     h.state.master = false;
     const [, immediateCustom, immediateInput] = controls(h.render(false));
     assert.equal(immediateCustom.props.disabled, true);
@@ -784,7 +784,7 @@ test("metadata: catalog preserves authorization/schema and changes only eligibil
   const metadata = discoverMetadata(syntheticFiles());
   const stock = records.find(record => record.id === "catalog").source;
   const before = "Every call checks fresh core usage: either the five-hour or weekly window must have 10% or less remaining.";
-  const after = "Each call requires the Usage setting allowing Codex to use resets, reads fresh core Codex usage, and checks the current local remaining-percentage threshold: 10% unless custom mode is enabled in Usage settings. Either available core window can qualify. Unavailable usage never qualifies. Custom settings permit a local attempt; service eligibility still applies.";
+  const after = "Each call requires the Usage setting allowing Codex to use resets, reads fresh core Codex usage, and checks the remaining-percentage threshold: 10% unless custom mode is enabled in Usage settings. Custom mode uses the saved threshold from 1% to 99%, allowing resets above the standard 10% remaining limit. Either available core window can qualify. Unavailable usage never qualifies.";
   assert.equal(metadata.catalog.original, stock, "Replacement owns the complete bounded catalog declaration");
   assert.equal(stock.split(before).length - 1, 1, "Exactly one stock eligibility sentence");
   // Full declaration equality preserves name, authorization, schema, and all
@@ -804,7 +804,7 @@ test("metadata: Usage search exposes controls without changing unrelated or manu
   assert.deepEqual(JSON.parse(JSON.stringify(after.filter(entry => untouched.some(original => original.id === entry.id)))), JSON.parse(JSON.stringify(untouched)));
   const added = after.filter(entry => !untouched.some(original => original.id === entry.id));
   assert.equal(added.length, 4);
-  for (const text of ["Use custom reset threshold", "Reset threshold (% remaining)", "service eligibility still applies", "10%"])
+  for (const text of ["Use custom reset threshold", "Reset threshold (% remaining)", "Custom mode uses your saved threshold", "10%"])
     assert.ok(added.some(entry => entry.defaultMessage.includes(text)), text);
   assert.ok(added.every(entry => entry.id.startsWith("codexLinux.usageResetThreshold.")));
 });

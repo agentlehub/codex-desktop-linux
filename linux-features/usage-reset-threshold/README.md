@@ -1,6 +1,6 @@
 # Usage reset threshold
 
-Choose the local remaining-quota threshold for explicitly requested agent usage resets in Usage settings. This feature is disabled by default. It permits a local attempt when eligible; service acceptance, including above the standard 10% threshold, is not guaranteed.
+Choose the remaining-quota threshold for explicitly requested agent usage resets in Usage settings. Custom mode lets Codex use a reset above the standard 10% remaining limit, up to your saved threshold. This feature is disabled by default.
 
 ## Enable
 
@@ -52,4 +52,4 @@ The bounded source fixtures use one signed **26.1021.22027 amd64** baseline with
 
 Run the feature suite with `node --test linux-features/usage-reset-threshold/test.js`. Existing GitHub CI discovers the feature in both Nix maximal profiles on both architectures; no local Nix installation or build was performed. Actual CI results are reported with the pull request.
 
-Inert tests and signed-package static checks do not establish service eligibility or successful redemption. No real reset was requested or consumed; no live profile, application UI or app-server socket was used. The generated disposable launchers were never run.
+One end-to-end test using a real reset above 10% remaining is deferred and must pass before this feature is ready for review. Validation so far uses inert tests and signed-package static checks. No real reset was requested or consumed; no live profile, application UI or app-server socket was used. The generated disposable launchers were never run.
