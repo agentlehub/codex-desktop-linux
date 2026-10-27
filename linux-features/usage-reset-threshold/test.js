@@ -11,7 +11,7 @@ const records = loadRecords();
 
 test("fixture provenance: exact bounded source slices reject truncation", () => {
   const { verifyRecord } = require("./fixtures/harness.js");
-  for (const record of [...records, ...loadRecords(require("./fixtures/current-usage-help.json")), ...loadRecords(require("./fixtures/current-source-contracts.json"))]) {
+  for (const record of records) {
     assert.equal(verifyRecord(record), true);
     assert.throws(() => verifyRecord({ ...record, source: record.source.slice(0, -1) }), /provenance/);
   }
@@ -141,7 +141,7 @@ test("registry: discovery links all four native definitions and rejects a fifth"
 test("registry: actual derived native maps include the new registered key", () => {
   const { registrySource } = require("./patch.js");
   const { registryFixture, loadSnippet } = require("./fixtures/harness.js");
-  const mapNames = { main: "kp", worker: "xB", renderer: "rMt", "display-worker": "Ej" };
+  const mapNames = { main: "Ip", worker: "Jz", renderer: "wpt", "display-worker": "DD" };
   for (const [category, registryName] of Object.entries(mapNames)) {
     const definition = registryFixture(category, registrySource);
     const first = records.find(r => r.id === `registry-${category}-derived-0`).source;
@@ -162,8 +162,8 @@ test("preflight: malformed schema links and partial markers fail closed", () => 
   const { planPatch } = require("./patch.js");
   const { syntheticFiles } = require("./fixtures/harness.js");
   const mutations = [
-    ["schema-main-export-O", record => record.source.replace('return Qd', 'return fixtureMissing')],
-    ["registry-renderer-appearance", record => record.source.replace('contrast:xu()', 'contrast:fixtureMissing()')],
+    ["schema-main-export-object", record => record.source.replace('return xg', 'return fixtureMissing')],
+    ["registry-renderer-appearance", record => record.source.replace('contrast:Tm()', 'contrast:fixtureMissing()')],
     ["handler", record => `/*codex-linux-usage-reset-threshold:partial*/${record.source}`],
   ];
   for (const [id, transform] of mutations) {
@@ -185,6 +185,23 @@ function assertNoFixtureWrites(root, files, operation) {
   assert.deepEqual(require("./patch.js").readSources(root), files);
 }
 
+test("preflight: unused native getters, aliases, and style entries can drift", () => {
+  const { planPatch } = require("./patch.js");
+  const { syntheticFiles } = require("./fixtures/harness.js");
+  const schema = records.find(record => record.id === "schema-main-number-type").sourcePath;
+  const mutations = [
+    [schema, source => source.replace("format:e=>q(e).format??null", "format:e=>q(e).format??`unknown`")],
+    [schema, source => source.replace("safe(e)", "fixtureUnusedSafe(e)").replace("gte(e,t)", "fixtureUnusedGte(e,t)").replace("lte(e,t)", "fixtureUnusedLte(e,t)")],
+    [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace(/fields:Ct,actions:wt,primaryActions:Tt,field:Et,label:Dt,/, "")],
+  ];
+  for (const [file, mutate] of mutations) {
+    const files = syntheticFiles(), source = files.get(file), changed = mutate(source);
+    assert.notEqual(changed, source, "Mutation reaches an unused native surface");
+    files.set(file, changed);
+    assert.equal(planPatch(files).changes.size, 8);
+  }
+});
+
 test("preflight: current helper semantics and chunk imports reject drift before writes", { concurrency: false }, t => {
   const { applyUsageResetThreshold } = require("./patch.js");
   const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
@@ -192,24 +209,24 @@ test("preflight: current helper semantics and chunk imports reject drift before 
   const schema = records.find(record => record.id === "schema-main-number-type").sourcePath;
   const shared = records.find(record => record.id === "native-read").sourcePath;
   const usage = records.find(record => record.id === "usage-row").sourcePath;
-  const catalog = records.find(record => record.id === "catalog").sourcePath;
+  const catalog = records.find(record => record.id === "catalog-availability").sourcePath;
   const mutations = [
-    [schema, source => source.replace(/(function fixtureNumberProperties[\s\S]*?)return t\}/, "$1return e}")],
-    [schema, source => source.replace("format:e=>q(e).format??null", "min:e=>q(e).format??null")],
+    ...["min", "max", "int"].map(method => [schema, source => source.replace(new RegExp(`\\b${method}\\(([^)]*)\\)\\{return this\\.check`), `fixtureUnused_${method}($1){return this.check`)]),
     [schema, source => source.replace("Object.assign(t,e)", "Object.assign(e,t)")],
-    [schema, source => source.replace("strict()", "fixtureMissing()")],
+    [schema, source => source.replace("strict()", "fixtureUnused_strict()")],
     [shared, source => source.replace(".effective;throw Error(`Settings are unavailable on this host`)", ".stored;throw Error(`Settings are unavailable on this host`)")],
     [shared, source => source.replace("return t?.throwIfAborted(),n", "return t?.throwIfAborted(),null")],
-    [usage, source => source.replace('from"./settings-form-fixture.js"', 'from"./missing-settings-form-fixture.js"')],
-    [catalog, source => source.replace("fixtureCatalog as tac", "fixtureMissingCatalog as tac")],
+    [usage, source => source.replace('from"./settings-form-b33b64c94cf6.js"', 'from"./missing-settings-form-fixture.js"')],
+    [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace("input:kt", "fixtureMissingInput:kt")],
+    [catalog, source => source.replace("c as sb", "fixtureMissingCatalog as sb")],
   ];
   for (const [file, mutate] of mutations) {
     const files = syntheticFiles(), source = files.get(file), changed = mutate(source);
     assert.notEqual(changed, source, "Mutation reaches its contract");
     files.set(file, changed);
-    assert.throws(() => require("./patch.js").planPatch(files), /number|merge|strict|reader|request|style|catalog|export|import/i);
+    assert.throws(() => require("./patch.js").planPatch(files), /number|integer|merge|strict|reader|request|style|catalog|export|import/i);
     writeFixtureTree(root, files);
-    assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /number|merge|strict|reader|request|style|catalog|export|import/i));
+    assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /number|integer|merge|strict|reader|request|style|catalog|export|import/i));
   }
 });
 
@@ -243,10 +260,10 @@ test("preflight: missing, duplicate, and disconnected runtime bindings reject be
       [record.sourcePath, source => source.replace(record.source, "")],
       [record.sourcePath, source => source.replace(record.source, `${record.source}${record.source}`)],
     ]),
-    [handler.sourcePath, source => source.replace("Sjt as yt", "K4t as yt")],
-    [handler.sourcePath, source => source.replace("K4t as je", "wjt as je")],
-    [shared, source => source.replace("aAn as Sjt", "aAn as fixtureRemovedReader")],
-    [shared, source => source.replace("rMt as K4t", "rMt as fixtureRemovedRegistry")],
+    [handler.sourcePath, source => source.replace("zit as Fe", "qlt as Fe")],
+    [handler.sourcePath, source => source.replace("qlt as De", "Vit as De")],
+    [shared, source => source.replace("EEt as zit", "EEt as fixtureRemovedReader")],
+    [shared, source => source.replace("wpt as qlt", "wpt as fixtureRemovedRegistry")],
   ];
   for (const [relative, mutate] of mutations) {
     const files = syntheticFiles(), source = files.get(relative), mutated = mutate(source);
@@ -276,7 +293,7 @@ test("native storage: missing and invalid configured values default without poli
   }
 });
 
-test("native storage: accepted queued object survives successful fake reconstruction", async () => {
+test("native storage: accepted persisted object survives successful fake reconstruction", async () => {
   const key = "codex-linux-agent-usage-reset-policy", value = { enabled: true, remainingPercent: 37 };
   const h = await nativeStore();
   let notifications = 0;
@@ -290,16 +307,32 @@ test("native storage: accepted queued object survives successful fake reconstruc
   assert.deepEqual(JSON.parse(JSON.stringify(rebuilt.store.getEffective(key))), value);
 });
 
-test("native storage: failed persistence retains memory and queued value without durable success", async () => {
-  const key = "codex-linux-agent-usage-reset-policy", value = { enabled: true, remainingPercent: 37 };
-  const h = await nativeStore({ persistenceError: true });
-  await h.writeUi(value);
-  await h.store.flush();
-  assert.deepEqual(JSON.parse(JSON.stringify(h.store.getEffective(key))), value);
-  assert.equal(h.durable[key], undefined);
+test("native storage: failed persistence rejects UI write and restores the accepted value", async () => {
+  const key = "codex-linux-agent-usage-reset-policy", prior = { enabled: true, remainingPercent: 10 };
+  const value = { enabled: true, remainingPercent: 37 };
+  const h = await nativeStore({ desktop: { [key]: prior }, persistenceError: true });
+  await assert.rejects(h.writeUi(value), /inert persistence failure/);
+  assert.deepEqual(JSON.parse(JSON.stringify(h.store.getEffective(key))), prior);
+  assert.deepEqual(h.durable[key], prior);
   assert.ok(h.warnings.some(([message]) => message === "Failed to persist desktop settings"));
   h.controls.persistenceError = false;
-  await h.store.flush();
+  await h.writeUi(value);
+  assert.deepEqual(h.durable[key], value);
+});
+
+test("native storage: UI acknowledgment waits for persistence completion", async () => {
+  const { deferred } = require("./fixtures/harness.js"), gate = deferred();
+  const key = "codex-linux-agent-usage-reset-policy", value = { enabled: true, remainingPercent: 37 };
+  const h = await nativeStore({ persistence: gate.promise });
+  let acknowledged = false;
+  const pending = h.writeUi(value).then(() => { acknowledged = true; });
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(acknowledged, false);
+  assert.deepEqual(JSON.parse(JSON.stringify(h.store.getEffective(key))), value);
+  assert.equal(h.durable[key], undefined);
+  gate.resolve();
+  await pending;
+  assert.equal(acknowledged, true);
   assert.deepEqual(h.durable[key], value);
 });
 
@@ -424,17 +457,17 @@ test("execution: wrapper reads desktop policy while auth and transport keep the 
   const reads = [], auth = [], clients = [], transport = [];
   const definitions = { agentUsageResetEnabled: { key: "master-fixture" }, codexLinuxAgentUsageResetPolicy: { key: "policy-fixture" } };
   const invoke = loadSnippet(generated.wrapper, {
-    Rd: async dependencies => {
+    Xd: async dependencies => {
       await dependencies.isUsageResetEnabled();
       await dependencies.readUsageResetPolicy();
       await dependencies.readAuthMethod();
       return dependencies.getSendRequest()("fixture-method", { fixture: true });
     },
-    yt: async (...args) => { reads.push(args); return true; }, je: definitions,
-    pa: async (...args) => { auth.push(args); return "chatgpt"; },
-    K: (...args) => { clients.push(args); return { sendRequest: (...call) => transport.push(call) }; },
-    _: () => {}, A: { warning() {} },
-  }, "Vd");
+    Fe: async (...args) => { reads.push(args); return true; }, De: definitions,
+    Oi: async (...args) => { auth.push(args); return "chatgpt"; },
+    R: (...args) => { clients.push(args); return { sendRequest: (...call) => transport.push(call) }; },
+    Et: () => {}, l: { warning() {} },
+  }, "$d");
   const scope = {}, queryClient = {};
   await invoke({ scope, hostId: "remote-fixture", argumentsValue: { idempotencyKey: "fixture" }, queryClient });
   assert.equal(reads.length, 2);
@@ -762,8 +795,7 @@ test("metadata: catalog preserves authorization/schema and changes only eligibil
 test("metadata: Usage search exposes controls without changing unrelated or manual messages", () => {
   const { discoverMetadata } = require("./patch.js"), { syntheticFiles, loadSnippet } = require("./fixtures/harness.js");
   const result = discoverMetadata(syntheticFiles()).search;
-  const [currentHelp] = loadRecords(require("./fixtures/current-usage-help.json"));
-  assert.ok(result.original.includes(currentHelp.source));
+  assert.ok(result.original.includes("id:`settings.usage.resets.agentEnabled.description`"));
   const before = loadSnippet("", {}, `({${result.original}}).usage`);
   const after = loadSnippet("", {}, `({${result.replacement}}).usage`);
   const stockId = "settings.usage.resets.agentEnabled.description";
@@ -782,11 +814,11 @@ test("metadata: stock catalog availability retains desktop/auth/master and all-m
   const files = syntheticFiles(), metadata = discoverMetadata(files);
   const availability = records.find(record => record.id === "catalog-availability").source;
   assert.ok(files.get(metadata.availability.path).includes(availability));
-  const clause = availability.match(/\.\.\.(e&&!C&&l===`chatgpt`\?\[Zic,\.\.\.ee\|\|u\?\[tac\]:\[\]\]:\[\])/);
+  const clause = availability.match(/\.\.\.(e&&!C&&l===`chatgpt`\?\[db,\.\.\.L\|\|u\?\[sb\]:\[\]\]:\[\])/);
   assert.ok(clause, "bounded stock availability clause");
   for (const desktop of [false, true]) for (const loading of [false, true])
     for (const auth of ["chatgpt", "api-key"]) for (const master of [false, true]) for (const all of [false, true]) {
-      const actual = loadSnippet("", { e: desktop, C: loading, l: auth, u: master, ee: all, Zic: "usage", tac: "reset" }, clause[1]);
+      const actual = loadSnippet("", { e: desktop, C: loading, l: auth, u: master, L: all, db: "usage", sb: "reset" }, clause[1]);
       assert.equal(actual.includes("reset"), desktop && !loading && auth === "chatgpt" && (master || all));
     }
 });
@@ -858,6 +890,44 @@ test("patch closure: partial failing write restores every attempted file", { con
   finally { fs.writeFileSync = write; }
   assert.equal(partial, true); assert.ok(attempts >= 4);
   assert.deepEqual(patch.readSources(failingRoot), before);
+});
+
+test("patch closure: a silently wrong write is detected and every attempted file is restored", { concurrency: false }, t => {
+  const patch = require("./patch.js"), root = fixtureDirectory(t, "silent-write");
+  const before = patch.readSources(root), write = fs.writeFileSync;
+  let attempts = 0;
+  fs.writeFileSync = function(file, ...args) {
+    if (String(file).startsWith(root + path.sep) && ++attempts === 2)
+      return write(file, "silently wrong bytes");
+    return write.call(this, file, ...args);
+  };
+  try { assert.throws(() => patch.applyUsageResetThreshold(root), /asset write verification failed/); }
+  finally { fs.writeFileSync = write; }
+  assert.deepEqual(patch.readSources(root), before);
+});
+
+test("patch closure: a silently wrong restoration rejects the candidate", { concurrency: false }, t => {
+  const root = fixtureDirectory(t, "silent-restore"), descriptors = featureDescriptors(root);
+  const { applyExtractedAppPatchDescriptors } = require("../../scripts/patches/engine.js");
+  const { createPatchReport, criticalFailuresFromReport } = require("../../scripts/lib/patch-report.js");
+  const report = createPatchReport(), write = fs.writeFileSync;
+  let attempts = 0, failedTarget;
+  fs.writeFileSync = function(file, ...args) {
+    if (String(file).startsWith(root + path.sep)) {
+      if (String(file) === failedTarget) return write(file, "silently wrong restored bytes");
+      if (++attempts === 2) {
+        failedTarget = String(file);
+        write(file, "partial bytes");
+        throw Error("injected-write-failure");
+      }
+    }
+    return write.call(this, file, ...args);
+  };
+  try {
+    assert.throws(() => applyExtractedAppPatchDescriptors(root, descriptors, {}, report, "extracted-app:pre-webview"), { name: "PatchIntegrityError" });
+  } finally { fs.writeFileSync = write; }
+  assert.equal(report.patches[0].status, "failed-integrity");
+  assert.equal(criticalFailuresFromReport(report).length, 1);
 });
 
 test("patch closure: failed restoration raises integrity error and rejects the candidate", { concurrency: false }, t => {

@@ -38,7 +38,7 @@ The policy belongs to the controlling desktop's native profile, alongside the ma
 
 Native settings own `desktop.codex-linux-agent-usage-reset-policy`, a strict object with `enabled` and `remainingPercent`. Missing configuration defaults to custom mode off and 10. Invalid persisted values are dropped by the native loader and receive that default; a runtime settings-read failure instead blocks the attempt. Tools and agents cannot write this read-only native setting.
 
-A settings acknowledgment means accepted in current memory. Disk persistence is queued and can fail while the accepted value and pending write remain in memory. The controls do not claim a durable disk save. A failed preference bridge write shows an error, restores the accepted draft and does not issue a rollback write or automatic retry.
+A settings acknowledgment waits for the native persistence operation to complete. If that operation fails, native settings restore the prior accepted value and reject the write. The controls show an error, reconcile with native state and do not issue a rollback write or automatic retry.
 
 ## Disable or remove
 
@@ -46,15 +46,9 @@ Remove only `usage-reset-threshold` from your enabled feature list, preserving o
 
 ## Validation
 
-Current compatibility checks use signed stable OpenAI Linux package **26.1021.22027** on **amd64 and arm64**. Feature-only disposable app builds passed, including extraction, patching, ASAR repacking, and layout verification. Checks on fresh source and the built ASARs passed for emitted JavaScript syntax, four-registry discovery, preservation of manual-reset and permission-gate code, and byte-identical reapplication. The built JavaScript differs from the required-core baseline in exactly the eight planned feature assets. Bounded signed-source fixtures cover the current native schema helpers and settings reader; synthetic fixtures also verify the numeric-style and catalog imports across chunks. Older behavioral fixtures retain their original provenance. Feature, framework, packaging, and patch-engine tests passed without skips. The upstream update-builder filter omits this feature's tests and fixtures while retaining its production inputs.
+Validation uses signed stable OpenAI Linux package **26.1021.22027** on **amd64 and arm64**. Feature-only disposable builds check extraction, patching, ASAR repacking, layout, emitted JavaScript syntax, four-registry discovery, preservation of manual-reset and permission-gate code, and byte-identical reapplication. Built JavaScript must differ from the required-core baseline in exactly the eight planned feature assets.
 
-These current checks did not produce native package archives, install or launch the app, or repeat hosted Nix validation. Earlier feature-enabled and feature-disabled build comparisons used signed stable OpenAI Linux package **26.1007.21434** on **amd64 and arm64**:
-
-- Feature, feature-framework, and packaging tests passed without skips. Runtime tests use bounded source snippets with inert settings, authentication, usage and transport fakes.
-- Official-bundle feature audits passed on each architecture.
-- Feature-enabled and feature-disabled disposable builds passed on both architectures. Complete file-manifest comparisons confirmed that disabled outputs contain only the required `quit-confirmation-focus` core repair, while enabled outputs differ from that core-only baseline in exactly the eight planned feature assets.
-- Built-output syntax/import checks, four-registry inventory, preserved manual/master paths, and byte-identical reapplication passed. Fault tests verify zero writes on failed preflight and restoration of partially written files, including explicit rejection when restoration fails.
-- Update-builder staging retains the feature and its policy module. Disabled-feature tests verify zero module loads, asset probes, and writes.
+The bounded source fixtures use one signed **26.1021.22027 amd64** baseline with exact source hashes and byte offsets. They retain the current native settings writer, bridge, persistence store and subscription declarations. Runtime tests execute only selected bounded declarations with inert settings, authentication, usage, query and transport fakes; the assembled cross-chunk fixture is syntax-checked but never executed. Tests cover rejection before writes, partial and silently incorrect writes, verified restoration, and fatal rejection of failed restoration. Disabled-feature tests check zero module loads, asset probes and writes. Update-builder staging omits tests and fixtures while retaining production inputs.
 
 Run the feature suite with `node --test linux-features/usage-reset-threshold/test.js`. Existing GitHub CI discovers the feature in both Nix maximal profiles on both architectures; no local Nix installation or build was performed. Actual CI results are reported with the pull request.
 

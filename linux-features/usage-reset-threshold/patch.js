@@ -2,7 +2,6 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 const { PatchIntegrityError } = require("../../scripts/patches/integrity-error.js");
 const { policySource } = require("./policy.js");
@@ -98,19 +97,14 @@ function verifySchema(files, file, source, aliases) {
   const numberType = schemaConstructor(number.source, number.name, "number");
   const numberBase = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${IDENT}\\(\x60ZodNumber\x60,\\((${IDENT}),(${IDENT})\\)=>\\{(${IDENT})\\.init\\(\\1,\\2\\),`, "native number type")[3];
   one(number.source, `(?:^|[^\\w$])${escape(numberBase)}=${IDENT}\\(\x60\\$ZodNumber\x60,[\\s\\S]{0,350}?if\\(typeof (${IDENT})==\x60number\x60&&!Number\\.isNaN\\(\\1\\)&&Number\\.isFinite\\(\\1\\)\\)return ${IDENT};`, "native finite number parser");
-  const methodSurface = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${IDENT}\\(\x60ZodNumber\x60,\\((${IDENT}),(${IDENT})\\)=>\\{[\\s\\S]{0,250}?\\1\\.isFinite=!0\\},(${IDENT})\\(\\{([\\s\\S]{0,700}?)\\},\\{([\\s\\S]{0,1500}?)\\}\\)\\)`, "native number methods");
-  one(number.source, `function ${escape(methodSurface[3])}\\((${IDENT}),(${IDENT})\\)\\{for\\(let (${IDENT}) in \\1\\)\\{let (${IDENT})=\\1\\[\\3\\];Object\\.defineProperty\\(\\2,\\3,\\{configurable:!0,enumerable:!0,get\\(\\)\\{return (${IDENT})\\(this,\\3,\\4\\(this\\)\\)\\},set\\((${IDENT})\\)\\{\\5\\(this,\\3,\\6\\)\\}\\}\\)\\}return \\2\\}`, "native number property helper");
-  one(methodSurface[4], `^minValue:(${IDENT})=>\\{let\\{minimum:(${IDENT}),exclusiveMinimum:(${IDENT})\\}=(${IDENT})\\(\\1\\);return Math\\.max\\(\\2\\?\\?-1/0,\\3\\?\\?-1/0\\)\\},maxValue:(${IDENT})=>\\{let\\{maximum:(${IDENT}),exclusiveMaximum:(${IDENT})\\}=\\4\\(\\5\\);return Math\\.min\\(\\6\\?\\?1/0,\\7\\?\\?1/0\\)\\},isInt:(${IDENT})=>\\{let\\{isInt:(${IDENT}),multipleOf:(${IDENT})\\}=\\4\\(\\8\\);return!!\\9\\|\\|!!\\10\\?\\.some\\(Number\\.isSafeInteger\\)\\},format:(${IDENT})=>\\4\\(\\11\\)\\.format\\?\\?null$`, "native number computed properties");
-  const methods = methodSurface[5];
-  for (const [method, equivalent] of [["min", "gte"], ["max", "lte"]]) {
-    const bounded = one(methods, `${method}\\((${IDENT}),(${IDENT})\\)\\{return this\\.check\\((${IDENT})\\(\\1,\\2\\)\\)\\}`, `native number ${method} bound`);
-    one(methods, `${equivalent}\\((${IDENT}),(${IDENT})\\)\\{return this\\.check\\(${escape(bounded[3])}\\(\\1,\\2\\)\\)\\}`, `native number inclusive ${method} bound`);
-  }
-  const integer = one(methods, `int\\((${IDENT})\\)\\{return this\\.check\\((${IDENT})\\(\\1\\)\\)\\}`, "native integer method")[2];
-  one(methods, `safe\\((${IDENT})\\)\\{return this\\.check\\(${escape(integer)}\\(\\1\\)\\)\\}`, "native safe integer method");
+  const methodSurface = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${IDENT}\\(\x60ZodNumber\x60,\\((${IDENT}),(${IDENT})\\)=>\\{[\\s\\S]{0,250}?\\1\\.isFinite=!0\\},${IDENT}\\(\\{[\\s\\S]{0,700}?\\},\\{([\\s\\S]{0,1500}?)\\}\\)\\)`, "native number methods");
+  const methods = methodSurface[3];
+  for (const method of ["min", "max"])
+    one(methods, `(?:^|,)${method}\\((${IDENT}),(${IDENT})\\)\\{return this\\.check\\((${IDENT})\\(\\1,\\2\\)\\)\\}`, `native number ${method} bound`);
+  one(methods, `(?:^|,)int\\((${IDENT})\\)\\{return this\\.check\\((${IDENT})\\(\\1\\)\\)\\}`, "native integer method");
   const objectFunction = one(object.source, `function ${escape(object.name)}\\((${IDENT}),(${IDENT})\\)\\{(?:return new (${IDENT})\\(\\{type:\x60object\x60,shape:\\1\\?\\?\\{\\},\\.\\.\\.${IDENT}\\(\\2\\)\\}\\)|let (${IDENT})=\\{type:\x60object\x60,shape:\\1\\?\\?\\{\\},\\.\\.\\.${IDENT}\\(\\2\\)\\};return new (${IDENT})\\(\\4\\))\\}`, "native object constructor");
   const objectType = objectFunction[3] || objectFunction[5];
-  const strict = one(object.source, `(?:^|[^\\w$])${escape(objectType)}=${IDENT}\\(\x60ZodObject\x60,[\\s\\S]{0,700}?strict\\(\\)\\{return this\\.clone\\((${IDENT})\\(this\\._zod\\.def,\\{catchall:(${IDENT})\\(\\)\\}\\)\\)\\}`, "native strict object method");
+  const strict = one(object.source, `(?:^|[^\\w$])${escape(objectType)}=${IDENT}\\(\x60ZodObject\x60,[\\s\\S]{0,700}?(?:\\{|,)strict\\(\\)\\{return this\\.clone\\((${IDENT})\\(this\\._zod\\.def,\\{catchall:(${IDENT})\\(\\)\\}\\)\\)\\}`, "native strict object method");
   one(object.source, `function ${escape(strict[1])}\\(\\.\\.\\.(${IDENT})\\)\\{let (${IDENT})=\\{\\};for\\(let (${IDENT}) of \\1\\)\\{let (${IDENT})=Object\\.getOwnPropertyDescriptors\\(\\3\\);Object\\.assign\\(\\2,\\4\\)\\}return Object\\.defineProperties\\(\\{\\},\\2\\)\\}`, "native strict descriptor merge");
   const neverType = schemaConstructor(object.source, strict[2], "strict never");
   one(object.source, `(?:^|[^\\w$])${escape(neverType)}=${IDENT}\\(\x60ZodNever\x60,`, "native strict never type");
@@ -339,15 +333,17 @@ function discoverUsage(files, registries = discoverRegistries(files)) {
   if (reactBindings.length !== 1) fail("Usage initialized React namespace is missing or ambiguous");
   const react = reactBindings[0];
 
-  const styleSurface = uniqueSurface(files, `(${IDENT})=\\{fields:${IDENT},actions:${IDENT},primaryActions:${IDENT},field:${IDENT},label:(${IDENT}),helper:(${IDENT}),inputContainer:(${IDENT}),input:(${IDENT}),endContent:(${IDENT})\\}`, "Usage native numeric style map");
+  const styleSurface = uniqueSurface(files, `(${IDENT})=\\{([^{}]*inputContainer:${IDENT}[^{}]*)\\}`, "Usage native numeric style map");
   const styleImports = matches(source, 'import\\{([^}]+)\\}from"([^"\\n]+)"').filter(statement => path.posix.normalize(path.posix.join(path.posix.dirname(file), statement[2])) === styleSurface.path);
   if (styleImports.length !== 1) fail("Usage numeric style import is missing or ambiguous");
   const styleMap = styleSurface.match;
   const styleInitializers = matches(files.get(styleSurface.path), `function (${IDENT})\\(\\)\\{return\\(\\1=${IDENT}\\(\\(\\(\\)=>\\{([\\s\\S]{0,1500}?)\\}\\)\\)\\)\\(\\)\\}`).filter(item => item[2].includes(styleMap[0]));
   if (styleInitializers.length !== 1) fail("Usage numeric style initializer is missing or ambiguous");
   const styles = {};
-  for (const [index, role] of ["label", "helper", "inputContainer", "input", "endContent"].entries())
-    styles[role] = one(styleInitializers[0][2], `(?:^|,)${escape(styleMap[index + 2])}=\x60([^\x60]+)\x60`, `Usage ${role} class`)[1];
+  for (const role of ["helper", "inputContainer", "input", "endContent"]) {
+    const binding = one(styleMap[2], `(?:^|,)${role}:(${IDENT})(?=,|$)`, `Usage ${role} style binding`)[1];
+    styles[role] = one(styleInitializers[0][2], `(?:^|,)${escape(binding)}=\x60([^\x60]+)\x60`, `Usage ${role} class`)[1];
+  }
 
   const reader = nativeSettingReader(native.source);
   const readerExports = [];
@@ -568,26 +564,25 @@ function applyUsageResetThreshold(root) {
     : planned.changes);
   if (planned.alreadyApplied) return { changed: false, reason: "Usage reset threshold is already fully applied and verified." };
   const ordered = [...planned.changes].sort(([left], [right]) => left.localeCompare(right));
-  const digest = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
   const backups = new Map();
   for (const [file] of ordered) {
     const bytes = fs.readFileSync(path.join(root, file));
     if (!bytes.equals(Buffer.from(files.get(file)))) fail(`asset changed or is not UTF-8 during preflight: ${file}`);
-    backups.set(file, { bytes, hash: digest(bytes) });
+    backups.set(file, bytes);
   }
   const attempted = [];
   try {
     for (const [file, source] of ordered) {
       attempted.push(file);
       fs.writeFileSync(path.join(root, file), source, "utf8");
-      if (digest(fs.readFileSync(path.join(root, file))) !== digest(Buffer.from(source))) fail(`asset write verification failed: ${file}`);
+      if (!fs.readFileSync(path.join(root, file)).equals(Buffer.from(source))) fail(`asset write verification failed: ${file}`);
     }
   } catch (failure) {
     const unrestored = [];
     for (const file of attempted) {
-      try { fs.writeFileSync(path.join(root, file), backups.get(file).bytes); } catch { /* Verify bytes independently below. */ }
+      try { fs.writeFileSync(path.join(root, file), backups.get(file)); } catch { /* Verify bytes independently below. */ }
       try {
-        if (digest(fs.readFileSync(path.join(root, file))) !== backups.get(file).hash) unrestored.push(file);
+        if (!fs.readFileSync(path.join(root, file)).equals(backups.get(file))) unrestored.push(file);
       } catch { unrestored.push(file); }
     }
     if (unrestored.length) throw new PatchIntegrityError(`Usage reset threshold restoration could not be verified: ${unrestored.join(", ")}`, { cause: failure });
