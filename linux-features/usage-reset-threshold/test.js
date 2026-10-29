@@ -659,13 +659,17 @@ test("usage: emitted component exposes accessible controls and immediate master 
     assert.equal(masterSwitch.props.disabled ?? false, false);
     assert.equal(custom.props.disabled, !master);
     assert.equal(input.props.disabled, !master || !enabled);
-    assert.equal(input.props["aria-label"], "Reset threshold (% remaining)");
+    assert.equal(input.props.value, enabled ? "37" : "10");
+    assert.equal(input.props["aria-label"], "Reset threshold");
     assert.equal(input.props.type, "text");
     assert.equal(input.props.inputMode, "numeric");
     assert.deepEqual([input.props.min, input.props.max, input.props.step], [1, 99, 1]);
-    assert.ok(treeText(tree).includes(master ? enabled ? "Custom threshold: 37% remaining." : "Standard threshold: 10% remaining." : "Agent resets are disabled."));
+    const { elements } = require("./fixtures/harness.js");
+    const rows = elements(tree).filter(element => element.type === "row");
+    assert.equal(rows[0].props.description.props.text, "Allow your assistant to use a reset only when you explicitly request it during a conversation and your remaining usage is at or below the reset threshold. Resets are never used automatically.");
+    assert.equal(rows[1].props.description ?? null, null);
     assert.ok(!treeText(tree).includes("STALE TEN PERCENT"));
-    assert.match(treeText(tree), /Custom mode uses your saved threshold/);
+    assert.doesNotMatch(treeText(tree), /Either available core Codex window can qualify/);
     h.state.master = false;
     const [, immediateCustom, immediateInput] = controls(h.render(false));
     assert.equal(immediateCustom.props.disabled, true);
@@ -674,19 +678,19 @@ test("usage: emitted component exposes accessible controls and immediate master 
   }
 });
 
-test("usage: emitted custom switch applies both modes and preserves the saved percentage", async () => {
+test("usage: custom mode shows the saved percentage and standard mode shows 10 without overwriting it", async () => {
   const h = usageComponent({ policy: { enabled: false, remainingPercent: 37 } });
-  for (const enabled of [true, false]) {
+  for (const enabled of [true, false, true]) {
     await controls(h.render())[1].props.onChange(enabled);
     const tree = h.render(), [, custom, input] = controls(tree);
     assert.equal(custom.props.checked, enabled);
     assert.equal(input.props.disabled, !enabled);
-    assert.equal(input.props.value, "37");
-    assert.ok(treeText(tree).includes(enabled ? "Custom threshold: 37% remaining." : "Standard threshold: 10% remaining."));
+    assert.equal(input.props.value, enabled ? "37" : "10");
   }
   assert.deepEqual(JSON.parse(JSON.stringify(h.writes.map(({ key, value }) => ({ key, value })))), [
     { key: "codex-linux-agent-usage-reset-policy", value: { enabled: true, remainingPercent: 37 } },
     { key: "codex-linux-agent-usage-reset-policy", value: { enabled: false, remainingPercent: 37 } },
+    { key: "codex-linux-agent-usage-reset-policy", value: { enabled: true, remainingPercent: 37 } },
   ]);
   assert.equal(h.state.master, true);
 });
@@ -803,8 +807,8 @@ test("metadata: Usage search exposes controls without changing unrelated or manu
   const untouched = before.filter(entry => entry.id !== stockId);
   assert.deepEqual(JSON.parse(JSON.stringify(after.filter(entry => untouched.some(original => original.id === entry.id)))), JSON.parse(JSON.stringify(untouched)));
   const added = after.filter(entry => !untouched.some(original => original.id === entry.id));
-  assert.equal(added.length, 4);
-  for (const text of ["Use custom reset threshold", "Reset threshold (% remaining)", "Custom mode uses your saved threshold", "10%"])
+  assert.equal(added.length, 3);
+  for (const text of ["Use custom reset threshold", "Reset threshold", "your remaining usage is at or below the reset threshold"])
     assert.ok(added.some(entry => entry.defaultMessage.includes(text)), text);
   assert.ok(added.every(entry => entry.id.startsWith("codexLinux.usageResetThreshold.")));
 });

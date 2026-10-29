@@ -10,7 +10,7 @@ Rebuild with `./install.sh` or the repository's existing native packaging workfl
 
 ## Usage settings
 
-The existing **Allow Codex to use resets** switch remains authoritative. Two controls follow it: **Use custom reset threshold** and **Reset threshold (% remaining)**.
+The existing **Allow your assistant to use resets** switch remains authoritative. Two controls follow it: **Use custom reset threshold** and **Reset threshold**.
 
 | Master permission | Custom mode | Custom switch | Percentage field | Effective behavior |
 | --- | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ The percentage is a whole number from 1 through 99, default 10. Either available
 
 Enter or blur applies an edit. Trimmed decimal digits are accepted; leading zeros normalize. Empty text, signs, fractions, exponent notation, nonfinite values and out-of-range values remain visible with an inline error and are not applied. Escape restores the latest accepted value. Invalid draft text does not change the accepted runtime policy.
 
-Turning either switch off discards unsent draft text and retains the accepted percentage. Both custom controls are disabled while a write is pending; the master switch stays available. A submitted preference write can finish after the master is turned off, but cannot authorize a reset. Cross-window subscriptions update the accepted value; a focused dirty draft remains until committed or discarded. Replacing an unfocused draft clears its validation error, but a previous write-failure message remains visible.
+Turning either switch off discards unsent draft text and retains the accepted percentage. With custom mode off, the disabled field shows the standard 10% threshold; turning custom mode back on restores the saved custom percentage. Both custom controls are disabled while a write is pending; the master switch stays available. A submitted preference write can finish after the master is turned off, but cannot authorize a reset. Cross-window subscriptions update the accepted value; a focused dirty draft remains until committed or discarded. Replacing an unfocused draft clears its validation error, but a previous write-failure message remains visible.
 
 ## Permission and reset behavior
 
