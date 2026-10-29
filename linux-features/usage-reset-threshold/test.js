@@ -1044,19 +1044,69 @@ test("patch closure: complete markers cannot hide edited bodies or a changed reg
   }
 });
 
-test("usage: a later subscription wins over an already pending native reconciliation read", async () => {
-  const { deferred } = require("./fixtures/harness.js"), gate = deferred();
-  let reading = false;
-  const h = usageController({ read: () => { reading = true; return gate.promise; } });
-  h.controller.edit("37"); const pending = h.controller.enter();
-  for (let count = 0; count < 10 && !reading; count++) await Promise.resolve();
-  assert.equal(reading, true);
-  h.controller.sync(true, { enabled: true, remainingPercent: 20 });
-  gate.resolve({ enabled: true, remainingPercent: 37 });
-  await pending;
-  assert.equal(h.controller.snapshot().draft, "20");
-  assert.equal(h.controller.snapshot().effective, 20);
-  assert.equal(h.writes.length, 1);
+test("usage: a later valid subscription wins over every pending reconciliation outcome", async t => {
+  const { deferred, elements } = require("./fixtures/harness.js");
+  for (const outcome of ["success", "rejection", "malformed"]) await t.test(outcome, async () => {
+    const gate = deferred();
+    const h = usageComponent({ read: () => h.reads.length === 1 ? gate.promise : h.state.policy });
+    const input = controls(h.render())[2];
+    input.props.onFocus(); input.props.onChange({ target: { value: "37" } });
+    const pending = input.props.onKeyDown({ key: "Enter", preventDefault() {} });
+    for (let count = 0; count < 10 && !h.reads.length; count++) await Promise.resolve();
+    assert.equal(h.reads.length, 1);
+    h.state.policy = { enabled: true, remainingPercent: 20 };
+    h.render();
+    if (outcome === "rejection") gate.reject(Error("inert read failure"));
+    else gate.resolve(outcome === "malformed" ? null : { enabled: true, remainingPercent: 37 });
+    await pending;
+    for (let count = 0; count < 2; count++) {
+      const tree = h.render(), [, custom, percentage] = controls(tree);
+      assert.equal(percentage.props.value, "20");
+      assert.equal(custom.props.disabled, false);
+      assert.equal(percentage.props.disabled, false);
+      assert.equal(elements(tree).some(element => element.props.role === "alert"), false);
+    }
+    const percentage = controls(h.render())[2];
+    percentage.props.onChange({ target: { value: "45" } });
+    assert.equal(controls(h.render())[2].props.value, "45");
+    percentage.props.onKeyDown({ key: "Escape", preventDefault() {} });
+    await percentage.props.onBlur();
+    assert.equal(controls(h.render())[2].props.value, "20");
+    assert.equal(h.writes.length, 1, "No automatic rollback or retry write");
+    assert.equal(h.reads.length, 1, "No reconciliation retry");
+    await controls(h.render())[1].props.onChange(false);
+    assert.equal(h.writes.length, 2, "Only the explicit subsequent toggle writes again");
+    assert.deepEqual(JSON.parse(JSON.stringify(h.writes[1].value)), { enabled: false, remainingPercent: 20 });
+    assert.equal(controls(h.render())[1].props.checked, false);
+    assert.equal(h.reads.length, 2);
+  });
+});
+
+test("usage: reconciliation stays blocked without a newer valid subscription", async t => {
+  const { deferred } = require("./fixtures/harness.js");
+  for (const newer of [false, true]) for (const outcome of ["success", "rejection", "malformed"]) {
+    if (!newer && outcome === "success") continue;
+    await t.test(`${newer ? "invalid newer subscription" : "no newer subscription"}, ${outcome}`, async () => {
+      const gate = deferred();
+      let reads = 0;
+      const h = usageController({ read: () => { reads++; return gate.promise; } });
+      h.controller.edit("37"); const pending = h.controller.enter();
+      for (let count = 0; count < 10 && !reads; count++) await Promise.resolve();
+      assert.equal(reads, 1);
+      if (newer) h.controller.sync(true, null);
+      if (outcome === "rejection") gate.reject(Error("inert read failure"));
+      else gate.resolve(outcome === "malformed" ? null : { enabled: true, remainingPercent: 37 });
+      await pending;
+      const snapshot = h.controller.snapshot();
+      assert.equal(snapshot.switchDisabled, true);
+      assert.equal(snapshot.fieldDisabled, true);
+      assert.equal(snapshot.pending, false);
+      assert.match(snapshot.error, /Couldn't apply reset threshold setting/);
+      h.controller.edit("45"); await h.controller.enter(); await h.controller.toggle(false);
+      assert.equal(h.writes.length, 1);
+      assert.equal(reads, 1);
+    });
+  }
 });
 
 test("patch closure: malformed changed asset rejects at syntax gate before any writes", { concurrency: false }, t => {

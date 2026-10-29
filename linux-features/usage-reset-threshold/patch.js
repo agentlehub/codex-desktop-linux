@@ -241,14 +241,17 @@ function createUsageResetController({ read, write, changed }, policy) {
       const revisionBeforeRead = nativeRevision;
       let current;
       try { current = await read(); }
-      catch (failure) { available = false; throw failure; }
-      if (!policy.isPolicy(current)) {
-        available = false;
-        throw new TypeError("Invalid usage reset policy read");
-      }
+      catch { current = null; }
       // A later native subscription supersedes the snapshot of an in-flight
-      // read. A master-only sync with the same native object is not a policy edit.
-      if (nativeRevision === revisionBeforeRead) sync(master, current);
+      // read, including failed reads. A master-only sync with the same native
+      // object is not a policy edit.
+      if (nativeRevision === revisionBeforeRead) {
+        if (!policy.isPolicy(current)) {
+          available = false;
+          throw new TypeError("Invalid usage reset policy read");
+        }
+        sync(master, current);
+      }
       else if (!available) throw new TypeError("Invalid later usage reset policy");
       discard();
     } catch {
