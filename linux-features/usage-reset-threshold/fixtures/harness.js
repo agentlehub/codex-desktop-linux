@@ -48,7 +48,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-// Free dependencies of the bounded signed handler are exactly Ec/Z/dc/Zd;
+// Free dependencies of the bounded signed handler are exactly Dc/X/fc/Qd;
 // the generated handler additionally closes over the pure policy factory.
 // None of these bindings loads an application module or has external I/O.
 function executionHarness(source, policy, options = {}) {
@@ -66,7 +66,7 @@ function executionHarness(source, policy, options = {}) {
   };
   const handlerName = source.match(/^async function ([\w$]+)\(/)[1];
   const handler = loadSnippet(source, {
-    Ec: parser, Z: failure, dc: "consume_usage_reset", Zd: "Master disabled",
+    Dc: parser, X: failure, fc: "consume_usage_reset", Qd: "Master disabled",
     codexLinuxResetPolicy: policy,
   }, handlerName);
   const send = async (method, payload) => {
@@ -125,9 +125,9 @@ function schemaAdapter() {
 }
 
 const registryFixtureBindings = {
-  main: { factory: "Z", boolean: "J", object: "t.k", number: "t.O" },
-  worker: { factory: "rF", boolean: "JP", object: "K", number: "H" },
-  renderer: { factory: "RX", boolean: "AX", object: "q", number: "Tm" },
+  main: { factory: "Z", boolean: "J", object: "t.M", number: "t.j" },
+  worker: { factory: "hF", boolean: "oF", object: "K", number: "H" },
+  renderer: { factory: "FX", boolean: "DX", object: "J", number: "wm" },
   "display-worker": { factory: "$", boolean: "X", object: "H", number: "R" },
 };
 
@@ -156,17 +156,17 @@ async function nativeStoreHarness(definition, options = {}) {
   const durable = clone({ [queue.key]: "steer", ...options.desktop });
   const facade = {
     N: key => definitions.get(key), P: key => definitions.get(key).schema,
-    L: [...definitions.values()], U: { followUpQueueMode: queue }, gs: { LOCAL_PROJECTS: "fixture-projects" },
+    L: [...definitions.values()], U: { followUpQueueMode: queue }, hs: { LOCAL_PROJECTS: "fixture-projects" },
   };
   const warnings = [], writes = [], controls = { persistenceError: options.persistenceError ?? false };
-  // Explicit free-dependency allowlist for zi/Ui: the loader never reads files;
+  // Explicit free-dependency allowlist for Bi/Wi: the loader never reads files;
   // the codecs only clone synthetic plain values; migrations are inert.
   const Store = loadSnippet(`${source("native-load")}\nconst ${source("native-store")};`, {
-    n: facade, Vi: () => clone(durable), Bi() {}, Gi() {},
+    n: facade, Hi: () => clone(durable), Vi() {}, Ki() {},
     ue: (_schema, value) => clone(value), le: (_schema, value) => clone(value),
-    X: () => ({ warning: (...args) => warnings.push(args) }),
-    lr: "fixture-queue-default", K: "fixture-layout", Ii: "fixture-queue-flag",
-  }, "zi");
+    Y: () => ({ warning: (...args) => warnings.push(args) }),
+    ur: "fixture-queue-default", G: "fixture-layout", Li: "fixture-queue-flag",
+  }, "Bi");
   const globalState = { getStored: key => key === "fixture-queue-default" ? "steer" : undefined, set() {}, async flush() {} };
   const store = new Store("fixture://config", globalState);
   const client = {
@@ -187,11 +187,11 @@ async function nativeStoreHarness(definition, options = {}) {
   // -> setAndPersist. All bridge, query, and persistence effects stay in memory.
   const bridgeWrite = loadSnippet("", {}, `({${source("native-bridge-write")}}).write`);
   const bridge = { store, applyWriteSideEffects() {} };
-  const awaitRequest = loadSnippet(source("request-wrapper"), {}, "D$");
+  const awaitRequest = loadSnippet(source("request-wrapper"), {}, "w$");
   const writeRaw = loadSnippet(source("native-write-raw"), {
-    f$: { settings: { write: (key, value) => bridgeWrite.call(bridge, key, value) } },
-    D$: awaitRequest,
-  }, "DEt");
+    l$: { settings: { write: (key, value) => bridgeWrite.call(bridge, key, value) } },
+    w$: awaitRequest,
+  }, "aDt");
   let queryData = { configuredValues: clone(durable), values: { [definition.key]: store.getEffective(definition.key) } };
   const query = {
     queryKey: ["inert-native-settings"], cancel: async () => {}, getData: () => queryData,
@@ -200,8 +200,8 @@ async function nativeStoreHarness(definition, options = {}) {
   };
   const scope = { query: { snapshot: () => query }, get: () => ({ current: undefined }) };
   const writeUi = loadSnippet(source("native-write"), {
-    Q$: {}, Z$: {}, DEt: writeRaw, ASt() {},
-  }, "wEt");
+    Y$: {}, J$: {}, aDt: writeRaw, aCt() {},
+  }, "nDt");
   let agentWrites = 0;
   const agentRoute = loadSnippet("", {
     i: { N: facade.N, I: (key, value) => facade.P(key).parse(value) },
@@ -238,7 +238,7 @@ function syntheticFiles() {
     if (!exports.has(file)) exports.set(file, new Map());
     exports.get(file).set(name, local);
   };
-  const mapNames = { main: "Ip", worker: "Jz", renderer: "wpt", "display-worker": "DD" };
+  const mapNames = { main: "Pp", worker: "oB", renderer: "Xpt", "display-worker": "DD" };
   for (const category of Object.keys(mapNames)) {
     add(`registry-${category}-factory`);
     if (category === "main") add("registry-main-schema-import", "var ", ";");

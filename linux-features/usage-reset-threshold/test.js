@@ -141,7 +141,7 @@ test("registry: discovery links all four native definitions and rejects a fifth"
 test("registry: actual derived native maps include the new registered key", () => {
   const { registrySource } = require("./patch.js");
   const { registryFixture, loadSnippet } = require("./fixtures/harness.js");
-  const mapNames = { main: "Ip", worker: "Jz", renderer: "wpt", "display-worker": "DD" };
+  const mapNames = { main: "Pp", worker: "oB", renderer: "Xpt", "display-worker": "DD" };
   for (const [category, registryName] of Object.entries(mapNames)) {
     const definition = registryFixture(category, registrySource);
     const first = records.find(r => r.id === `registry-${category}-derived-0`).source;
@@ -163,7 +163,7 @@ test("preflight: malformed schema links and partial markers fail closed", () => 
   const { syntheticFiles } = require("./fixtures/harness.js");
   const mutations = [
     ["schema-main-export-object", record => record.source.replace('return xg', 'return fixtureMissing')],
-    ["registry-renderer-appearance", record => record.source.replace('contrast:Tm()', 'contrast:fixtureMissing()')],
+    ["registry-renderer-appearance", record => record.source.replace('contrast:wm()', 'contrast:fixtureMissing()')],
     ["handler", record => `/*codex-linux-usage-reset-threshold:partial*/${record.source}`],
   ];
   for (const [id, transform] of mutations) {
@@ -192,7 +192,7 @@ test("preflight: unused native getters, aliases, and style entries can drift", (
   const mutations = [
     [schema, source => source.replace("format:e=>q(e).format??null", "format:e=>q(e).format??`unknown`")],
     [schema, source => source.replace("safe(e)", "fixtureUnusedSafe(e)").replace("gte(e,t)", "fixtureUnusedGte(e,t)").replace("lte(e,t)", "fixtureUnusedLte(e,t)")],
-    [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace(/fields:Ct,actions:wt,primaryActions:Tt,field:Et,label:Dt,/, "")],
+    [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace(/fields:wt,actions:Tt,primaryActions:Et,field:Dt,label:Ot,/, "")],
   ];
   for (const [file, mutate] of mutations) {
     const files = syntheticFiles(), source = files.get(file), changed = mutate(source);
@@ -216,9 +216,9 @@ test("preflight: current helper semantics and chunk imports reject drift before 
     [schema, source => source.replace("strict()", "fixtureUnused_strict()")],
     [shared, source => source.replace(".effective;throw Error(`Settings are unavailable on this host`)", ".stored;throw Error(`Settings are unavailable on this host`)")],
     [shared, source => source.replace("return t?.throwIfAborted(),n", "return t?.throwIfAborted(),null")],
-    [usage, source => source.replace('from"./settings-form-b33b64c94cf6.js"', 'from"./missing-settings-form-fixture.js"')],
-    [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace("input:kt", "fixtureMissingInput:kt")],
-    [catalog, source => source.replace("c as sb", "fixtureMissingCatalog as sb")],
+    [usage, source => source.replace('from"./settings-form-ad1cae9ed277.js"', 'from"./missing-settings-form-fixture.js"')],
+    [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace("input:At", "fixtureMissingInput:At")],
+    [catalog, source => source.replace("c as Cb", "fixtureMissingCatalog as Cb")],
   ];
   for (const [file, mutate] of mutations) {
     const files = syntheticFiles(), source = files.get(file), changed = mutate(source);
@@ -260,10 +260,10 @@ test("preflight: missing, duplicate, and disconnected runtime bindings reject be
       [record.sourcePath, source => source.replace(record.source, "")],
       [record.sourcePath, source => source.replace(record.source, `${record.source}${record.source}`)],
     ]),
-    [handler.sourcePath, source => source.replace("zit as Fe", "qlt as Fe")],
-    [handler.sourcePath, source => source.replace("qlt as De", "Vit as De")],
-    [shared, source => source.replace("EEt as zit", "EEt as fixtureRemovedReader")],
-    [shared, source => source.replace("wpt as qlt", "wpt as fixtureRemovedRegistry")],
+    [handler.sourcePath, source => source.replace("sat as Me", "but as Me")],
+    [handler.sourcePath, source => source.replace("but as ae", "lat as ae")],
+    [shared, source => source.replace("iDt as sat", "iDt as fixtureRemovedReader")],
+    [shared, source => source.replace("Xpt as but", "Xpt as fixtureRemovedRegistry")],
   ];
   for (const [relative, mutate] of mutations) {
     const files = syntheticFiles(), source = files.get(relative), mutated = mutate(source);
@@ -457,17 +457,17 @@ test("execution: wrapper reads desktop policy while auth and transport keep the 
   const reads = [], auth = [], clients = [], transport = [];
   const definitions = { agentUsageResetEnabled: { key: "master-fixture" }, codexLinuxAgentUsageResetPolicy: { key: "policy-fixture" } };
   const invoke = loadSnippet(generated.wrapper, {
-    Xd: async dependencies => {
+    Zd: async dependencies => {
       await dependencies.isUsageResetEnabled();
       await dependencies.readUsageResetPolicy();
       await dependencies.readAuthMethod();
       return dependencies.getSendRequest()("fixture-method", { fixture: true });
     },
-    Fe: async (...args) => { reads.push(args); return true; }, De: definitions,
-    Oi: async (...args) => { auth.push(args); return "chatgpt"; },
-    R: (...args) => { clients.push(args); return { sendRequest: (...call) => transport.push(call) }; },
-    Et: () => {}, l: { warning() {} },
-  }, "$d");
+    Me: async (...args) => { reads.push(args); return true; }, ae: definitions,
+    Qa: async (...args) => { auth.push(args); return "chatgpt"; },
+    K: (...args) => { clients.push(args); return { sendRequest: (...call) => transport.push(call) }; },
+    Qt: () => {}, k: { warning() {} },
+  }, "ef");
   const scope = {}, queryClient = {};
   await invoke({ scope, hostId: "remote-fixture", argumentsValue: { idempotencyKey: "fixture" }, queryClient });
   assert.equal(reads.length, 2);
@@ -814,11 +814,11 @@ test("metadata: stock catalog availability retains desktop/auth/master and all-m
   const files = syntheticFiles(), metadata = discoverMetadata(files);
   const availability = records.find(record => record.id === "catalog-availability").source;
   assert.ok(files.get(metadata.availability.path).includes(availability));
-  const clause = availability.match(/\.\.\.(e&&!C&&l===`chatgpt`\?\[db,\.\.\.L\|\|u\?\[sb\]:\[\]\]:\[\])/);
+  const clause = availability.match(/\.\.\.(e&&!C&&l===`chatgpt`\?\[Db,\.\.\.F\|\|u\?\[Cb\]:\[\]\]:\[\])/);
   assert.ok(clause, "bounded stock availability clause");
   for (const desktop of [false, true]) for (const loading of [false, true])
     for (const auth of ["chatgpt", "api-key"]) for (const master of [false, true]) for (const all of [false, true]) {
-      const actual = loadSnippet("", { e: desktop, C: loading, l: auth, u: master, L: all, db: "usage", sb: "reset" }, clause[1]);
+      const actual = loadSnippet("", { e: desktop, C: loading, l: auth, u: master, F: all, Db: "usage", Cb: "reset" }, clause[1]);
       assert.equal(actual.includes("reset"), desktop && !loading && auth === "chatgpt" && (master || all));
     }
 });
