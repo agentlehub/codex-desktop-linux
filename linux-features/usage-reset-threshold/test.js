@@ -37,6 +37,126 @@ test("preflight: current signed schema and split-chunk contracts patch and reapp
   assert.equal(again.changes.size, 0);
 });
 
+test("preflight: eligibility prose and comparison spacing can drift while stock diagnostics survive", async () => {
+  const { planPatch, discoverExecution } = require("./patch.js");
+  const { syntheticFiles, executionHarness } = require("./fixtures/harness.js");
+  const record = records.find(record => record.id === "handler");
+  const mutations = [
+    source => source.replace("More than 10% remains", "Over 10% remains"),
+    source => source.replace("Current core Codex usage is unavailable.", "Core usage cannot currently be read."),
+    source => source.replace("This call did not attempt a reset.", "No reset was attempted by this call."),
+    source => source.replace("if(!l.some(e=>e>=90))", "if ( !l.some( e => e >= 90 ) )"),
+  ];
+  for (const mutate of mutations) {
+    const files = syntheticFiles(), changed = mutate(record.source);
+    assert.notEqual(changed, record.source);
+    files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, changed));
+    const plan = planPatch(files);
+    assert.equal(plan.changes.size, 8);
+    const generated = discoverExecution(files).generated.handler;
+    const h = executionHarness(generated, require("./policy.js"), {
+      policy: { enabled: true, remainingPercent: 37 },
+      usage: { rateLimits: { primary: { usedPercent: 62 } } },
+    });
+    const result = await h.invoke();
+    assert.equal(result.success, false);
+    assert.equal(consumes(h).length, 0);
+    const text = JSON.parse(responseText(result));
+    assert.equal(text.idempotencyKey, "attempt-fixture-1");
+    assert.match(text.error, /(?:More than|Over) 37% remains/);
+    assert.ok(text.error.includes(changed.includes("No reset was attempted") ? "No reset was attempted by this call." : "This call did not attempt a reset."));
+    for (const [file, source] of plan.changes) files.set(file, source);
+    assert.equal(planPatch(files).alreadyApplied, true);
+  }
+});
+
+test("execution: an inert comparison lookalike cannot redirect threshold edits", async t => {
+  const { discoverExecution, planPatch } = require("./patch.js");
+  const { syntheticFiles, executionHarness } = require("./fixtures/harness.js");
+  const record = records.find(record => record.id === "handler");
+  const lookalike = "let fixtureDiagnostic=`if(!l.some(e=>e>=90))`;";
+  const source = record.source.replace("try{", () => `${lookalike}try{`);
+  const files = syntheticFiles();
+  files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, () => source));
+  assert.equal(planPatch(files).changes.size, 8);
+  const generated = discoverExecution(files).generated.handler;
+  for (const [threshold, usedPercent, permitted] of [[1, 90, false], [37, 63, true]]) {
+    await t.test(`threshold ${threshold} with ${usedPercent}% used`, async () => {
+      const h = executionHarness(generated, require("./policy.js"), {
+        policy: { enabled: true, remainingPercent: threshold },
+        usage: { rateLimits: { primary: { usedPercent } } },
+      });
+      assert.equal((await h.invoke()).success, permitted);
+      assert.equal(consumes(h).length, permitted ? 1 : 0);
+    });
+  }
+  assert.ok(generated.includes(lookalike), "Unrelated diagnostic text remains unchanged");
+});
+
+test("execution: dollar-sign window aliases retain declaration and reference identity", async () => {
+  const { planPatch } = require("./patch.js");
+  const { syntheticFiles, executionHarness } = require("./fixtures/harness.js");
+  const record = records.find(record => record.id === "handler");
+  const source = record.source.replace(/\bl\b/g, () => "l$$");
+  const files = syntheticFiles();
+  files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, () => source));
+  const plan = planPatch(files);
+  assert.equal(plan.changes.size, 8);
+  // Exercise the final emitted declaration as well as the source transformer;
+  // the marker bounds this inert fixture declaration without loading an asset.
+  const generated = plan.changes.get(record.sourcePath).match(/\/\*codex-linux-usage-reset-threshold:begin:v1:execution-handler:[A-Za-z0-9+/=]*\*\/([\s\S]*?)\/\*codex-linux-usage-reset-threshold:end:v1:execution-handler\*\//)[1];
+  for (const [usedPercent, permitted] of [[63, true], [62.99, false]]) {
+    const h = executionHarness(generated, require("./policy.js"), {
+      policy: { enabled: true, remainingPercent: 37 },
+      usage: { rateLimits: { primary: { usedPercent } } },
+    });
+    const result = await h.invoke();
+    assert.equal(result.success, permitted);
+    assert.equal(consumes(h).length, permitted ? 1 : 0);
+    if (!permitted) assert.match(responseText(result), /More than 37%/);
+  }
+});
+
+test("preflight: settings prose follows stable identities rather than exact wording", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const files = syntheticFiles();
+  let mutations = 0;
+  for (const [file, source] of files) {
+    const changed = source
+      .replaceAll("Whether Codex can use usage resets after explicit user authorization", "Allow explicitly authorized agent usage resets")
+      .replace("Every call checks fresh core usage:", "Every invocation checks current core usage:")
+      .replace("your current limit has 10% or less remaining", "an available core window has 10% or less remaining");
+    if (changed !== source) { files.set(file, changed); mutations++; }
+  }
+  assert.equal(mutations, 7);
+  assert.equal(planPatch(files).changes.size, 8);
+});
+
+test("preflight: changed eligibility semantics and executable error templates reject before writes", { concurrency: false }, t => {
+  const { applyUsageResetThreshold } = require("./patch.js");
+  const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
+  const record = records.find(record => record.id === "handler");
+  const root = fixtureDirectory(t, "eligibility-drift");
+  const mutations = [
+    source => source.replace("?.rateLimitsByLimitId?.codex", "?.rateLimitsByLimitId?.model"),
+    source => source.replace("Number.isFinite(e.usedPercent)", "Number.isNaN(e.usedPercent)"),
+    source => source.replace("if(!l.some(e=>e>=90))", "if(!l.every(e=>e>=90))"),
+    source => source.replace("if(!l.some(e=>e>=90))", "if(!l.some(e=>e>90))"),
+    source => source.replace("idempotencyKey:c,error:", "idempotencyKey:undefined,error:"),
+    source => source.replace("More than 10% remains", "${fixtureUnsafe()}More than 10% remains"),
+    source => source.replace("This call did not attempt", "${fixtureUnsafe()}This call did not attempt"),
+    source => source.replace("));if(!await n())return X($d);", "));fixtureUnsafe();if(!await n())return X($d);"),
+    source => source.replace("));if(!await n())return X($d);", "));if(await n())return X($d);"),
+  ];
+  for (const mutate of mutations) {
+    const files = syntheticFiles(), changed = mutate(record.source);
+    assert.notEqual(changed, record.source);
+    files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, changed));
+    writeFixtureTree(root, files);
+    assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /eligibility|master|gate|comparison/i));
+  }
+});
+
 test("fixture provenance: optional signed source matches all bounded evidence and patches statically", {
   skip: !process.env.CODEX_SIGNED_EXTRACTED_APP,
 }, () => {
@@ -164,13 +284,6 @@ test("fixture provenance: synthetic assets parse without executing initializers"
 });
 
 function policyCases(p) {
-  const core = usedPercent => ({ rateLimitsByLimitId: { codex: { primary: { usedPercent } } } });
-  for (const threshold of [1, 10, 37, 99]) {
-    const boundary = 100 - threshold;
-    assert.equal(p.evaluateUsage(core(boundary - 0.01), threshold), "above-threshold");
-    assert.equal(p.evaluateUsage(core(boundary), threshold), "eligible");
-    assert.equal(p.evaluateUsage(core(boundary + 0.01), threshold), "eligible");
-  }
   assert.equal(p.effectiveThreshold({ enabled: false, remainingPercent: 37 }), 10);
   assert.equal(p.effectiveThreshold({ enabled: true, remainingPercent: 37 }), 37);
   for (const [text, expected] of [["1", 1], [" 010 ", 10], ["99", 99]])
@@ -179,25 +292,7 @@ function policyCases(p) {
     assert.equal(p.parseRemainingText(text), null);
   for (const value of invalidPolicies()) assert.equal(p.isPolicy(value), false);
   assert.equal(p.isPolicy({ enabled: true, remainingPercent: 10.0 }), true);
-  const eligible = { primary: { usedPercent: 90 } };
-  const cases = [
-    [{ rateLimitsByLimitId: { codex: {} }, rateLimits: eligible }, "unavailable"],
-    [{ rateLimitsByLimitId: { codex: null }, rateLimits: eligible }, "eligible"],
-    [{ rateLimitsByLimitId: { model: eligible } }, "unavailable"],
-    [{ rateLimits: { ...eligible, limitId: "codex", limitName: "other" } }, "eligible"],
-    ...[undefined, null, "codex"].map(limitName => [{ rateLimits: { ...eligible, limitId: null, limitName } }, "eligible"]),
-    [{ rateLimits: { ...eligible, limitId: "model" } }, "unavailable"],
-    [{ rateLimits: { ...eligible, limitName: "model" } }, "unavailable"],
-    [{ rateLimits: { secondary: { usedPercent: 90 } } }, "eligible"],
-    [{ rateLimits: { primary: { usedPercent: "90" }, secondary: { usedPercent: 90 } } }, "eligible"],
-    ...[undefined, null, {}, true, { rateLimits: 7 }, { rateLimits: { primary: [] } }].map(response => [response, "unavailable"]),
-    ...["90", true, null, NaN, Infinity, -Infinity].map(value => [core(value), "unavailable"]),
-    [core(101), "eligible"],
-  ];
-  for (const [response, expected] of cases) assert.equal(p.evaluateUsage(response, 10), expected);
-  for (const usage of [0, -1]) assert.equal(p.evaluateUsage(core(usage), 99), "above-threshold");
   assert.throws(() => p.effectiveThreshold(null), /Invalid usage reset policy/);
-  assert.throws(() => p.evaluateUsage(core(100), 100), /Invalid reset threshold/);
 }
 
 function invalidPolicies() {
@@ -206,7 +301,7 @@ function invalidPolicies() {
     { enabled: true, remainingPercent: 10, extra: true }];
 }
 
-test("policy: inclusive thresholds, strict values, core identity, and unavailable windows", () => {
+test("policy: strict native values, draft syntax, and effective threshold", () => {
   policyCases(require("./policy.js"));
 });
 
@@ -481,6 +576,35 @@ test("execution: stock and custom boundaries preserve the sole consume payload",
     assert.equal(result.success, permitted);
     assert.equal(consumes(h).length, permitted ? 1 : 0);
     if (permitted) assert.deepEqual(JSON.parse(JSON.stringify(consumes(h)[0].payload)), { idempotencyKey: "attempt-fixture-1" });
+  }
+});
+
+test("execution: retained stock core selection and finite windows enforce every threshold boundary", async () => {
+  const core = usedPercent => ({ rateLimitsByLimitId: { codex: { primary: { usedPercent } } } });
+  const eligible = { primary: { usedPercent: 90 } };
+  const cases = [
+    [{ rateLimitsByLimitId: { codex: {} }, rateLimits: eligible }, 10, false],
+    [{ rateLimitsByLimitId: { codex: null }, rateLimits: eligible }, 10, true],
+    [{ rateLimitsByLimitId: { model: eligible } }, 10, false],
+    [{ rateLimits: { ...eligible, limitId: "codex", limitName: "other" } }, 10, true],
+    ...[undefined, null, "codex"].map(limitName => [{ rateLimits: { ...eligible, limitId: null, limitName } }, 10, true]),
+    [{ rateLimits: { ...eligible, limitId: "model" } }, 10, false],
+    [{ rateLimits: { ...eligible, limitName: "model" } }, 10, false],
+    [{ rateLimits: { secondary: { usedPercent: 90 } } }, 10, true],
+    [{ rateLimits: { primary: { usedPercent: "90" }, secondary: { usedPercent: 90 } } }, 10, true],
+    ...[undefined, null, {}, true, { rateLimits: 7 }, { rateLimits: { primary: [] } }].map(response => [response, 10, false]),
+    ...["90", true, null, NaN, Infinity, -Infinity].map(value => [core(value), 10, false]),
+    [core(101), 10, true],
+    ...[0, -1].map(value => [core(value), 99, false]),
+    ...[1, 10, 37, 99].flatMap(threshold => [-0.01, 0, 0.01].map(delta =>
+      [core(100 - threshold + delta), threshold, delta >= 0])),
+  ];
+  for (const [response, threshold, permitted] of cases) {
+    const h = execution({ policy: { enabled: true, remainingPercent: threshold } });
+    // Push even null/undefined: constructor defaults must not mask missing data.
+    h.controls.usage.push(response);
+    assert.equal((await h.invoke()).success, permitted);
+    assert.equal(consumes(h).length, permitted ? 1 : 0);
   }
 });
 

@@ -9,6 +9,8 @@ const { policySource } = require("./policy.js");
 const IDENT = "[A-Za-z_$][\\w$]*";
 const MEMBER = `${IDENT}(?:\\.${IDENT})?`;
 const CALLABLE = `(?:${MEMBER}|\\(0,${IDENT}\\.${IDENT}\\))`;
+// Literal prose only: accepting interpolation here would accept executable code.
+const PROSE = "[^`\\\\$]*";
 const MARKER = "codex-linux-usage-reset-threshold";
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function fail(message) { throw new Error(`Usage reset threshold: ${message}`); }
@@ -35,7 +37,7 @@ function registrySource({ factory, boolean, object, number }) {
 // These are source transforms, never executable application imports. Capture
 // identifiers from narrow stock contracts and reject a changed contract.
 function executionSources(handler, wrapper) {
-  const names = ["codexLinuxResetNoAttempt", "codexLinuxResetCurrent", "codexLinuxResetThreshold", "codexLinuxResetResult", "codexLinuxResetInitialMaster", "codexLinuxResetAuth", "codexLinuxResetReadSetting"];
+  const names = ["codexLinuxResetNoAttempt", "codexLinuxResetCurrent", "codexLinuxResetThreshold", "codexLinuxResetInitialMaster", "codexLinuxResetAuth", "codexLinuxResetReadSetting"];
   noCollisions(handler + wrapper, [...names, "codexLinuxResetPolicy"]);
   const head = one(handler, `^async function (${IDENT})\\(\\{argumentsValue:(${IDENT}),readAuthMethod:(${IDENT}),isUsageResetEnabled:(${IDENT}),getSendRequest:(${IDENT}),invalidateUsage:(${IDENT}),logger:(${IDENT}),signal:(${IDENT})\\}\\)\\{`, "handler dependency bindings");
   const [, handlerName, args, auth, master, client, , , signal] = head;
@@ -51,19 +53,31 @@ function executionSources(handler, wrapper) {
   const fresh = one(handler, `let (${IDENT})=${escape(client)}\\(\\),(${IDENT})=await \\1\\(\x60account/rateLimits/read\x60,void 0\\)\\.catch\\(\\(\\)=>null\\);`, "fresh task-host usage read");
   const [, transport, usage] = fresh;
   const region = one(handler, `let (${IDENT})=${escape(usage)}\\?\\.rateLimitsByLimitId\\?\\.codex[\\s\\S]*?(?=let\\{outcome:${IDENT}\\}=await ${escape(transport)}\\(\x60account/rateLimitResetCredit/consume\x60,)`, "stock eligibility region");
-  const selection = one(region[0], `,(${IDENT})=\\[${escape(region[1])}\\?\\.primary,${escape(region[1])}\\?\\.secondary\\]\\.flatMap\\((${IDENT})=>`, "stock usage window aliases");
-  const [bucket, windows, item] = [region[1], selection[1], selection[2]];
-  const some = one(region[0], `if\\(!${escape(windows)}\\.some\\((${IDENT})=>\\1>=90\\)\\)`, "stock eligibility comparison")[1];
-  const expected = `let ${bucket}=${usage}?.rateLimitsByLimitId?.codex??(${usage}?.rateLimits.limitId===\`codex\`||${usage}?.rateLimits.limitId==null&&(${usage}?.rateLimits.limitName==null||${usage}.rateLimits.limitName===\`codex\`)?${usage}?.rateLimits:null),${windows}=[${bucket}?.primary,${bucket}?.secondary].flatMap(${item}=>${item}!=null&&Number.isFinite(${item}.usedPercent)?[${item}.usedPercent]:[]);if(!${windows}.some(${some}=>${some}>=90))return ${failure}(JSON.stringify({idempotencyKey:${key},error:\`\$\{${windows}.length===0?\`Current core Codex usage is unavailable.\`:\`More than 10% remains in every available core Codex usage window.\`\} This call did not attempt a reset. If an earlier attempt was uncertain, it may already have succeeded; keep the same idempotencyKey for any retry.\`}));${stockMaster}${cancel}`;
-  if (region[0] !== expected) fail("stock eligibility contract changed");
+  const aliases = one(region[0], `,(${IDENT})=\\[${escape(region[1])}\\?\\.primary,${escape(region[1])}\\?\\.secondary\\]\\.flatMap\\((${IDENT})=>`, "stock usage window aliases");
+  const [bucket, windows, item] = [region[1], aliases[1], aliases[2]];
+  const selection = `let ${bucket}=${usage}?.rateLimitsByLimitId?.codex??(${usage}?.rateLimits.limitId===\`codex\`||${usage}?.rateLimits.limitId==null&&(${usage}?.rateLimits.limitName==null||${usage}.rateLimits.limitName===\`codex\`)?${usage}?.rateLimits:null),${windows}=[${bucket}?.primary,${bucket}?.secondary].flatMap(${item}=>${item}!=null&&Number.isFinite(${item}.usedPercent)?[${item}.usedPercent]:[]);`;
+  const comparison = one(region[0], `if\\s*\\(\\s*!${escape(windows)}\\.some\\(\\s*(${IDENT})\\s*=>\\s*\\1\\s*>=\\s*90\\s*\\)\\s*\\)`, "stock eligibility comparison");
+  const rejection = one(region[0], `return ${escape(failure)}\\(JSON\\.stringify\\(\\{idempotencyKey:${escape(key)},error:\x60\\$\\{${escape(windows)}\\.length===0\\?\x60(${PROSE})\x60:\x60(${PROSE})10%(${PROSE})\x60\\}(${PROSE})\x60\\}\\)\\);`, "stock eligibility rejection envelope");
+  // Verify adjacency as well as each contract: extra code must not slip between
+  // selection, rejection and the final guards. Diagnostic wording is preserved,
+  // never reconstructed as a prerequisite for recognizing those contracts.
+  if (region[0] !== selection + comparison[0] + rejection[0] + stockMaster + cancel) fail("stock eligibility selection or guard order changed");
   if (!handler.includes(`${cancel}${stockMaster}${stockAuth}${cancel}${fresh[0]}${cancel}`)) fail("initial permission/auth/cancellation order changed");
-  const generated = `const codexLinuxResetNoAttempt=error=>${failure}(JSON.stringify({idempotencyKey:${key},error:\`\$\{error\} This call did not attempt a reset. If an earlier attempt was uncertain, it may already have succeeded; keep the same idempotencyKey for any retry.\`}));const codexLinuxResetCurrent=await codexLinuxResetReadSetting().then(value=>({value}),()=>({error:"Usage reset settings are unavailable."}));${cancel}if(codexLinuxResetCurrent.error)return codexLinuxResetNoAttempt(codexLinuxResetCurrent.error);if(!codexLinuxResetPolicy.isPolicy(codexLinuxResetCurrent.value))return codexLinuxResetNoAttempt("Usage reset settings are invalid.");const codexLinuxResetThreshold=codexLinuxResetPolicy.effectiveThreshold(codexLinuxResetCurrent.value),codexLinuxResetResult=codexLinuxResetPolicy.evaluateUsage(${usage},codexLinuxResetThreshold);if(codexLinuxResetResult!=="eligible")return codexLinuxResetNoAttempt(codexLinuxResetResult==="unavailable"?"Current core Codex usage is unavailable.":\`More than \$\{codexLinuxResetThreshold\}% remains in every available core Codex usage window.\`);${stockMaster}${cancel}`;
-  const output = handler.replace(head[0], head[0].replace("}){", ",readUsageResetPolicy:codexLinuxResetReadSetting}){"))
-    .replace(region[0], generated)
-    .replace(`${stockMaster}${stockAuth}`, `const codexLinuxResetInitialMaster=await ${master}();${cancel}if(!codexLinuxResetInitialMaster)return ${disabled};const codexLinuxResetAuth=await ${auth}();${cancel}if(codexLinuxResetAuth!==\`chatgpt\`)return ${failure}(\`Usage resets require a ChatGPT account on this task's host.\`);`);
+  const generated = `const codexLinuxResetNoAttempt=error=>${failure}(JSON.stringify({idempotencyKey:${key},error:\`\$\{error\}${rejection[4]}\`}));const codexLinuxResetCurrent=await codexLinuxResetReadSetting().then(value=>({value}),()=>({error:"Usage reset settings are unavailable."}));${cancel}if(codexLinuxResetCurrent.error)return codexLinuxResetNoAttempt(codexLinuxResetCurrent.error);if(!codexLinuxResetPolicy.isPolicy(codexLinuxResetCurrent.value))return codexLinuxResetNoAttempt("Usage reset settings are invalid.");const codexLinuxResetThreshold=codexLinuxResetPolicy.effectiveThreshold(codexLinuxResetCurrent.value);`;
+  const changedComparison = comparison[0].replace(/90(?=\s*\)\s*\))/, () => "100-codexLinuxResetThreshold");
+  const changedRejection = rejection[0].replace(`:\x60${rejection[2]}10%${rejection[3]}\x60`, () => `:\x60${rejection[2]}\$\{codexLinuxResetThreshold\}%${rejection[3]}\x60`);
+  // Edit the verified offsets, not the first matching text elsewhere in the
+  // handler (which may be an inert diagnostic string). Keep stock bytes between
+  // edits, and never interpret dollar signs in captured bindings as replacements.
+  const changedRegion = region[0].slice(0, comparison.index) + changedComparison
+    + region[0].slice(comparison.index + comparison[0].length, rejection.index) + changedRejection
+    + region[0].slice(rejection.index + rejection[0].length);
+  const output = (handler.slice(0, region.index) + generated + changedRegion + handler.slice(region.index + region[0].length))
+    .replace(head[0], () => head[0].replace("}){", ",readUsageResetPolicy:codexLinuxResetReadSetting}){"))
+    .replace(`${stockMaster}${stockAuth}`, () => `const codexLinuxResetInitialMaster=await ${master}();${cancel}if(!codexLinuxResetInitialMaster)return ${disabled};const codexLinuxResetAuth=await ${auth}();${cancel}if(codexLinuxResetAuth!==\`chatgpt\`)return ${failure}(\`Usage resets require a ChatGPT account on this task's host.\`);`);
   const wrapperRead = one(wrapper, `isUsageResetEnabled:\\(\\)=>(${IDENT})\\((${IDENT})\\.agentUsageResetEnabled\\)`, "wrapper controlling-desktop read");
   one(wrapper, `^async function ${IDENT}\\(\\{scope:${IDENT},argumentsValue:${IDENT},hostId:${IDENT},queryClient:${IDENT},signal:${IDENT}\\}\\)\\{return ${escape(handlerName)}\\(\\{`, "task-host wrapper");
-  return { handler: output, wrapper: wrapper.replace(wrapperRead[0], `${wrapperRead[0]},readUsageResetPolicy:()=>${wrapperRead[1]}(${wrapperRead[2]}.codexLinuxAgentUsageResetPolicy)`) };
+  return { handler: output, wrapper: wrapper.replace(wrapperRead[0], () => `${wrapperRead[0]},readUsageResetPolicy:()=>${wrapperRead[1]}(${wrapperRead[2]}.codexLinuxAgentUsageResetPolicy)`) };
 
 }
 
@@ -257,7 +271,8 @@ function discoverRegistries(files) {
     const native = category === "main" || category === "worker";
     const scope = native ? nativeScope(fullSource, keys[0].index) : null;
     const source = scope?.source ?? fullSource, q = native ? '"' : "\x60";
-    const property = one(source, `agentUsageResetEnabled:(${CALLABLE})\\(\\{agentAccess:${q}read-only${q},default:!1,description:${q}Whether Codex can use usage resets after explicit user authorization${q},key:${q}agent-usage-reset-enabled${q},schema:(${MEMBER})\\}\\)`, `${category} master definition`);
+    const prose = native ? '[^"\\\\$]*' : PROSE;
+    const property = one(source, `agentUsageResetEnabled:(${CALLABLE})\\(\\{agentAccess:${q}read-only${q},default:!1,description:${q}${prose}${q},key:${q}agent-usage-reset-enabled${q},schema:(${MEMBER})\\}\\)`, `${category} master definition`);
     const factory = property[1], boolean = property[2];
     const factoryBinding = native ? nativeResolve(fullSource, scope, factory.replace(/^\(0,|\)$/g, ""), `${category} persisted factory`) : { source, name: factory };
     one(factoryBinding.source, `function ${escape(factoryBinding.name)}\\(\\{agentAccess:(${IDENT}),default:(${IDENT}),description:(${IDENT}),key:(${IDENT}),schema:(${IDENT})\\}\\)\\{return\\{agentAccess:\\1,default:\\2,description:\\3,key:\\4,hostStorage:\\{kind:${q}persisted-atom${q},key:\\4\\},schema:\\5\\}\\}`, `${category} persisted factory`);
@@ -523,7 +538,6 @@ return ${group}}
 `;
 }
 
-const CATALOG_STOCK_THRESHOLD = "Every call checks fresh core usage: either the five-hour or weekly window must have 10% or less remaining.";
 const CATALOG_CURRENT_THRESHOLD = "Each call requires the Usage setting allowing Codex to use resets, reads fresh core Codex usage, and checks the remaining-percentage threshold: 10% unless custom mode is enabled in Usage settings. Custom mode uses the saved threshold from 1% to 99%, allowing resets above the standard 10% remaining limit. Either available core window can qualify. Unavailable usage never qualifies.";
 const MASTER_HELP = "Allow your assistant to use a reset only when you explicitly request it during a conversation and your remaining usage is at or below the reset threshold. Resets are never used automatically.";
 
@@ -537,13 +551,15 @@ function uniqueSurface(files, pattern, label, accept = () => true) {
 }
 function discoverMetadata(files) {
   const catalog = uniqueSurface(files, `var (${IDENT}),(${IDENT}),(${IDENT});function (${IDENT})\\(\\)\\{return\\(\\4=${IDENT}\\(\\(\\(\\)=>\\{${IDENT}\\(\\),\\1=\x60consume_usage_reset\x60,\\2=[\\s\\S]{0,1800}?inputSchema:${IDENT}\\(\\)\\.parse\\(${IDENT}\\(\\2\\)\\)\\}\\}\\)\\)\\)\\(\\)\\}`, "reset catalog constructor");
-  const description = one(catalog.original, "description:\x60([^\x60]+)\x60,inputSchema:", "reset catalog description")[1];
-  if (description.split(CATALOG_STOCK_THRESHOLD).length !== 2) fail("reset catalog threshold sentence is missing or duplicated");
-  catalog.replacement = catalog.original.replace(CATALOG_STOCK_THRESHOLD, CATALOG_CURRENT_THRESHOLD);
+  const description = one(catalog.original, `description:\x60(${PROSE})\x60,inputSchema:`, "reset catalog description")[1];
+  // Replace the threshold sentence only. Its introductory prose is not a
+  // runtime contract; the numeric rule and sentence boundary identify the edit.
+  const threshold = one(description, "(?:^|[.!?]\\s+)([^.!?]*10% or less remaining\\.)", "reset catalog threshold sentence")[1];
+  catalog.replacement = catalog.original.replace(threshold, CATALOG_CURRENT_THRESHOLD);
   const record = "\\{defaultMessage:\x60(?:[^\x60\\\\]|\\\\[\\s\\S])*\x60,id:\x60[^\x60]+\x60\\}";
   const search = uniqueSurface(files, `\\busage:\\[(?:${record})(?:,${record})*\\]`, "Usage search section", match => match[0].includes("settings.usage.resets.agentEnabled.label"));
   one(files.get(search.path), "export\\{[^}]*\\bas settingsSearchDocuments\\}", "settings search export");
-  const stockHelp = one(search.original, "\\{defaultMessage:\x60Allow your assistant to use a reset only when you explicitly request it during a conversation and your current limit has 10% or less remaining\\. Resets are never used automatically\\.\x60,id:\x60settings\\.usage\\.resets\\.agentEnabled\\.description\x60\\}", "Usage stock help record")[0];
+  const stockHelp = one(search.original, `\\{defaultMessage:\x60${PROSE}\x60,id:\x60settings\\.usage\\.resets\\.agentEnabled\\.description\x60\\}`, "Usage stock help record")[0];
   one(search.original, "id:\x60settings\\.usage\\.resets\\.agentEnabled\\.label\x60", "Usage master search label");
   const entry = (id, text) => `{defaultMessage:${JSON.stringify(text)},id:${JSON.stringify(`codexLinux.usageResetThreshold.${id}`)}}`;
   const added = [entry("masterHelp", MASTER_HELP), entry("customLabel", "Use custom reset threshold"), entry("fieldLabel", "Reset threshold")].join(",");
@@ -613,7 +629,7 @@ function pristinePlan(files) {
   const replace = (file, original, replacement, slot) => {
     const current = changes.get(file) ?? files.get(file);
     if (original.length === 0 || current.split(original).length !== 2) fail(`ambiguous replacement: ${slot}`);
-    changes.set(file, current.replace(original, marked(slot, original, replacement)));
+    changes.set(file, current.replace(original, () => marked(slot, original, replacement)));
   };
   for (const registry of registries) replace(registry.path, registry.property, `${registry.property},${registrySource(registry.aliases)}`, `registry-${registry.category}`);
   replace(execution.path, execution.handler, execution.generated.handler, "execution-handler");
