@@ -19,19 +19,7 @@ function createPolicy() {
     if (!isPolicy(value)) throw new TypeError("Invalid usage reset policy");
     return value.enabled ? value.remainingPercent : 10;
   }
-  function evaluateUsage(response, threshold) {
-    if (!isPercent(threshold)) throw new TypeError("Invalid reset threshold");
-    const legacy = response?.rateLimits;
-    const core = response?.rateLimitsByLimitId?.codex ??
-      (legacy?.limitId === "codex" || (legacy?.limitId == null &&
-       (legacy?.limitName == null || legacy.limitName === "codex")) ? legacy : null);
-    const values = [core?.primary, core?.secondary]
-      .flatMap(window => typeof window?.usedPercent === "number" &&
-        Number.isFinite(window.usedPercent) ? [window.usedPercent] : []);
-    return values.length === 0 ? "unavailable" :
-      values.some(value => value >= 100 - threshold) ? "eligible" : "above-threshold";
-  }
-  return { isPolicy, parseRemainingText, effectiveThreshold, evaluateUsage };
+  return { isPolicy, parseRemainingText, effectiveThreshold };
 }
 
 const policy = createPolicy();
