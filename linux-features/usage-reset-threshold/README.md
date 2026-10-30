@@ -1,53 +1,58 @@
 # Usage reset threshold
 
-Choose the remaining-quota threshold for explicitly requested agent usage resets in Usage settings. Custom mode lets Codex use a reset above the standard 10% remaining limit, up to your saved threshold. This feature is disabled by default.
+Choose how much Codex usage can remain when your assistant uses a reset,
+including above the standard 10% remaining limit. The feature and its
+**Use custom reset threshold** switch are disabled by default.
 
 ## Enable
 
-Add `usage-reset-threshold` to the `enabled` array in your local `linux-features/features.json`, preserving other enabled features and settings. The committed `features.example.json` remains empty. You can also select the feature through `make setup-native`.
+Select **Usage reset threshold** with `make setup-native`, or add
+`usage-reset-threshold` to the `enabled` array in your local
+`linux-features/features.json`. Preserve your other selected features.
 
-Rebuild with `./install.sh` or the repository's existing native packaging workflow. This is a build-time feature: editing the feature selection does not change an already running or installed app. See the [top-level build instructions](../../README.md).
+Rebuild and install with `make install-native`, or use your usual
+[build and installation workflow](../../README.md). Fully quit ChatGPT Community,
+including the tray, and launch the rebuilt app.
 
-## Usage settings
+## Usage
 
-The existing **Allow your assistant to use resets** switch remains authoritative. Two controls follow it: **Use custom reset threshold** and **Reset threshold**.
+Open **Settings → Usage**:
 
-| Master permission | Custom mode | Custom switch | Percentage field | Effective behavior |
-| --- | --- | --- | --- | --- |
-| Off | Either | Disabled | Disabled | Agent resets are disabled. |
-| On | Off | Enabled | Disabled | Standard threshold: 10% remaining. |
-| On | On | Enabled | Enabled | Custom threshold: the saved percentage remaining. |
+1. Enable **Allow your assistant to use resets**.
+2. Enable **Use custom reset threshold**.
+3. Enter a whole percentage from **1 to 99** in **Reset threshold**. The default
+   is **10**.
 
-The percentage is a whole number from 1 through 99, default 10. Either available core Codex window may qualify. The comparison is inclusive and uses unrounded usage. Missing usage never qualifies. A 99% threshold still requires at least 1% used in a valid core window.
+Press **Enter** or leave the field to save. **Escape** restores the saved value.
+Invalid values show an error and are not saved. Changing the threshold after
+installation does not require rebuilding.
 
-Enter or blur applies an edit. Trimmed decimal digits are accepted; leading zeros normalize. Empty text, signs, fractions, exponent notation, nonfinite values and out-of-range values remain visible with an inline error and are not applied. Escape restores the latest accepted value. Invalid draft text does not change the accepted runtime policy.
+The percentage means usage **remaining**. For example, a threshold of **25%**
+allows a reset when an available five-hour or weekly Codex limit has **25% or
+less remaining**. Either limit can qualify; both do not need to be below the
+threshold. A reset cannot proceed while usage information is unavailable.
 
-Turning either switch off discards unsent draft text and retains the accepted percentage. With custom mode off, the disabled field shows the standard 10% threshold; turning custom mode back on restores the saved custom percentage. Both custom controls are disabled while a write is pending; the master switch stays available. A submitted preference write can finish after the master is turned off, but cannot authorize a reset. Cross-window subscriptions update the accepted value; a focused dirty draft remains until committed or discarded. Replacing an unfocused draft clears its validation error, but a previous write-failure message remains visible.
+You must still explicitly request each reset during a conversation. Reaching
+the threshold, changing the percentage, or enabling either switch never uses
+a reset automatically.
 
-## Permission and reset behavior
+Turning **Use custom reset threshold** off restores the standard **10%** limit
+and shows 10 in the disabled field. Turning it back on restores your saved
+custom percentage. Turning **Allow your assistant to use resets** off disables
+agent resets and both custom controls.
 
-Each reset still requires explicit user authorization. Neither changing the percentage nor either switch spends or schedules a reset. There is no automatic reset, retry, credit selection, new tool argument, or HTTP fallback. The tool retains its original idempotency key, outcomes, task-host transport and independent main-process master-permission gate.
-
-Each invocation reads fresh core usage, then reads the controlling desktop's native policy once and checks eligibility once. It retains the stock initial and final master-permission checks and checks cancellation after pre-dispatch awaits. The native policy read defines that invocation's threshold snapshot: edits while usage is pending are included, and later preference edits apply to later invocations. This is not an atomic transaction across the renderer, main process and service.
-
-Existing tasks may retain earlier stock 10% tool instructions until their normal catalog refresh or a new task. A fresh catalog describes standard and custom mode. Tool instructions do not override runtime enforcement.
-
-## Native settings and persistence
-
-The policy belongs to the controlling desktop's native profile, alongside the master switch. It is not per task, project, quota pool, or account. Existing profile sharing and the optional `community-profile-isolation` feature remain authoritative. Task-host authentication, usage and redemption retain their existing host scope.
-
-Native settings own `desktop.codex-linux-agent-usage-reset-policy`, a strict object with `enabled` and `remainingPercent`. Missing configuration defaults to custom mode off and 10. Invalid persisted values are dropped by the native loader and receive that default; a runtime settings-read failure instead blocks the attempt. Tools and agents cannot write this read-only native setting.
-
-A settings acknowledgment waits for the native persistence operation to complete. If that operation fails, native settings restore the prior accepted value and reject the write. The controls show an error, reconcile with native state and do not issue a rollback write or automatic retry.
+The saved threshold applies across chats and accounts in the same app profile.
+If an existing chat still refers to the old 10% limit, try a new chat.
 
 ## Disable or remove
 
-Remove only `usage-reset-threshold` from your enabled feature list, preserving other choices, and rebuild through the same workflow. The rebuilt app restores stock controls and the stock 10% threshold. The saved custom policy remains inert so a later re-enable can reuse it. Disabling the feature does not delete settings or change the master permission.
+Turn **Use custom reset threshold** off to return to the standard limit.
+To remove the extra controls, deselect the feature with `make setup-native`
+or remove its ID from `linux-features/features.json`, then rebuild and install.
+Your saved percentage is retained if you enable the feature again.
 
-## Validation
+## Testing
 
-Validation uses signed stable OpenAI Linux package **26.1027.30824** on **amd64 and arm64**. Feature-only disposable builds check extraction, patching, ASAR repacking, layout, emitted JavaScript syntax, four-registry discovery, preservation of manual-reset and permission-gate code, and byte-identical reapplication. Built JavaScript must differ from the required-core baseline in exactly the eight planned feature assets.
-
-The bounded source fixtures use one signed **26.1027.30824 amd64** baseline with exact source hashes and byte offsets. They retain the current native settings writer, bridge, persistence store and subscription declarations. Main and worker discovery verifies the current rspack module import/export contracts; renderer and display-worker discovery verifies their current bundled schema declarations. Missing or ambiguous module links reject the feature build. Runtime tests execute only selected bounded declarations with inert settings, authentication, usage, query and transport fakes; the assembled cross-chunk fixture is syntax-checked but never executed. Tests cover rejection before writes, partial and silently incorrect writes, verified restoration, and fatal rejection of failed restoration. Disabled-feature tests check zero module loads, asset probes and writes. Update-builder staging omits tests and fixtures while retaining production inputs.
-
-Run the feature suite with `node --test linux-features/usage-reset-threshold/test.js`. Existing GitHub CI discovers the feature in both Nix maximal profiles on both architectures; no local Nix installation or build was performed. Actual CI results are reported with the pull request.
+```bash
+node --test linux-features/usage-reset-threshold/test.js
+```
