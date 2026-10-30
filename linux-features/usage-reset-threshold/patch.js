@@ -8,6 +8,7 @@ const { policySource } = require("./policy.js");
 
 const IDENT = "[A-Za-z_$][\\w$]*";
 const MEMBER = `${IDENT}(?:\\.${IDENT})?`;
+const CALLABLE = `(?:${MEMBER}|\\(0,${IDENT}\\.${IDENT}\\))`;
 const MARKER = "codex-linux-usage-reset-threshold";
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function fail(message) { throw new Error(`Usage reset threshold: ${message}`); }
@@ -18,7 +19,7 @@ function one(source, expression, label) {
   return found[0];
 }
 function identifier(value) {
-  if (typeof value !== "string" || !new RegExp(`^${MEMBER}$`).test(value)) fail("invalid generated binding");
+  if (typeof value !== "string" || !new RegExp(`^${CALLABLE}$`).test(value)) fail("invalid generated binding");
   return value;
 }
 function noCollisions(source, names) {
@@ -67,27 +68,65 @@ function executionSources(handler, wrapper) {
 }
 
 const categories = [
-  ["main", /^\.vite\/build\/src-[^/]+\.js$/],
+  ["main", /^\.vite\/build\/early-bootstrap\.js$/],
   ["worker", /^\.vite\/build\/worker\.js$/],
   ["renderer", /^webview\/assets\/app-shared-[^/]+\.js$/],
   ["display-worker", /^webview\/assets\/page-bootstrap-display\.worker-[^/]+\.js$/],
 ];
 
-// Resolve the main-process namespace edge before checking native schema bodies.
-function resolveSchema(files, file, source, binding) {
-  if (!binding.includes(".")) return { source, name: binding, path: file };
+// Native main/worker registries use rspack module factories. Resolve only the
+// current strict factory header, numeric import and named export contracts;
+// this is static source inspection, never a module loader or initializer.
+function nativeModules(source) {
+  const headers = matches(source, `(?:^|[,{])([0-9]+)\\((${IDENT})(?:,(${IDENT}))?(?:,(${IDENT}))?\\)\\{\"use strict\";`);
+  return headers.map((header, index) => ({
+    id: header[1], exports: header[3], loader: header[4],
+    start: header.index, end: headers[index + 1]?.index ?? source.length,
+    source: source.slice(header.index + header[0].length, headers[index + 1]?.index ?? source.length),
+  }));
+}
+function nativeScope(source, offset) {
+  const scopes = nativeModules(source).filter(scope => scope.start <= offset && offset < scope.end);
+  if (scopes.length !== 1) fail("native registry module is missing or ambiguous");
+  return scopes[0];
+}
+function nativeExport(scope, member, label) {
+  const head = `${escape(scope.loader)}\\.d\\(${escape(scope.exports)},`;
+  const table = one(scope.source, `${head}\\{([^{}]*)\\}`, `${label} export table`);
+  const constants = scope.source.slice(table.index + table[0].length).match(/^,\{([^{}]*)\}\)/)?.[1] ?? "";
+  const found = [];
+  for (const [entries, getter] of [[table[1], true], [constants, false]]) {
+    for (const entry of entries.split(",")) {
+      const match = entry.match(new RegExp(`^${escape(member)}:${getter ? "\\(\\)=>" : ""}(${MEMBER})$`));
+      if (match) found.push(match[1]);
+    }
+  }
+  if (found.length !== 1) fail(`${label} export ${member}: expected one binding, found ${found.length}`);
+  return found[0];
+}
+function nativeResolve(source, scope, binding, label, seen = new Set()) {
+  const edge = `${scope.id}:${binding}`;
+  if (seen.has(edge)) fail(`${label} module alias cycle`);
+  seen.add(edge);
+  if (!binding.includes(".")) return { source: scope.source, name: binding, scope };
   const [namespace, member] = binding.split(".");
-  const imported = one(source, `(?:^|[^\\w$])${escape(namespace)}=require\\("([^"\\n]+)"\\)`, "schema namespace import");
-  const target = path.posix.normalize(path.posix.join(path.posix.dirname(file), imported[1]));
-  const schema = files.get(target);
-  if (!schema) fail(`missing schema import target: ${target}`);
-  const exported = one(schema, `Object\\.defineProperty\\(exports,"${escape(member)}",\\{enumerable:!0,get:function\\(\\)\\{return (${IDENT})\\}\\}\\)`, "schema constructor export");
-  return { source: schema, name: exported[1], path: target };
+  const imported = one(scope.source, `(?:^|[^\\w$])${escape(namespace)}=${escape(scope.loader)}\\(([0-9]+)\\)`, `${label} module import`);
+  const targets = nativeModules(source).filter(item => item.id === imported[1]);
+  if (targets.length !== 1) fail(`${label} module ${imported[1]}: expected one factory, found ${targets.length}`);
+  const target = targets[0], local = nativeExport(target, member, label);
+  return nativeResolve(source, target, local, label, seen);
+}
+function resolveSchema(_files, file, source, binding) {
+  if (binding.includes(".")) fail("unexpected renderer schema namespace");
+  return { source, name: binding, path: file };
 }
 function schemaConstructor(source, name, label) {
   return one(source, `function ${escape(name)}\\((${IDENT})\\)\\{return (${IDENT})\\((${IDENT}),\\1\\)\\}`, `${label} constructor`)[3];
 }
 function verifySchema(files, file, source, aliases) {
+  // Current display worker retains tree-shaking annotations inside schema calls.
+  source = source.replace(/return(?=\/\*\s*@__PURE__)/g, "return ")
+    .replace(/\/\*\s*@__PURE__\s*\*\/\s*/g, "");
   const booleanBinding = one(source, `(?:^|[^\\w$])${escape(aliases.boolean)}=(${MEMBER})\\(\\)`, "native boolean binding")[1];
   const boolean = resolveSchema(files, file, source, booleanBinding);
   const number = resolveSchema(files, file, source, aliases.number);
@@ -111,9 +150,41 @@ function verifySchema(files, file, source, aliases) {
   return { boolean: boolean.name, number: number.name, object: object.name, schemaPath: object.path };
 }
 
-function cjsExportFor(source, local, label) {
-  return one(source, `Object\\.defineProperty\\(exports,"([^"\\n]+)",\\{enumerable:!0,get:function\\(\\)\\{return ${escape(local)}\\}\\}\\)`, label)[1];
+function verifyNativeSchema(source, scope, aliases, file) {
+  const booleanValue = nativeResolve(source, scope, aliases.boolean, "native boolean");
+  const booleanCall = one(booleanValue.source, `(?:^|[^\\w$])${escape(booleanValue.name)}=(${MEMBER})\\(\\)`, "native boolean binding");
+  const boolean = nativeResolve(source, booleanValue.scope, booleanCall[1], "native boolean constructor");
+  const number = nativeResolve(source, scope, aliases.number, "native number constructor");
+  const object = nativeResolve(source, scope, aliases.object, "native object constructor");
+  const constructor = (resolved, label) => one(resolved.source, `function ${escape(resolved.name)}\\((${IDENT})\\)\\{return (${MEMBER})\\((${IDENT}),\\1\\)\\}`, `${label} constructor`)[3];
+  const booleanType = constructor(boolean, "native boolean");
+  one(boolean.source, `(?:^|[^\\w$])${escape(booleanType)}=${MEMBER}\\("ZodBoolean",`, "native boolean type");
+  const numberType = constructor(number, "native number");
+  const numberHead = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${MEMBER}\\("ZodNumber",\\((${IDENT}),(${IDENT})\\)=>\\{(${MEMBER})\\.init\\(\\1,\\2\\),`, "native number type");
+  const base = nativeResolve(source, number.scope, numberHead[3], "native finite number");
+  one(base.source, `(?:^|[^\\w$])${escape(base.name)}=${MEMBER}\\("\\$ZodNumber",[\\s\\S]{0,350}?if\\("number"==typeof (${IDENT})&&!Number\\.isNaN\\(\\1\\)&&Number\\.isFinite\\(\\1\\)\\)return ${IDENT};`, "native finite number parser");
+  const methods = one(number.source, `(?:^|[^\\w$])${escape(numberType)}=${MEMBER}\\("ZodNumber",[\\s\\S]{0,250}?isFinite=!0\\},${MEMBER}\\(\\{[\\s\\S]{0,700}?\\},\\{([\\s\\S]{0,1500}?)\\}\\)\\)`, "native number methods")[1];
+  for (const method of ["min", "max"])
+    one(methods, `(?:^|,)${method}\\((${IDENT}),(${IDENT})\\)\\{return this\\.check\\((${MEMBER})\\(\\1,\\2\\)\\)\\}`, `native number ${method} bound`);
+  if (file.endsWith("worker.js")) {
+    const integer = one(methods, `(?:^|,)int\\((${IDENT})\\)\\{var (${IDENT});return this\\.check\\(\\(\\2=\\1,(${MEMBER})\\((${IDENT}),\\2\\)\\)\\)\\}`, "native integer method");
+    one(number.source, `(?:^|[^\\w$])${escape(integer[4])}=${MEMBER}\\("ZodNumberFormat",`, "native integer format");
+  } else {
+    const integer = one(methods, `(?:^|,)int\\((${IDENT})\\)\\{return this\\.check\\((${IDENT})\\(\\1\\)\\)\\}`, "native integer method");
+    const format = one(number.source, `function ${escape(integer[2])}\\((${IDENT})\\)\\{return ${MEMBER}\\((${IDENT}),\\1\\)\\}`, "native integer constructor")[2];
+    one(number.source, `(?:^|[^\\w$])${escape(format)}=${MEMBER}\\("ZodNumberFormat",`, "native integer format");
+  }
+  const objectType = one(object.source, `function ${escape(object.name)}\\((${IDENT}),(${IDENT})\\)\\{return new (${IDENT})\\(\\{type:"object",shape:\\1\\?\\?\\{\\},\\.\\.\\.${MEMBER}\\(\\2\\)\\}\\)\\}`, "native object constructor")[3];
+  const strict = one(object.source, `(?:^|[^\\w$])${escape(objectType)}=${MEMBER}\\("ZodObject",[\\s\\S]{0,700}?(?:\\{|,)strict\\(\\)\\{return this\\.clone\\((${MEMBER})\\(this\\._zod\\.def,\\{catchall:([^{}]{1,100})\\}\\)\\)\\}`, "native strict object method");
+  const merge = nativeResolve(source, object.scope, strict[1], "native strict merge");
+  one(merge.source, `function ${escape(merge.name)}\\(\\.\\.\\.(${IDENT})\\)\\{let (${IDENT})=\\{\\};for\\(let (${IDENT}) of \\1\\)Object\\.assign\\(\\2,Object\\.getOwnPropertyDescriptors\\(\\3\\)\\);return Object\\.defineProperties\\(\\{\\},\\2\\)\\}`, "native strict descriptor merge");
+  let neverType;
+  if (file.endsWith("worker.js")) neverType = one(strict[2], `^${MEMBER}\\((${IDENT}),void 0\\)$`, "native strict never constructor")[1];
+  else neverType = constructor({ ...object, name: one(strict[2], `^(${IDENT})\\(\\)$`, "native strict never call")[1] }, "native strict never");
+  one(object.source, `(?:^|[^\\w$])${escape(neverType)}=${MEMBER}\\("ZodNever",`, "native strict never type");
+  return { boolean: boolean.name, number: number.name, object: object.name, schemaPath: file };
 }
+
 function exportedLocal(source, exported, label) {
   const found = [];
   for (const statement of matches(source, "export\\{([^}]+)\\}")) {
@@ -140,24 +211,78 @@ function importedBinding(files, file, local) {
   return { path: target, source, local: exportedLocal(source, exported, `execution import ${local}`) };
 }
 
+// Native aggregates include inline default arrays. Bound the owning array
+// before looking for the registry spread so a later unrelated array cannot
+// satisfy the link. This contract accepts plain arrays and quoted literals;
+// regexes, comments and template interpolation require a fresh review.
+function nativeAggregate(source, registryName, category) {
+  const candidates = [];
+  for (const start of matches(source, `(?:^|[^\\w$])(${IDENT})=\\[(?=\\.\\.\\.Object\\.values\\()`)) {
+    const open = start.index + start[0].length - 1;
+    const spread = `...Object.values(${registryName})`;
+    let depth = 0, parens = 0, braces = 0, direct = 0, quote = null, complete = false;
+    for (let index = open; index < Math.min(source.length, open + 6000); index++) {
+      const char = source[index];
+      if (quote) {
+        if (char === "\\") { index++; continue; }
+        if (quote === "`" && char === "$" && source[index + 1] === "{") break;
+        if (char === quote) quote = null;
+        continue;
+      }
+      if (["\"", "'", "`"].includes(char)) { quote = char; continue; }
+      if (char === "/") break;
+      if (depth === 1 && parens === 0 && braces === 0 && ["[", ","].includes(source[index - 1])
+        && source.startsWith(spread, index) && [",", "]"].includes(source[index + spread.length])) direct++;
+      if (char === "(") parens++;
+      if (char === ")" && --parens < 0) break;
+      if (char === "{") braces++;
+      if (char === "}" && --braces < 0) break;
+      if (char === "[") depth++;
+      if (char === "]" && --depth === 0) { complete = parens === 0 && braces === 0; break; }
+    }
+    if (complete && direct === 1) candidates.push(start[1]);
+  }
+  if (candidates.length !== 1) fail(`${category} derived definitions: expected one connected aggregate, found ${candidates.length}`);
+  return candidates[0];
+}
+
 function discoverRegistries(files) {
   const inventory = [];
-  for (const [file, source] of files) {
-    const keys = matches(source, `(?:\\bagentUsageResetEnabled|["\'\x60]agentUsageResetEnabled["\'\x60])\\s*:\\s*${IDENT}\\(\\{`);
+  for (const [file, fullSource] of files) {
+    const keys = matches(fullSource, `(?:\\bagentUsageResetEnabled|["\'\x60]agentUsageResetEnabled["\'\x60])\\s*:\\s*${CALLABLE}\\(\\{`);
     if (!keys.length) continue;
     const category = categories.find(([, pattern]) => pattern.test(file))?.[0];
     if (!category) fail(`unexpected registry definition in ${file}`);
     if (keys.length !== 1) fail(`duplicate ${category} registry definition`);
-    const property = one(source, `agentUsageResetEnabled:(${IDENT})\\(\\{agentAccess:\x60read-only\x60,default:!1,description:\x60Whether Codex can use usage resets after explicit user authorization\x60,key:\x60agent-usage-reset-enabled\x60,schema:(${IDENT})\\}\\)`, `${category} master definition`);
+    const native = category === "main" || category === "worker";
+    const scope = native ? nativeScope(fullSource, keys[0].index) : null;
+    const source = scope?.source ?? fullSource, q = native ? '"' : "\x60";
+    const property = one(source, `agentUsageResetEnabled:(${CALLABLE})\\(\\{agentAccess:${q}read-only${q},default:!1,description:${q}Whether Codex can use usage resets after explicit user authorization${q},key:${q}agent-usage-reset-enabled${q},schema:(${MEMBER})\\}\\)`, `${category} master definition`);
     const factory = property[1], boolean = property[2];
-    one(source, `function ${escape(factory)}\\(\\{agentAccess:(${IDENT}),default:(${IDENT}),description:(${IDENT}),key:(${IDENT}),schema:(${IDENT})\\}\\)\\{return\\{agentAccess:\\1,default:\\2,description:\\3,key:\\4,hostStorage:\\{kind:\x60persisted-atom\x60,key:\\4\\},schema:\\5\\}\\}`, `${category} persisted factory`);
-    const font = one(source, `(${MEMBER})\\(\\{family:(${MEMBER})\\(\\),fullName:\\2\\(\\),postscriptName:\\2\\(\\)\\}\\)`, `${category} appearance font schema`);
-    const contrast = one(source, `contrast:(${MEMBER})\\(\\)\\.int\\(\\)\\.min\\(0\\)\\.max\\(100\\)`, `${category} appearance contrast schema`);
+    const factoryBinding = native ? nativeResolve(fullSource, scope, factory.replace(/^\(0,|\)$/g, ""), `${category} persisted factory`) : { source, name: factory };
+    one(factoryBinding.source, `function ${escape(factoryBinding.name)}\\(\\{agentAccess:(${IDENT}),default:(${IDENT}),description:(${IDENT}),key:(${IDENT}),schema:(${IDENT})\\}\\)\\{return\\{agentAccess:\\1,default:\\2,description:\\3,key:\\4,hostStorage:\\{kind:${q}persisted-atom${q},key:\\4\\},schema:\\5\\}\\}`, `${category} persisted factory`);
+    let appearanceSource = source, appearanceScope = scope;
+    if (category === "main") {
+      const resolved = nativeResolve(fullSource, scope, boolean, "main boolean definition");
+      appearanceSource = resolved.source; appearanceScope = resolved.scope;
+    }
+    const font = one(appearanceSource, `(${MEMBER})\\(\\{family:(${MEMBER})\\(\\),fullName:\\2\\(\\),postscriptName:\\2\\(\\)\\}\\)`, `${category} appearance font schema`);
+    const contrast = one(appearanceSource, `contrast:(${MEMBER})\\(\\)\\.int\\(\\)\\.min\\(0\\)\\.max\\(100\\)`, `${category} appearance contrast schema`);
     const aliases = { factory, boolean, object: font[1], number: contrast[1] };
-    const schemas = verifySchema(files, file, source, aliases);
+    if (category === "main") {
+      const namespace = one(source, `schema:(${IDENT})\\.number\\(\\)\\.int\\(\\)\\.nonnegative\\(\\)`, "main registry schema namespace")[1];
+      aliases.object = `${namespace}.object`; aliases.number = `${namespace}.number`;
+      for (const [role, binding] of [["object", font[1]], ["number", contrast[1]]]) {
+        const appearance = nativeResolve(fullSource, appearanceScope, binding, `main appearance ${role}`);
+        const registry = nativeResolve(fullSource, scope, aliases[role], `main registry ${role}`);
+        if (appearance.name !== registry.name || appearance.scope.id !== registry.scope.id) fail(`main ${role} schema linkage changed`);
+      }
+    }
+    const schemas = native ? verifyNativeSchema(fullSource, scope, aliases, file) : verifySchema(files, file, source, aliases);
     const prefix = source.slice(Math.max(0, property.index - 6000), property.index);
     const registryName = one(prefix, `(?:^|[^\\w$])(${IDENT})=\\{confirmBeforeClose:[^;{}]*(?:\\([^;]*?)?$`, `${category} definition object binding`)[1];
-    const aggregate = one(source, `(?:^|[^\\w$])(${IDENT})=\\[\\.\\.\\.Object\\.values\\([^\\]]*?\\.\\.\\.Object\\.values\\(${escape(registryName)}\\)[^\\]]*\\]`, `${category} derived definitions`)[1];
+    const aggregate = native ? nativeAggregate(source, registryName, category)
+      : one(source, `(?:^|[^\\w$])(${IDENT})=\\[\\.\\.\\.Object\\.values\\([^\\]]*?\\.\\.\\.Object\\.values\\(${escape(registryName)}\\)[^\\]]*\\]`, `${category} derived definitions`)[1];
     const list = one(source, `(?:^|[^\\w$])(${IDENT})=\\[\\.\\.\\.${escape(aggregate)}\\]`, `${category} derived list`)[1];
     one(source, `new Map\\(${escape(list)}\\.map\\((${IDENT})=>\\[\\1\\.key,\\1\\]\\)\\)`, `${category} derived key map`);
     if (category === "main") {
@@ -165,10 +290,13 @@ function discoverRegistries(files) {
       const lookup = one(source, `function (${IDENT})\\((${IDENT})\\)\\{return ${escape(keyMap)}\\.get\\(\\2\\)\\}`, "main definition lookup")[1];
       const schema = one(source, `function (${IDENT})\\((${IDENT})\\)\\{return ${escape(lookup)}\\(\\2\\)\\.schema\\}`, "main schema lookup")[1];
       const validator = one(source, `function (${IDENT})\\((${IDENT}),(${IDENT})\\)\\{return ${escape(schema)}\\(\\2\\)\\.parse\\(\\3\\)\\}`, "main schema validator")[1];
-      for (const [local, role] of [[list, "list"], [lookup, "definition lookup"], [schema, "schema lookup"], [validator, "validator"]]) cjsExportFor(source, local, `main ${role} export`);
+      for (const [local, role] of [[list, "list"], [lookup, "definition lookup"], [schema, "schema lookup"], [validator, "validator"]]) {
+        const table = one(source, `${escape(scope.loader)}\\.d\\(${escape(scope.exports)},\\{([\\s\\S]{0,15000}?)\\}\\);var ${IDENT}=${escape(scope.loader)}\\([0-9]+\\)`, "main settings export table")[1];
+        one(table, `(?:^|,)${IDENT}:\\(\\)=>${escape(local)}(?=,|$)`, `main ${role} export`);
+      }
     }
     noCollisions(source, ["codexLinuxAgentUsageResetPolicy"]);
-    inventory.push({ category, path: file, property: property[0], offset: property.index, registryName, aliases, schemas, aggregate, list });
+    inventory.push({ category, path: file, property: property[0], offset: fullSource.indexOf(property[0]), registryName, aliases, schemas, aggregate, list });
   }
   for (const [category] of categories) {
     const count = inventory.filter(item => item.category === category).length;
@@ -436,7 +564,7 @@ function discoverMetadata(files) {
 }
 
 function discoverPreserved(files, availability) {
-  const gate = uniqueSurface(files, `transformOutgoingMessage:(${IDENT})=>\\{if\\(\x60method\x60in \\1&&\\1\\.method===\x60account/rateLimitResetCredit/consume\x60&&this\\.options\\.settingsStore\\.getEffective\\(${IDENT}\\.${IDENT}\\.agentUsageResetEnabled\\.key\\)!==!0\\)throw new ${MEMBER}\\(\x60Usage resets are disabled in settings\\.\x60\\);return ${IDENT}\\?\\.\\(\\1\\)\\?\\?\\1\\},`, "main-process master gate");
+  const gate = uniqueSurface(files, `transformOutgoingMessage:(${IDENT})=>\\{if\\("method"in \\1&&"account/rateLimitResetCredit/consume"===\\1\\.method&&!0!==this\\.options\\.settingsStore\\.getEffective\\(${IDENT}\\.${IDENT}\\.agentUsageResetEnabled\\.key\\)\\)throw new ${MEMBER}\\("Usage resets are disabled in settings\\."\\);return ${IDENT}\\?\\.\\(\\1\\)\\?\\?\\1\\},`, "main-process master gate");
   const manual = uniqueSurface(files, `function (${IDENT})\\((${IDENT})\\)\\{let\\{creditId:(${IDENT}),redeemRequestId:(${IDENT})\\}=\\2;return ${IDENT}\\.safePost\\(\x60/wham/rate-limit-reset-credits/consume\x60,\\{requestBody:\\{credit_id:\\3,redeem_request_id:\\4\\}\\}\\)\\}`, "manual reset HTTP path");
   const retry = uniqueSurface(files, `function (${IDENT})\\(\\)\\{let (${IDENT})=!1,(${IDENT});return\\{async redeem\\(\\{availableCount:${IDENT},consume:${IDENT},creditId:${IDENT}\\}\\)\\{[\\s\\S]{0,1000}?finally\\{\\2=!1\\}\\}\\}\\}`, "manual reset retry controller", match => match[0].includes("redeemRequestId:crypto.randomUUID()"));
   return [["main-master-gate", gate], ["manual-http", manual], ["manual-retry", retry], ["catalog-availability", availability]].map(([kind, item]) => ({ kind, path: item.path, source: item.original }));

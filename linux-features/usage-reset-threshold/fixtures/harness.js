@@ -48,7 +48,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-// Free dependencies of the bounded signed handler are exactly Dc/X/fc/Qd;
+// Free dependencies of the bounded signed handler are exactly Oc/X/Cc/$d;
 // the generated handler additionally closes over the pure policy factory.
 // None of these bindings loads an application module or has external I/O.
 function executionHarness(source, policy, options = {}) {
@@ -66,7 +66,7 @@ function executionHarness(source, policy, options = {}) {
   };
   const handlerName = source.match(/^async function ([\w$]+)\(/)[1];
   const handler = loadSnippet(source, {
-    Dc: parser, X: failure, fc: "consume_usage_reset", Qd: "Master disabled",
+    Oc: parser, X: failure, Cc: "consume_usage_reset", $d: "Master disabled",
     codexLinuxResetPolicy: policy,
   }, handlerName);
   const send = async (method, payload) => {
@@ -124,49 +124,38 @@ function schemaAdapter() {
   return { boolean: schema(value => typeof value === "boolean"), number, object };
 }
 
-const registryFixtureBindings = {
-  main: { factory: "Z", boolean: "J", object: "t.M", number: "t.j" },
-  worker: { factory: "hF", boolean: "oF", object: "K", number: "H" },
-  renderer: { factory: "FX", boolean: "DX", object: "J", number: "wm" },
-  "display-worker": { factory: "$", boolean: "X", object: "H", number: "R" },
-};
-
 function registryFixture(category, registrySource) {
-  const records = loadRecords();
-  const aliases = registryFixtureBindings[category], adapter = schemaAdapter();
-  const bindings = {};
-  for (const [role, value] of Object.entries(adapter)) {
-    const parts = aliases[role].split(".");
-    if (parts.length === 1) bindings[parts[0]] = value;
-    else (bindings[parts[0]] ??= {})[parts[1]] = value;
-  }
-  const factory = records.find(record => record.id === `registry-${category}-factory`).source;
-  return loadSnippet(factory, bindings, `({${registrySource(aliases)}}).codexLinuxAgentUsageResetPolicy`);
+  const factory = loadRecords().find(record => record.id === `registry-${category}-factory`).source;
+  const name = factory.match(/^function ([\w$]+)\(/)[1], adapter = schemaAdapter();
+  const aliases = { factory: name, boolean: "fixtureBoolean", object: "fixtureObject", number: "fixtureNumber" };
+  return loadSnippet(factory, {
+    fixtureBoolean: adapter.boolean, fixtureObject: adapter.object, fixtureNumber: adapter.number,
+  }, `({${registrySource(aliases)}}).codexLinuxAgentUsageResetPolicy`);
 }
 
 async function nativeStoreHarness(definition, options = {}) {
   const records = loadRecords();
   const source = id => records.find(record => record.id === id).source;
   const clone = value => JSON.parse(JSON.stringify(value));
-  const queue = { key: "fixture-followup", default: "steer", schema: {
+  const queue = { key: "fixture-followup", default: "steer", hostStorage: { kind: "persisted-atom", key: "fixture-followup" }, schema: {
     parse: value => { if (value !== "steer" && value !== "queue") throw Error("Invalid queue"); return value; },
     safeParse(value) { try { return { success: true, data: this.parse(value) }; } catch { return { success: false }; } },
   } };
   const definitions = new Map([definition, queue].map(item => [item.key, item]));
   const durable = clone({ [queue.key]: "steer", ...options.desktop });
   const facade = {
-    N: key => definitions.get(key), P: key => definitions.get(key).schema,
-    L: [...definitions.values()], U: { followUpQueueMode: queue }, hs: { LOCAL_PROJECTS: "fixture-projects" },
+    crQ: key => definitions.get(key), Q6s: key => definitions.get(key).schema,
+    fsg: [...definitions.values()], Szl: { followUpQueueMode: queue }, Q2Y: { LOCAL_PROJECTS: "fixture-projects" },
+    Q4s: (_schema, value) => clone(value), uvL: (_schema, value) => clone(value),
   };
   const warnings = [], writes = [], controls = { persistenceError: options.persistenceError ?? false };
-  // Explicit free-dependency allowlist for Bi/Wi: the loader never reads files;
-  // the codecs only clone synthetic plain values; migrations are inert.
-  const Store = loadSnippet(`${source("native-load")}\nconst ${source("native-store")};`, {
-    n: facade, Hi: () => clone(durable), Vi() {}, Ki() {},
-    ue: (_schema, value) => clone(value), le: (_schema, value) => clone(value),
-    Y: () => ({ warning: (...args) => warnings.push(args) }),
-    ur: "fixture-queue-default", G: "fixture-layout", Li: "fixture-queue-flag",
-  }, "Bi");
+  // Current class includes a config-file reader. The existence fake is always
+  // false, so the bounded declaration cannot enter a filesystem read path.
+  const Store = loadSnippet(`${source("native-load")}\n${source("native-store")}`, {
+    n: facade, i: { existsSync: () => false }, g() {},
+    c: () => ({ warning: (...args) => warnings.push(args) }),
+    l: { $6: "fixture-queue-default", Oq: "fixture-layout" },
+  }, "f");
   const globalState = { getStored: key => key === "fixture-queue-default" ? "steer" : undefined, set() {}, async flush() {} };
   const store = new Store("fixture://config", globalState);
   const client = {
@@ -187,11 +176,11 @@ async function nativeStoreHarness(definition, options = {}) {
   // -> setAndPersist. All bridge, query, and persistence effects stay in memory.
   const bridgeWrite = loadSnippet("", {}, `({${source("native-bridge-write")}}).write`);
   const bridge = { store, applyWriteSideEffects() {} };
-  const awaitRequest = loadSnippet(source("request-wrapper"), {}, "w$");
+  const awaitRequest = loadSnippet(source("request-wrapper"), {}, "c$");
   const writeRaw = loadSnippet(source("native-write-raw"), {
-    l$: { settings: { write: (key, value) => bridgeWrite.call(bridge, key, value) } },
-    w$: awaitRequest,
-  }, "aDt");
+    KQ: { settings: { write: (key, value) => bridgeWrite.call(bridge, key, value) } },
+    c$: awaitRequest,
+  }, "ckt");
   let queryData = { configuredValues: clone(durable), values: { [definition.key]: store.getEffective(definition.key) } };
   const query = {
     queryKey: ["inert-native-settings"], cancel: async () => {}, getData: () => queryData,
@@ -200,11 +189,11 @@ async function nativeStoreHarness(definition, options = {}) {
   };
   const scope = { query: { snapshot: () => query }, get: () => ({ current: undefined }) };
   const writeUi = loadSnippet(source("native-write"), {
-    Y$: {}, J$: {}, aDt: writeRaw, aCt() {},
-  }, "nDt");
+    N$: {}, M$: {}, ckt: writeRaw, oTt() {},
+  }, "akt");
   let agentWrites = 0;
   const agentRoute = loadSnippet("", {
-    i: { N: facade.N, I: (key, value) => facade.P(key).parse(value) },
+    el: { crQ: facade.crQ, jls: (key, value) => facade.Q6s(key).parse(value) },
   }, `({${source("agent-write")}}).writeForAgent`);
   const agentOwner = {
     write: async (key, value) => { agentWrites++; await bridgeWrite.call(bridge, key, value); },
@@ -238,32 +227,56 @@ function syntheticFiles() {
     if (!exports.has(file)) exports.set(file, new Map());
     exports.get(file).set(name, local);
   };
-  const mapNames = { main: "Pp", worker: "oB", renderer: "Xpt", "display-worker": "DD" };
+  // Native rspack factories preserve their original numeric boundaries and all
+  // import/export proof. The assembled object is parsed only, never evaluated.
+  for (const file of new Set(records.filter(record => record.moduleId).map(record => record.sourcePath))) {
+    const headers = records.filter(record => record.sourcePath === file && record.id.startsWith("native-header-"));
+    let object = "const fixtureNativeModules={";
+    for (const header of headers) {
+      object += header.source.slice(1);
+      const priority = record => record.id.startsWith("native-exports-") ? 2 : record.id.startsWith("native-import-") ? 1 : 0;
+      const declarations = records.filter(record => record.sourcePath === file && record.moduleId === header.moduleId)
+        .sort((a, b) => priority(b) - priority(a));
+      for (const record of declarations) {
+        if (record.id.startsWith("native-header-") || /^registry-(main|worker)$/.test(record.id)
+          || record.id === "registry-main-key-map") continue;
+        if (record.id.endsWith("-key-map")) object += `const fixtureKeyMap=${record.source};`;
+        else if (record.id.endsWith("-schema-namespace")) object += `const fixtureSchema={${record.source}};`;
+        else if (record.id.endsWith("-appearance-font")) object += `const fixtureFont=${record.source};`;
+        else if (record.id.endsWith("-appearance")) object += `const fixtureAppearance={${record.source}};`;
+        else if (record.id.endsWith("-map")) {
+          const name = { main: "r6", worker: "le" }[file.endsWith("worker.js") ? "worker" : "main"];
+          object += `var ${name}=${record.source};`;
+        } else if (/^(?:function |class |[\w$]+\.d\()/.test(record.source)) object += `${record.source};`;
+        else object += `var ${record.source};`;
+      }
+      object += "},";
+    }
+    object += "};"; append(file, object);
+  }
+  const mapNames = { renderer: "Wht", "display-worker": "jD" };
   for (const category of Object.keys(mapNames)) {
     add(`registry-${category}-factory`);
-    if (category === "main") add("registry-main-schema-import", "var ", ";");
     add(`registry-${category}-boolean-binding`, "var ", ";");
     add(`registry-${category}-appearance-font`, "const fixtureFont=", ";");
     add(`registry-${category}-appearance`, "const fixtureAppearance={", "};");
     add(`registry-${category}-map`, `var ${mapNames[category]}=`, ";");
     for (const record of records.filter(record => record.id.startsWith(`registry-${category}-derived-`)))
       append(record.sourcePath, `var ${record.source};`);
-    if (category !== "main") add(`registry-${category}-key-map`, "const fixtureKeyMap=", ";");
+    add(`registry-${category}-key-map`, "const fixtureKeyMap=", ";");
     for (const record of records.filter(record => record.id.startsWith(`schema-${category}-`)))
       append(record.sourcePath, /^(?:function |Object\.)/.test(record.source) ? `${record.source};` : `var ${record.source};`);
   }
-  for (const record of records.filter(record => /^registry-main-(lookup|export)-/.test(record.id)))
-    append(record.sourcePath, `${record.source};`);
   for (const id of ["native-read", "request-wrapper", "native-write", "native-write-raw", "native-load", "handler", "wrapper", "manual-http", "manual-retry", "usage-row", "catalog", "catalog-availability", "ui-row-initializer", "ui-react-initializer", "ui-numeric-style", "native-subscription", "native-subscription-initializer"])
     add(id);
-  add("native-store", "const ", ";");
+  add("native-store");
   add("agent-write", "const fixtureAgentRoute={", "};");
   add("master-gate", "const fixtureMainGate={", "};");
   const search = get("search");
   append(search.sourcePath, `var t={${search.source}};export{t as settingsSearchDocuments};`);
   for (const id of ["ui-react-useRef", "ui-react-useId", "ui-react-useState"])
     add(id, `const fixture_${id.replaceAll("-", "_")}=`, ";");
-  append(get("usage-row").sourcePath, "var yo,bo,mo,ho,Y;");
+  append(get("usage-row").sourcePath, "var Y;");
   for (const record of records.filter(record => /^(?:binding-export-|native-reader-export$|catalog-export$)/.test(record.id))) {
     const [local, name] = record.source.split(" as ");
     exportValue(record.sourcePath, name, local);
@@ -285,7 +298,7 @@ function syntheticFiles() {
     const source = files.get(file) ?? "";
     for (const local of new Set(entries.values())) {
       const escaped = local.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      if (!new RegExp(`(?:function |(?:var|let|const) (?:[A-Za-z_$][\\w$]*,)*)${escaped}(?:[=;(,{]|\\b)`).test(source))
+      if (!new RegExp(`(?:^|\\n)(?:(?:async )?function |(?:var|let|const) (?:[A-Za-z_$][\\w$]*,)*)${escaped}[=;(,{]`).test(source))
         append(file, `const ${local}=()=>{};`);
     }
     append(file, `export{${[...entries].map(([name, local]) => `${local} as ${name}`).join(",")}};`);

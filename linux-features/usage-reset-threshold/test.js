@@ -28,6 +28,83 @@ test("preflight: current signed schema and split-chunk contracts patch and reapp
   assert.equal(again.changes.size, 0);
 });
 
+test("fixture provenance: optional signed source matches all bounded evidence and patches statically", {
+  skip: !process.env.CODEX_SIGNED_EXTRACTED_APP,
+}, () => {
+  const { readSources, planPatch } = require("./patch.js");
+  const crypto = require("node:crypto"), manifest = require("./fixtures/source-contracts.json");
+  const root = process.env.CODEX_SIGNED_EXTRACTED_APP;
+  for (const [relative, expected] of Object.entries(manifest.sources)) {
+    const bytes = fs.readFileSync(path.join(root, relative));
+    assert.equal(crypto.createHash("sha256").update(bytes).digest("hex"), expected, relative);
+    for (const record of records.filter(record => record.sourcePath === relative))
+      assert.equal(bytes.subarray(record.byteStart, record.byteEnd).toString("utf8"), record.source, record.id);
+  }
+  const files = readSources(root), plan = planPatch(files);
+  assert.equal(plan.changes.size, 8);
+  for (const [file, source] of plan.changes) files.set(file, source);
+  assert.equal(planPatch(files).changes.size, 0);
+});
+
+test("preflight: native module aliases require unique imports, exports, and factories", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const main = records.find(record => record.id === "registry-main").sourcePath;
+  const header = records.find(record => record.id === "native-header-early-bootstrap.js-35553").source;
+  const mutations = [
+    source => source.replace("o=n(35553)", "o=fixtureMissing(35553)"),
+    source => source.replace("o=n(35553)", "o=n(35553),o=n(35553)"),
+    source => source.replace("number:()=>ej", "fixtureNumber:()=>ej"),
+    source => source.replace("number:()=>ej", "number:()=>fixtureMissing"),
+    source => source.replace("number:()=>ej", "number:()=>ej,number:()=>ej"),
+    source => source + `\nconst fixtureDuplicate={${header.slice(1)}}};`,
+    source => source.replace("number:()=>ej", "number:()=>o.number").replace("o=n(43578)", "o=n(35553)"),
+  ];
+  for (const mutate of mutations) {
+    const files = syntheticFiles(), source = files.get(main), changed = mutate(source);
+    assert.notEqual(changed, source);
+    files.set(main, changed);
+    assert.throws(() => planPatch(files), /module|import|export|factory|constructor|cycle/i);
+  }
+});
+
+test("preflight: native schema semantics and generated names reject drift", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const mutations = [
+    ["schema-main-number-finite", source => source.replace("Number.isFinite(i)", "Number.isNaN(i)")],
+    ["schema-worker-number-finite", source => source.replace("Number.isFinite(i)", "Number.isNaN(i)")],
+    ["schema-main-strict-merge", source => source.replace("Object.assign(t,Object.getOwnPropertyDescriptors(n))", "Object.assign(Object.getOwnPropertyDescriptors(n),t)")],
+    ["schema-worker-strict-merge", source => source.replace("Object.assign(t,Object.getOwnPropertyDescriptors(r))", "Object.assign(Object.getOwnPropertyDescriptors(r),t)")],
+    ["handler", source => source.replace("{let s=Oc", "{let codexLinuxResetCurrent;let s=Oc")],
+  ];
+  for (const [id, mutate] of mutations) {
+    const record = records.find(record => record.id === id), files = syntheticFiles();
+    const changed = mutate(record.source);
+    assert.notEqual(changed, record.source, id);
+    files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, changed));
+    assert.throws(() => planPatch(files), /finite|merge|collision|binding/i);
+  }
+});
+
+test("preflight: only direct registry spreads in the actual aggregate establish linkage", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const names = { main: "r6", worker: "le", renderer: "Wht", "display-worker": "jD" };
+  for (const [category, registry] of Object.entries(names)) {
+    const record = records.find(record => record.id === `registry-${category}-derived-0`);
+    const list = records.find(record => record.id === `registry-${category}-derived-1`);
+    const spread = `...Object.values(${registry})`;
+    const replacements = category === "renderer" || category === "display-worker" ? ["...[]"] : ["...[]", `[${spread}]`, `{fixture:[${spread}]}`, `${spread}.filter(()=>false)`, `${spread}&&[]`, JSON.stringify(spread)];
+    for (const replacement of replacements) {
+      const files = syntheticFiles(), original = files.get(record.sourcePath);
+      let changed = original.replace(record.source, record.source.replace(spread, replacement));
+      if (replacement === "...[]")
+        changed = changed.replace(`var ${list.source};`, `var fixtureUnused=[${spread}];var ${list.source};`);
+      assert.notEqual(changed, original, category);
+      files.set(record.sourcePath, changed);
+      assert.throws(() => planPatch(files), /aggregate|derived|registry|linkage/i, `${category}: ${replacement}`);
+    }
+  }
+});
+
 test("fixture provenance: shared metadata resolves each source and rejects broken references", () => {
   const manifest = require("./fixtures/source-contracts.json");
   for (const record of records) {
@@ -141,7 +218,7 @@ test("registry: discovery links all four native definitions and rejects a fifth"
 test("registry: actual derived native maps include the new registered key", () => {
   const { registrySource } = require("./patch.js");
   const { registryFixture, loadSnippet } = require("./fixtures/harness.js");
-  const mapNames = { main: "Pp", worker: "oB", renderer: "Xpt", "display-worker": "DD" };
+  const mapNames = { main: "r6", worker: "le", renderer: "Wht", "display-worker": "jD" };
   for (const [category, registryName] of Object.entries(mapNames)) {
     const definition = registryFixture(category, registrySource);
     const first = records.find(r => r.id === `registry-${category}-derived-0`).source;
@@ -151,6 +228,19 @@ test("registry: actual derived native maps include the new registered key", () =
     const bindings = Object.fromEntries([...first.matchAll(/Object\.values\(([\w$]+)\)/g)].map(match => [match[1], {}]));
     for (const match of first.matchAll(/([\w$]+)\(\)/g))
       bindings[match[1]] = () => ({ key: "fixture-other", fontSize: { key: "fixture-font" }, fullWidth: { key: "fixture-width" }, smartPunctuationEnabled: { key: "fixture-punctuation" } });
+    // Native arrays contain an inlined lazy settings group and namespace
+    // references. Bind those free values to inert definitions, never modules.
+    for (const match of first.matchAll(/Object\.values\(([\w$]+)=\1\?\?/g)) bindings[match[1]] = {};
+    for (const match of first.matchAll(/Object\.values\(([\w$]+)\.([\w$]+)\)/g))
+      (bindings[match[1]] ??= {})[match[2]] = {};
+    for (const match of first.matchAll(/\(0,([\w$]+)\.([\w$]+)\)\(/g))
+      (bindings[match[1]] ??= {})[match[2]] = value => value ?? {};
+    for (const match of first.matchAll(/schema:([\w$]+)\.([\w$]+)/g))
+      (bindings[match[1]] ??= {})[match[2]] ??= {};
+    const nativeFactory = records.find(r => r.id === `registry-${category}-factory`).source;
+    bindings[nativeFactory.match(/^function ([\w$]+)\(/)[1]] = value => value;
+    const nativeBoolean = records.find(r => r.id === `registry-${category}`).source.match(/schema:([\w$]+(?:\.[\w$]+)?)/)[1];
+    if (!nativeBoolean.includes(".")) bindings[nativeBoolean] = {};
     bindings[registryName] = { codexLinuxAgentUsageResetPolicy: definition };
     const expression = map.startsWith("new Map") ? map : map.slice(map.indexOf("=") + 1);
     const nativeMap = loadSnippet(`const ${first};const ${second};`, bindings, expression);
@@ -162,8 +252,8 @@ test("preflight: malformed schema links and partial markers fail closed", () => 
   const { planPatch } = require("./patch.js");
   const { syntheticFiles } = require("./fixtures/harness.js");
   const mutations = [
-    ["schema-main-export-object", record => record.source.replace('return xg', 'return fixtureMissing')],
-    ["registry-renderer-appearance", record => record.source.replace('contrast:wm()', 'contrast:fixtureMissing()')],
+    ["schema-main-object", record => record.source.replace('new e8', 'new fixtureMissing')],
+    ["registry-renderer-appearance", record => record.source.replace('contrast:cm()', 'contrast:fixtureMissing()')],
     ["handler", record => `/*codex-linux-usage-reset-threshold:partial*/${record.source}`],
   ];
   for (const [id, transform] of mutations) {
@@ -190,7 +280,7 @@ test("preflight: unused native getters, aliases, and style entries can drift", (
   const { syntheticFiles } = require("./fixtures/harness.js");
   const schema = records.find(record => record.id === "schema-main-number-type").sourcePath;
   const mutations = [
-    [schema, source => source.replace("format:e=>q(e).format??null", "format:e=>q(e).format??`unknown`")],
+    [schema, source => source.replace("format:e=>p.Fs(e).format??null", "format:e=>p.Fs(e).format??`unknown`")],
     [schema, source => source.replace("safe(e)", "fixtureUnusedSafe(e)").replace("gte(e,t)", "fixtureUnusedGte(e,t)").replace("lte(e,t)", "fixtureUnusedLte(e,t)")],
     [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace(/fields:wt,actions:Tt,primaryActions:Et,field:Dt,label:Ot,/, "")],
   ];
@@ -212,19 +302,19 @@ test("preflight: current helper semantics and chunk imports reject drift before 
   const catalog = records.find(record => record.id === "catalog-availability").sourcePath;
   const mutations = [
     ...["min", "max", "int"].map(method => [schema, source => source.replace(new RegExp(`\\b${method}\\(([^)]*)\\)\\{return this\\.check`), `fixtureUnused_${method}($1){return this.check`)]),
-    [schema, source => source.replace("Object.assign(t,e)", "Object.assign(e,t)")],
-    [schema, source => source.replace("strict()", "fixtureUnused_strict()")],
+    [schema, source => source.replace("Object.assign(t,Object.getOwnPropertyDescriptors(n))", "Object.assign(Object.getOwnPropertyDescriptors(n),t)")],
+    [schema, source => { const record = records.find(record => record.id === "schema-main-object-type"); return source.replace(record.source, record.source.replace("strict(){return this.clone", "fixtureUnused_strict(){return this.clone")); }],
     [shared, source => source.replace(".effective;throw Error(`Settings are unavailable on this host`)", ".stored;throw Error(`Settings are unavailable on this host`)")],
     [shared, source => source.replace("return t?.throwIfAborted(),n", "return t?.throwIfAborted(),null")],
-    [usage, source => source.replace('from"./settings-form-ad1cae9ed277.js"', 'from"./missing-settings-form-fixture.js"')],
+    [usage, source => source.replace('from"./settings-form-30f8a3176e42.js"', 'from"./missing-settings-form-fixture.js"')],
     [records.find(record => record.id === "ui-numeric-style").sourcePath, source => source.replace("input:At", "fixtureMissingInput:At")],
-    [catalog, source => source.replace("c as Cb", "fixtureMissingCatalog as Cb")],
+    [catalog, source => source.replace("a as Ih", "fixtureMissingCatalog as Ih")],
   ];
-  for (const [file, mutate] of mutations) {
+  for (const [index, [file, mutate]] of mutations.entries()) {
     const files = syntheticFiles(), source = files.get(file), changed = mutate(source);
     assert.notEqual(changed, source, "Mutation reaches its contract");
     files.set(file, changed);
-    assert.throws(() => require("./patch.js").planPatch(files), /number|integer|merge|strict|reader|request|style|catalog|export|import/i);
+    assert.throws(() => require("./patch.js").planPatch(files), /number|integer|merge|strict|reader|request|style|catalog|export|import/i, `Mutation ${index}`);
     writeFixtureTree(root, files);
     assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /number|integer|merge|strict|reader|request|style|catalog|export|import/i));
   }
@@ -260,10 +350,10 @@ test("preflight: missing, duplicate, and disconnected runtime bindings reject be
       [record.sourcePath, source => source.replace(record.source, "")],
       [record.sourcePath, source => source.replace(record.source, `${record.source}${record.source}`)],
     ]),
-    [handler.sourcePath, source => source.replace("sat as Me", "but as Me")],
-    [handler.sourcePath, source => source.replace("but as ae", "lat as ae")],
-    [shared, source => source.replace("iDt as sat", "iDt as fixtureRemovedReader")],
-    [shared, source => source.replace("Xpt as but", "Xpt as fixtureRemovedRegistry")],
+    [handler.sourcePath, source => source.replace("wot as Ie", "qdt as Ie")],
+    [handler.sourcePath, source => source.replace("qdt as ke", "wot as ke")],
+    [shared, source => source.replace("skt as wot", "skt as fixtureRemovedReader")],
+    [shared, source => source.replace("Wht as qdt", "Wht as fixtureRemovedRegistry")],
   ];
   for (const [relative, mutate] of mutations) {
     const files = syntheticFiles(), source = files.get(relative), mutated = mutate(source);
@@ -457,17 +547,17 @@ test("execution: wrapper reads desktop policy while auth and transport keep the 
   const reads = [], auth = [], clients = [], transport = [];
   const definitions = { agentUsageResetEnabled: { key: "master-fixture" }, codexLinuxAgentUsageResetPolicy: { key: "policy-fixture" } };
   const invoke = loadSnippet(generated.wrapper, {
-    Zd: async dependencies => {
+    Qd: async dependencies => {
       await dependencies.isUsageResetEnabled();
       await dependencies.readUsageResetPolicy();
       await dependencies.readAuthMethod();
       return dependencies.getSendRequest()("fixture-method", { fixture: true });
     },
-    Me: async (...args) => { reads.push(args); return true; }, ae: definitions,
-    Qa: async (...args) => { auth.push(args); return "chatgpt"; },
-    K: (...args) => { clients.push(args); return { sendRequest: (...call) => transport.push(call) }; },
-    Qt: () => {}, k: { warning() {} },
-  }, "ef");
+    Ie: async (...args) => { reads.push(args); return true; }, ke: definitions,
+    en: async (...args) => { auth.push(args); return "chatgpt"; },
+    J: (...args) => { clients.push(args); return { sendRequest: (...call) => transport.push(call) }; },
+    Aa: () => {}, j: { warning() {} },
+  }, "tf");
   const scope = {}, queryClient = {};
   await invoke({ scope, hostId: "remote-fixture", argumentsValue: { idempotencyKey: "fixture" }, queryClient });
   assert.equal(reads.length, 2);
@@ -818,11 +908,11 @@ test("metadata: stock catalog availability retains desktop/auth/master and all-m
   const files = syntheticFiles(), metadata = discoverMetadata(files);
   const availability = records.find(record => record.id === "catalog-availability").source;
   assert.ok(files.get(metadata.availability.path).includes(availability));
-  const clause = availability.match(/\.\.\.(e&&!C&&l===`chatgpt`\?\[Db,\.\.\.F\|\|u\?\[Cb\]:\[\]\]:\[\])/);
+  const clause = availability.match(/\.\.\.(e&&!E&&u===`chatgpt`\?\[Kh,\.\.\.z\|\|d\?\[Ih\]:\[\]\]:\[\])/);
   assert.ok(clause, "bounded stock availability clause");
   for (const desktop of [false, true]) for (const loading of [false, true])
     for (const auth of ["chatgpt", "api-key"]) for (const master of [false, true]) for (const all of [false, true]) {
-      const actual = loadSnippet("", { e: desktop, C: loading, l: auth, u: master, F: all, Db: "usage", Cb: "reset" }, clause[1]);
+      const actual = loadSnippet("", { e: desktop, E: loading, u: auth, d: master, z: all, Kh: "usage", Ih: "reset" }, clause[1]);
       assert.equal(actual.includes("reset"), desktop && !loading && auth === "chatgpt" && (master || all));
     }
 });
