@@ -11,6 +11,8 @@ const MEMBER = `${IDENT}(?:\\.${IDENT})?`;
 const CALLABLE = `(?:${MEMBER}|\\(0,${IDENT}\\.${IDENT}\\))`;
 // Literal prose only: accepting interpolation here would accept executable code.
 const PROSE = "[^`\\\\$]*";
+const REGISTRY_ASSIGNMENT_START = "(?:^|[;,{}])\\s*(?:(?:var|let|const)\\s+)?";
+const REGISTRY_EXPRESSION_END = "(?=\\s*(?:[,;}]|$))";
 const MARKER = "codex-linux-usage-reset-threshold";
 const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 function fail(message) { throw new Error(`Usage reset threshold: ${message}`); }
@@ -225,36 +227,41 @@ function importedBinding(files, file, local) {
   return { path: target, source, local: exportedLocal(source, exported, `execution import ${local}`) };
 }
 
-// Registry aggregates include inline default arrays. Bound the owning array
-// before looking for the registry spread so a later unrelated array cannot
-// satisfy the link. This contract accepts plain arrays and quoted literals;
+// Bound the owning registry object/aggregate array, including nested calls and
+// literals. This is the current conservative registry syntax, not a JS parser:
 // regexes, comments and template interpolation require a fresh review.
+function registryContainer(source, open, spread = null) {
+  if (!["{", "["].includes(source[open])) return null;
+  const pairs = { "(": ")", "[": "]", "{": "}" }, stack = [];
+  let quote = null, direct = 0;
+  for (let index = open; index < Math.min(source.length, open + 6000); index++) {
+    const char = source[index];
+    if (quote) {
+      if (char === "\\") { index++; continue; }
+      if (quote === "`" && char === "$" && source[index + 1] === "{") return null;
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (["\"", "'", "`"].includes(char)) { quote = char; continue; }
+    if (char === "/") return null;
+    if (spread && stack.length === 1 && stack[0] === "[" && ["[", ","].includes(source[index - 1])
+      && source.startsWith(spread, index) && [",", "]"].includes(source[index + spread.length])) direct++;
+    if (Object.hasOwn(pairs, char)) stack.push(char);
+    else if ([")", "]", "}"].includes(char)) {
+      if (pairs[stack.pop()] !== char) return null;
+      if (!stack.length) return new RegExp(`^${REGISTRY_EXPRESSION_END}`).test(source.slice(index + 1))
+        ? { end: index + 1, direct } : null;
+    }
+  }
+  return null;
+}
+
 function registryAggregate(source, registryName, category) {
   const candidates = [];
-  for (const start of matches(source, `(?:^|[^\\w$])(${IDENT})=\\[(?=\\.\\.\\.Object\\.values\\()`)) {
+  for (const start of matches(source, `${REGISTRY_ASSIGNMENT_START}(${IDENT})=\\[(?=\\.\\.\\.Object\\.values\\()`)) {
     const open = start.index + start[0].length - 1;
-    const spread = `...Object.values(${registryName})`;
-    let depth = 0, parens = 0, braces = 0, direct = 0, quote = null, complete = false;
-    for (let index = open; index < Math.min(source.length, open + 6000); index++) {
-      const char = source[index];
-      if (quote) {
-        if (char === "\\") { index++; continue; }
-        if (quote === "`" && char === "$" && source[index + 1] === "{") break;
-        if (char === quote) quote = null;
-        continue;
-      }
-      if (["\"", "'", "`"].includes(char)) { quote = char; continue; }
-      if (char === "/") break;
-      if (depth === 1 && parens === 0 && braces === 0 && ["[", ","].includes(source[index - 1])
-        && source.startsWith(spread, index) && [",", "]"].includes(source[index + spread.length])) direct++;
-      if (char === "(") parens++;
-      if (char === ")" && --parens < 0) break;
-      if (char === "{") braces++;
-      if (char === "}" && --braces < 0) break;
-      if (char === "[") depth++;
-      if (char === "]" && --depth === 0) { complete = parens === 0 && braces === 0; break; }
-    }
-    if (complete && direct === 1) candidates.push(start[1]);
+    const container = registryContainer(source, open, `...Object.values(${registryName})`);
+    if (container?.direct === 1) candidates.push(start[1]);
   }
   if (candidates.length !== 1) fail(`${category} derived definitions: expected one connected aggregate, found ${candidates.length}`);
   return candidates[0];
@@ -294,13 +301,17 @@ function discoverRegistries(files) {
       }
     }
     const schemas = native ? verifyNativeSchema(fullSource, scope, aliases, file) : verifySchema(files, file, source, aliases);
-    const prefix = source.slice(Math.max(0, property.index - 6000), property.index);
-    const registryName = one(prefix, `(?:^|[^\\w$])(${IDENT})=\\{confirmBeforeClose:[^;{}]*(?:\\([^;]*?)?$`, `${category} definition object binding`)[1];
+    const prefixStart = Math.max(0, property.index - 6000), prefix = source.slice(prefixStart, property.index);
+    const definition = one(prefix, `${REGISTRY_ASSIGNMENT_START}(${IDENT})=\\{confirmBeforeClose:[^;{}]*(?:\\([^;]*?)?$`, `${category} definition object binding`);
+    const registryName = definition[1], open = prefixStart + definition.index + definition[0].indexOf("={") + 1;
+    const container = registryContainer(source, open);
+    if (!container || property.index < open || property.index + property[0].length >= container.end)
+      fail(`${category} registry definition object binding is not a complete owning literal`);
     const aggregate = registryAggregate(source, registryName, category);
-    const list = one(source, `(?:^|[^\\w$])(${IDENT})=\\[\\.\\.\\.${escape(aggregate)}\\]`, `${category} derived list`)[1];
-    one(source, `new Map\\(${escape(list)}\\.map\\((${IDENT})=>\\[\\1\\.key,\\1\\]\\)\\)`, `${category} derived key map`);
+    const list = one(source, `${REGISTRY_ASSIGNMENT_START}(${IDENT})=\\[\\.\\.\\.${escape(aggregate)}\\]${REGISTRY_EXPRESSION_END}`, `${category} derived list`)[1];
+    const keyMap = one(source, `${REGISTRY_ASSIGNMENT_START}(?:(${IDENT})=)?new Map\\(${escape(list)}\\.map\\((${IDENT})=>\\[\\2\\.key,\\2\\]\\)\\)${REGISTRY_EXPRESSION_END}`, `${category} derived key map`)[1];
     if (category === "main") {
-      const keyMap = one(source, `(?:^|[^\\w$])(${IDENT})=new Map\\(${escape(list)}\\.map\\((${IDENT})=>\\[\\2\\.key,\\2\\]\\)\\)`, "main key map binding")[1];
+      if (!keyMap) fail("main key map binding is missing");
       const lookup = one(source, `function (${IDENT})\\((${IDENT})\\)\\{return ${escape(keyMap)}\\.get\\(\\2\\)\\}`, "main definition lookup")[1];
       const schema = one(source, `function (${IDENT})\\((${IDENT})\\)\\{return ${escape(lookup)}\\(\\2\\)\\.schema\\}`, "main schema lookup")[1];
       const validator = one(source, `function (${IDENT})\\((${IDENT}),(${IDENT})\\)\\{return ${escape(schema)}\\(\\2\\)\\.parse\\(\\3\\)\\}`, "main schema validator")[1];
@@ -508,7 +519,7 @@ function discoverUsage(files, registries = discoverRegistries(files)) {
   const introduced = ["codexLinuxCreateResetController", "codexLinuxResetPolicy", "codexLinuxResetNotify", "codexLinuxResetController", "codexLinuxResetRevision", "codexLinuxResetSetRevision", "codexLinuxResetNative", "codexLinuxResetSnapshot", "codexLinuxResetCurrent", "codexLinuxResetId", "codexLinuxResetErrorId", "codexLinuxResetSwitchDisabled", "codexLinuxResetFieldDisabled", "codexLinuxResetDraft", "codexLinuxResetError", "codexLinuxResetLabel"];
   noCollisions(source, existingReaders.length ? introduced : [...introduced, readerAlias]);
   const bindings = { componentName, storeHook, storeAtom, formatterHook, subscription, definitions, jsx, row, group, content, switch: switchComponent, message, writer, toast, react, styles, reader: readerAlias };
-  const readerImport = { original: statement[0], replacement: existingReaders.length ? statement[0] : statement[0].replace("}from", `,${readerExports[0]} as ${readerAlias}}from`), path: native.path, alias: readerAlias, exported: readerExports[0] };
+  const readerImport = { original: statement[0], replacement: existingReaders.length ? statement[0] : statement[0].replace("}from", () => `,${readerExports[0]} as ${readerAlias}}from`), path: native.path, alias: readerAlias, exported: readerExports[0] };
   return { path: file, original, component: usageComponentSource(bindings, { store, formatter, master, controlParameter, label: label[0], masterHandler: masterHandler[0] }), bindings, controllerSource: usageControllerSource(), policySource: policySource(), readerImport };
 }
 
@@ -641,8 +652,8 @@ function pristinePlan(files) {
     const source = changes.get(usage.path), original = usage.readerImport.original;
     if (source.split(original).length !== 2) fail("ambiguous Usage reader import replacement");
     const specifier = `,${usage.readerImport.exported} as ${usage.readerImport.alias}`;
-    const replacement = original.replace("}from", `${marked("usage-reader", "", specifier)}}from`);
-    changes.set(usage.path, source.replace(original, replacement));
+    const replacement = original.replace("}from", () => `${marked("usage-reader", "", specifier)}}from`);
+    changes.set(usage.path, source.replace(original, () => replacement));
   }
   replace(metadata.catalog.path, metadata.catalog.original, metadata.catalog.replacement, "catalog");
   replace(metadata.search.path, metadata.search.edit.original, metadata.search.edit.replacement, "search");

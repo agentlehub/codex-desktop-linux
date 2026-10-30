@@ -117,6 +117,28 @@ test("execution: dollar-sign window aliases retain declaration and reference ide
   }
 });
 
+test("preflight: emitted Usage reader import preserves its provider export identity", async () => {
+  const { discoverUsage, planPatch } = require("./patch.js");
+  const { syntheticFiles } = require("./fixtures/harness.js");
+  const files = syntheticFiles();
+  for (const [file, source] of files) {
+    files.set(file, source.replace("skt as wot", () => "skt as wot$$")
+      .replace("wot as Ie", () => "wot$$ as Ie"));
+  }
+  const usage = discoverUsage(files), plan = planPatch(files);
+  assert.equal(plan.changes.size, 8);
+  assert.equal(usage.readerImport.exported, "wot$$");
+  const emitted = plan.changes.get(usage.path).match(/([\w$]+) as codexLinuxReadResetPolicy/)[0];
+  // Link only this final source-derived specifier to a tiny inert provider.
+  // Complete application assets and initializers are never imported.
+  const moduleUrl = source => `data:text/javascript,${encodeURIComponent(source)}`;
+  const provider = moduleUrl(`export const ${usage.readerImport.exported}=()=>37;`);
+  const consumer = await import(moduleUrl(`import{${emitted}}from${JSON.stringify(provider)};export{codexLinuxReadResetPolicy};`));
+  assert.equal(consumer.codexLinuxReadResetPolicy(), 37);
+  for (const [file, source] of plan.changes) files.set(file, source);
+  assert.equal(planPatch(files).alreadyApplied, true);
+});
+
 test("preflight: settings prose follows stable identities rather than exact wording", () => {
   const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
   const files = syntheticFiles();
@@ -257,6 +279,68 @@ test("preflight: only direct registry spreads in the actual aggregate establish 
       assert.throws(() => planPatch(files), /aggregate|derived|registry|linkage/i, `${category}: ${replacement}`);
     }
   }
+});
+
+test("preflight: registry chain rejects continued RHS expressions and member-assignment decoys before writes", { concurrency: false }, async t => {
+  const { applyUsageResetThreshold } = require("./patch.js");
+  const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
+  const stages = [
+    ["aggregate", "registry-main-derived-0", '.filter(entry=>entry.key!=="codex-linux-agent-usage-reset-policy")'],
+    ["list", "registry-main-derived-1", "[0]"],
+    ["key map", "registry-main-derived-2", '.delete("codex-linux-agent-usage-reset-policy")'],
+  ];
+  for (const [stage, id, suffix] of stages) for (const kind of ["continued RHS", "member assignment"]) {
+    await t.test(`${stage}: ${kind}`, () => {
+      const files = syntheticFiles(), record = records.find(record => record.id === id);
+      const name = record.source.slice(0, record.source.indexOf("="));
+      const original = `var ${record.source};`;
+      assert.ok(files.get(record.sourcePath).includes(original));
+      const replacement = kind === "continued RHS" ? `var ${record.source}${suffix};`
+        : `var fixture={};fixture.${record.source};var ${name}=[];`;
+      files.set(record.sourcePath, files.get(record.sourcePath).replace(original, () => replacement));
+      const root = fixtureDirectory(t, "registry-chain-boundaries");
+      writeFixtureTree(root, files);
+      assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /aggregate|derived|key map|binding/i));
+    });
+  }
+});
+
+test("preflight: a member-owned registry root cannot stand in for the local registry", { concurrency: false }, t => {
+  const { applyUsageResetThreshold, discoverRegistries } = require("./patch.js");
+  const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
+  const files = syntheticFiles(), registry = discoverRegistries(files).find(entry => entry.category === "main");
+  const record = records.find(record => record.id === "registry-main-map");
+  const original = `var ${registry.registryName}=${record.source};`;
+  assert.ok(files.get(record.sourcePath).includes(original));
+  files.set(record.sourcePath, files.get(record.sourcePath).replace(original,
+    () => `var fixture={};fixture.${registry.registryName}=${record.source};var ${registry.registryName}={};`));
+  const root = fixtureDirectory(t, "registry-root-boundary");
+  writeFixtureTree(root, files);
+  assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /definition object binding/i));
+});
+
+test("preflight: the registry root must own the complete object RHS before writes", { concurrency: false }, t => {
+  const { applyUsageResetThreshold } = require("./patch.js");
+  const { syntheticFiles, writeFixtureTree } = require("./fixtures/harness.js");
+  const files = syntheticFiles(), record = records.find(record => record.id === "registry-main-map");
+  files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, () => `${record.source}.constructor`));
+  const root = fixtureDirectory(t, "registry-root-rhs");
+  writeFixtureTree(root, files);
+  assertNoFixtureWrites(root, files, () => assert.throws(() => applyUsageResetThreshold(root), /registry|definition object/i));
+});
+
+test("preflight: registry container scanning honors literal delimiters and rejects interpolation", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const record = records.find(record => record.id === "registry-renderer-map");
+  const rewrite = replacement => {
+    const files = syntheticFiles();
+    const changed = record.source.replace("When to ask for confirmation", () => replacement);
+    assert.notEqual(changed, record.source);
+    files.set(record.sourcePath, files.get(record.sourcePath).replace(record.source, () => changed));
+    return files;
+  };
+  assert.equal(planPatch(rewrite("When }]) to ask [({ for confirmation")).changes.size, 8);
+  assert.throws(() => planPatch(rewrite("When ${({value:1}).value} to ask for confirmation")), /registry|definition object/i);
 });
 
 test("fixture provenance: shared metadata resolves each source and rejects broken references", () => {
