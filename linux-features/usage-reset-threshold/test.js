@@ -9,12 +9,21 @@ const { spawnSync } = require("node:child_process");
 const { loadRecords } = require("./fixtures/harness.js");
 const records = loadRecords();
 
-test("fixture provenance: exact bounded source slices reject truncation", () => {
+test("fixture provenance: every bounded source slice validates", () => {
   const { verifyRecord } = require("./fixtures/harness.js");
-  for (const record of records) {
-    assert.equal(verifyRecord(record), true);
-    assert.throws(() => verifyRecord({ ...record, source: record.source.slice(0, -1) }), /provenance/);
-  }
+  for (const record of records) assert.equal(verifyRecord(record), true);
+});
+
+test("fixture provenance: changed byte length rejects independently", () => {
+  const { verifyRecord } = require("./fixtures/harness.js"), record = records[0];
+  assert.throws(() => verifyRecord({ ...record, source: record.source.slice(0, -1) }), /provenance length/);
+});
+
+test("fixture provenance: same-length source corruption rejects by hash", () => {
+  const { verifyRecord } = require("./fixtures/harness.js"), record = records[0];
+  const source = (record.source[0] === "X" ? "Y" : "X") + record.source.slice(1);
+  assert.equal(Buffer.byteLength(source), Buffer.byteLength(record.source));
+  assert.throws(() => verifyRecord({ ...record, source }), /provenance hash/);
 });
 
 test("preflight: current signed schema and split-chunk contracts patch and reapply", () => {
@@ -67,6 +76,21 @@ test("preflight: native module aliases require unique imports, exports, and fact
   }
 });
 
+test("preflight: native namespace imports require complete direct RHS and binding boundaries", () => {
+  const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
+  const main = records.find(record => record.id === "registry-main").sourcePath;
+  for (const replacement of [
+    "o=n(35553).default", "o=n(35553)()", 'o=n(35553)["default"]',
+    "fixture.o=n(35553)",
+  ]) {
+    const files = syntheticFiles(), source = files.get(main);
+    const changed = source.replace("o=n(35553)", replacement);
+    assert.notEqual(changed, source);
+    files.set(main, changed);
+    assert.throws(() => planPatch(files), /module import/i, replacement);
+  }
+});
+
 test("preflight: native schema semantics and generated names reject drift", () => {
   const { planPatch } = require("./patch.js"), { syntheticFiles } = require("./fixtures/harness.js");
   const mutations = [
@@ -92,7 +116,17 @@ test("preflight: only direct registry spreads in the actual aggregate establish 
     const record = records.find(record => record.id === `registry-${category}-derived-0`);
     const list = records.find(record => record.id === `registry-${category}-derived-1`);
     const spread = `...Object.values(${registry})`;
-    const replacements = category === "renderer" || category === "display-worker" ? ["...[]"] : ["...[]", `[${spread}]`, `{fixture:[${spread}]}`, `${spread}.filter(()=>false)`, `${spread}&&[]`, JSON.stringify(spread)];
+    // This allowlist retains every stock key but would silently drop the new
+    // policy after insertion. Unlike an always-false filter it preserves the
+    // original registry contract before the feature is applied.
+    // Worker spells every shared key literally, including the key computed in
+    // the other categories. Use its complete list for each registry.
+    const map = records.find(record => record.id === "registry-worker-map");
+    const stockKeys = [...map.source.matchAll(/key:["`]([^"`]+)["`]/g)].map(match => match[1]);
+    assert.ok(stockKeys.includes("agent-usage-reset-enabled"), category);
+    assert.ok(stockKeys.includes("desktop-app-beta-preferences-by-account-id"), category);
+    const allowlist = `${spread}.filter(entry=>${JSON.stringify(stockKeys)}.includes(entry.key))`;
+    const replacements = ["...[]", `[${spread}]`, `{fixture:[${spread}]}`, `${spread}.filter(()=>false)`, `${spread}&&[]`, JSON.stringify(spread), allowlist];
     for (const replacement of replacements) {
       const files = syntheticFiles(), original = files.get(record.sourcePath);
       let changed = original.replace(record.source, record.source.replace(spread, replacement));

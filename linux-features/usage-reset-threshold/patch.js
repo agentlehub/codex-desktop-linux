@@ -110,7 +110,7 @@ function nativeResolve(source, scope, binding, label, seen = new Set()) {
   seen.add(edge);
   if (!binding.includes(".")) return { source: scope.source, name: binding, scope };
   const [namespace, member] = binding.split(".");
-  const imported = one(scope.source, `(?:^|[^\\w$])${escape(namespace)}=${escape(scope.loader)}\\(([0-9]+)\\)`, `${label} module import`);
+  const imported = one(scope.source, `(?:^|[;,])(?:var |let |const )?${escape(namespace)}=${escape(scope.loader)}\\(([0-9]+)\\)(?=[,;])`, `${label} module import`);
   const targets = nativeModules(source).filter(item => item.id === imported[1]);
   if (targets.length !== 1) fail(`${label} module ${imported[1]}: expected one factory, found ${targets.length}`);
   const target = targets[0], local = nativeExport(target, member, label);
@@ -211,11 +211,11 @@ function importedBinding(files, file, local) {
   return { path: target, source, local: exportedLocal(source, exported, `execution import ${local}`) };
 }
 
-// Native aggregates include inline default arrays. Bound the owning array
+// Registry aggregates include inline default arrays. Bound the owning array
 // before looking for the registry spread so a later unrelated array cannot
 // satisfy the link. This contract accepts plain arrays and quoted literals;
 // regexes, comments and template interpolation require a fresh review.
-function nativeAggregate(source, registryName, category) {
+function registryAggregate(source, registryName, category) {
   const candidates = [];
   for (const start of matches(source, `(?:^|[^\\w$])(${IDENT})=\\[(?=\\.\\.\\.Object\\.values\\()`)) {
     const open = start.index + start[0].length - 1;
@@ -281,8 +281,7 @@ function discoverRegistries(files) {
     const schemas = native ? verifyNativeSchema(fullSource, scope, aliases, file) : verifySchema(files, file, source, aliases);
     const prefix = source.slice(Math.max(0, property.index - 6000), property.index);
     const registryName = one(prefix, `(?:^|[^\\w$])(${IDENT})=\\{confirmBeforeClose:[^;{}]*(?:\\([^;]*?)?$`, `${category} definition object binding`)[1];
-    const aggregate = native ? nativeAggregate(source, registryName, category)
-      : one(source, `(?:^|[^\\w$])(${IDENT})=\\[\\.\\.\\.Object\\.values\\([^\\]]*?\\.\\.\\.Object\\.values\\(${escape(registryName)}\\)[^\\]]*\\]`, `${category} derived definitions`)[1];
+    const aggregate = registryAggregate(source, registryName, category);
     const list = one(source, `(?:^|[^\\w$])(${IDENT})=\\[\\.\\.\\.${escape(aggregate)}\\]`, `${category} derived list`)[1];
     one(source, `new Map\\(${escape(list)}\\.map\\((${IDENT})=>\\[\\1\\.key,\\1\\]\\)\\)`, `${category} derived key map`);
     if (category === "main") {

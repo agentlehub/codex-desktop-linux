@@ -228,7 +228,8 @@ function syntheticFiles() {
     exports.get(file).set(name, local);
   };
   // Native rspack factories preserve their original numeric boundaries and all
-  // import/export proof. The assembled object is parsed only, never evaluated.
+  // consumed import edges and export tables. The assembled object is parsed
+  // only, never evaluated.
   for (const file of new Set(records.filter(record => record.moduleId).map(record => record.sourcePath))) {
     const headers = records.filter(record => record.sourcePath === file && record.id.startsWith("native-header-"));
     let object = "const fixtureNativeModules={";
