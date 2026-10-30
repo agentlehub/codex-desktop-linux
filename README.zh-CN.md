@@ -290,6 +290,7 @@ Nix 用户应从 profile、Home Manager 配置或 NixOS module 中删除该包�
 | `thorium-chrome-plugin` | 为官方 Chrome integration 添加 Thorium | [文档](linux-features/thorium-chrome-plugin/README.md) |
 | `tray-usage` | 在 Linux 系统托盘菜单显示剩余用量 | [文档](linux-features/tray-usage/README.md) |
 | `ui-tweaks` | 可选 UI 与交互自定义 | [文档](linux-features/ui-tweaks/README.md) |
+| `usage-reset-threshold` | 为明确请求的智能体用量重置设置剩余额度阈值 | [文档](linux-features/usage-reset-threshold/README.md) |
 
 若要在 GNOME Wayland 下听写时避免 RemoteDesktop 权限提示，请通过
 `make setup-native` 同时选择 `global-dictation` 和 `global-dictation-gnome`，

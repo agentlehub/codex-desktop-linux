@@ -1,0 +1,1377 @@
+{
+  "version": "26.1027.30824",
+  "architecture": "amd64",
+  "packageSha256": "4e139a44f7c917a643f2dd014ad32298dd30aec6d324d323524b190f7667684c",
+  "sources": {
+    ".vite/build/early-bootstrap.js": "0d20210cbefda34c7a5d09e520c758028245c0bf40a84321364e4f77b30e323c",
+    ".vite/build/worker.js": "5dcdf08bc35aee025e87f18fc5027751e2f17e53adf6e2c8712f5aabeb095c53",
+    "webview/assets/app-shared-7a3b5b1a0788.js": "bdfe90b6091c0ae04f83bb37946782f9c4ed9dd3b2baabb988017e2a57ba8d40",
+    "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js": "355141d2caba66f62455873e9bfb2d8a85706c0a62b52977ff800f2eb704fc15",
+    "webview/assets/execution-42e8bacbeb01.js": "69657d2aeb4c27cbdb50aab470ceaa8c632cca1939af7837412af7285089495e",
+    "webview/assets/page-2f18a45b6e14.js": "de402ad8d9028072faf8e79d1cbff28fd20e7fb98b3f0534b49675d98a98d843",
+    "webview/assets/settings-group-19b1582aa25c.js": "948004fa35d3f17fd262df3d39f6e277cd1f795da7ef0033de8e31d271688b3d",
+    "webview/assets/settings-form-30f8a3176e42.js": "3c9c7570587d4398ada1031a9f1c3f160c677fd5c3ffc85fb9100e2009dac56a",
+    "webview/assets/thread-handoff-dynamic-tool-3f1c9dbad285.js": "af9776a789c1a950f9f1feb9c8a1e86ad30a7b6e8a7702381a3ed36852529997",
+    "webview/assets/_virtual_settings-search-documents-e84bcda5b237.js": "1c645a7e2016d87e2d672cdd0961d1b217aca8c75983a1b2a58790f9b8c507e3",
+    "webview/assets/app-initial-c4cac3105190.js": "5092c2aa079ed1435df53e4b2b758776e0ba405b3dae56207ab6a65c3e08374f",
+    "webview/assets/redemption-16a052327444.js": "6c8b011eed406e6b98164fe7bfe6ce0f32cae51da6e87ef0086354cc05e2fa6f",
+    ".vite/build/early-bootstrap-916-2f6483d5bfd826f1.js": "b50821d3723b10548c3321b9615140b8599033299c2890203c44b86ea7184e16",
+    "webview/assets/initialize-app-host-services-32dd4cad0b90.js": "4b5a22f4d88526ec44873c4eff4622503efffe9beef15f071a26d1ec56ba5934",
+    ".vite/build/early-bootstrap-133-a2b781596743bab7.js": "35629d1aabe19b3ebb2833d126f70f858778eb5252c29778b1aa93dee2167855"
+  },
+  "records": [
+    {
+      "id": "registry-main",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 202773,
+      "byteEnd": 202971,
+      "sha256": "20f53a28ec60826f2c7d41d7e78df741cd94dddddf49ed669d4c8214be2c2bc7",
+      "source": "agentUsageResetEnabled:(0,nY.at)({agentAccess:\"read-only\",default:!1,description:\"Whether Codex can use usage resets after explicit user authorization\",key:\"agent-usage-reset-enabled\",schema:nG.uf})",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-map",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 202541,
+      "byteEnd": 205340,
+      "sha256": "843a40fd9fa860436cb4b8f55220a996b3aff0c0fb56f73b1e1dee6466c07a71",
+      "source": "{confirmBeforeClose:(0,nY.at)({agentAccess:\"read-write\",default:\"keyboardOnly\",description:\"When to ask for confirmation before closing a desktop window\",key:\"confirm-before-close\",schema:o.enum([\"never\",\"keyboardOnly\",\"always\"])}),agentUsageResetEnabled:(0,nY.at)({agentAccess:\"read-only\",default:!1,description:\"Whether Codex can use usage resets after explicit user authorization\",key:\"agent-usage-reset-enabled\",schema:nG.uf}),mcpStartupAuthentication:(0,nY.at)({agentAccess:\"read-only\",default:!1,description:\"Whether to prompt for MCP authentication at startup\",key:\"mcp_startup_authentication\",schema:nG.uf}),primaryNumberShortcutTarget:(0,nY.at)({agentAccess:\"read-write\",default:\"tabs\",description:\"Whether primary-modifier number shortcuts select sidebar tasks or tabs\",key:\"primary-number-shortcut-target\",schema:o.enum([\"sidebar\",\"tabs\"])}),defaultWorkspaceFullView:(0,nY.at)({agentAccess:\"read-write\",default:!1,description:\"Whether new tasks start with the workspace in full view\",key:\"default-workspace-full-view\",schema:nG.uf}),appBetaPreferencesByAccountId:(0,nY.KF)({agentAccess:\"hidden\",default:{},description:\"Desktop app beta feature preferences by account\",key:nq.Q2.DESKTOP_APP_BETA_PREFERENCES_BY_ACCOUNT_ID,schema:o.record(o.string(),o.boolean())}),macMenuBarEnabled:(0,nY.KF)({agentAccess:\"read-write\",default:!0,description:\"Whether the macOS menu bar is shown\",key:\"mac-menu-bar-enabled\",schema:nG.uf}),chronicleMenuBarIndicatorEnabled:(0,nY.at)({agentAccess:\"read-write\",default:!0,description:\"Whether the macOS menu bar shows the Computer History recording indicator\",key:\"chronicle-menu-bar-indicator-enabled\",schema:nG.uf}),openInTargetPreferences:(0,nY.KF)({agentAccess:\"read-write\",default:{},description:\"Preferred targets for opening paths\",key:\"open-in-target-preferences\",schema:o.object({global:o.string().optional(),perPath:o.record(o.string(),o.string()).optional()})}),openLinkInTargetPreference:(0,nY.IZ)({agentAccess:\"read-write\",default:r2.u,description:\"Preferred target for opening links\",key:\"open-link-in-target-preference\",schema:o.enum([\"in-app-browser\",\"external-browser\"])}),externalBrowserLinkShortcut:(0,nY.IZ)({agentAccess:\"read-write\",default:\"primary\",description:\"Modifier-click shortcut for opening web links in the default browser\",key:\"external-browser-link-shortcut\",schema:o.enum([\"unassigned\",\"primary\",\"alt\",\"primary-shift\"])}),openLocalUrlInTargetPreference:(0,nY.IZ)({agentAccess:\"read-write\",default:r2.u,description:\"Preferred target for opening local URLs\",key:\"open-local-url-in-target-preference\",schema:o.enum([\"in-app-browser\",\"external-browser\"])}),customFileHandlers:(0,nY.IZ)({agentAccess:\"read-write\",default:{},description:\"Custom file handlers for opening files from Codex App\",key:\"custom_file_handlers\",schema:r4})}",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-factory",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 282366,
+      "byteEnd": 282536,
+      "sha256": "b2af149870627b58eaf7b3eed61b30627211dc5a74361f9de398a284a4c8d5e2",
+      "source": "function r({agentAccess:e,default:t,description:n,key:a,schema:i}){return{agentAccess:e,default:t,description:n,key:a,hostStorage:{kind:\"persisted-atom\",key:a},schema:i}}",
+      "moduleId": "41803"
+    },
+    {
+      "id": "registry-main-boolean-binding",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281434,
+      "byteEnd": 281447,
+      "sha256": "fc55e4ce42622fe30f69f87b9e5aa4da7cd8e8ad48a21ab4613c26d835c5106e",
+      "source": "r=a.boolean()",
+      "moduleId": "37581"
+    },
+    {
+      "id": "schema-main-boolean",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 324852,
+      "byteEnd": 324885,
+      "sha256": "f089e47c24d82b9134b51067009ade13159e3888f98f2a03e88fdc96e5761328",
+      "source": "function e$(e){return l._L(eR,e)}",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-boolean-type",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 324746,
+      "byteEnd": 324851,
+      "sha256": "630e6251a08605661cc3ed006c1578c9547f617485110614086b114a568335ad",
+      "source": "eR=a.xI(\"ZodBoolean\",(e,t)=>{r.sF.init(e,t),v.init(e,t),e._zod.processJSONSchema=(t,n,a)=>p.dO(e,t,n,a)})",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-number",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 324478,
+      "byteEnd": 324511,
+      "sha256": "8efc543df5994d3708a7a73c4c1896a4208e3f19c403e1b771641f6a50631a1f",
+      "source": "function ej(e){return l.F7(eA,e)}",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-number-type",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 323468,
+      "byteEnd": 324477,
+      "sha256": "868088346fe7d231507957b8635d0b537d09bbe5201657e38d19c96c01664e23",
+      "source": "eA=a.xI(\"ZodNumber\",(e,t)=>{r.vz.init(e,t),v.init(e,t),e._zod.processJSONSchema=(t,n,a)=>p.Wg(e,t,n,a),e.isFinite=!0},o.derived({minValue:e=>{let{minimum:t,exclusiveMinimum:n}=p.Fs(e);return Math.max(t??-1/0,n??-1/0)},maxValue:e=>{let{maximum:t,exclusiveMaximum:n}=p.Fs(e);return Math.min(t??1/0,n??1/0)},isInt:e=>{let{isInt:t,multipleOf:n}=p.Fs(e);return!!t||!!n?.some(Number.isSafeInteger)},format:e=>p.Fs(e).format??null},{gt(e,t){return this.check(l.Tx(e,t))},gte(e,t){return this.check(l.qm(e,t))},min(e,t){return this.check(l.qm(e,t))},lt(e,t){return this.check(l.Au(e,t))},lte(e,t){return this.check(l.Zm(e,t))},max(e,t){return this.check(l.Zm(e,t))},int(e){return this.check(eO(e))},safe(e){return this.check(eO(e))},positive(e){return this.check(l.Tx(0,e))},nonnegative(e){return this.check(l.qm(0,e))},negative(e){return this.check(l.Au(0,e))},nonpositive(e){return this.check(l.Zm(0,e))},multipleOf(e,t){return this.check(l.Hi(e,t))},step(e,t){return this.check(l.Hi(e,t))},finite(){return this}}))",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-object",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 328423,
+      "byteEnd": 328507,
+      "sha256": "3c339c59f7fe3124ecac3c216b9b3db0308817b611aa266b5820bb1070df9567",
+      "source": "function e5(e,t){return new e8({type:\"object\",shape:e??{},...o.normalizeParams(t)})}",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-object-type",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 327510,
+      "byteEnd": 328422,
+      "sha256": "9e234efb291aa77760bf45c277fb6d5d927194142e0d5d8a35cfd11834988024",
+      "source": "e8=a.xI(\"ZodObject\",(e,t)=>{g(),r.w.init(e,t),v.init(e,t),e._zod.processJSONSchema=(t,n,a)=>p.Ec(e,t,n,a),o.installLazyProp(e,\"shape\",e=>e._zod.def.shape,!1)},{keyof(){return tb(Object.keys(this._zod.def.shape))},catchall(e){return this.clone(o.mergeDefs(this._zod.def,{catchall:e}))},passthrough(){return this.clone(o.mergeDefs(this._zod.def,{catchall:eG()}))},loose(){return this.clone(o.mergeDefs(this._zod.def,{catchall:eG()}))},strict(){return this.clone(o.mergeDefs(this._zod.def,{catchall:eX()}))},strip(){return this.clone(o.mergeDefs(this._zod.def,{catchall:void 0}))},extend(e){return o.extend(this,e)},safeExtend(e){return o.safeExtend(this,e)},merge(e){return o.merge(this,e)},pick(e){return o.pick(this,e)},omit(e){return o.omit(this,e)},partial(...e){return o.partial(tj,this,e[0])},exactPartial(...e){return o.partial(tO,this,e[0],\"exactPartial\")},required(...e){return o.required(tM,this,e[0])}})",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-number-finite",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 400462,
+      "byteEnd": 400873,
+      "sha256": "78ed5847a94996db040c09f5afe6e1bdaf530c15398f8fa08373b45e6a689747",
+      "source": "es=i.xI(\"$ZodNumber\",(e,t)=>{u.init(e,t),e._zod.pattern=s.number,e._zod.parse=(n,a)=>{if(t.coerce)try{n.value=Number(n.value)}catch(e){}let i=n.value;if(\"number\"==typeof i&&!Number.isNaN(i)&&Number.isFinite(i))return n;let r=\"number\"==typeof i?Number.isNaN(i)?\"NaN\":Number.isFinite(i)?void 0:String(i):void 0;return n.issues.push({expected:\"number\",code:\"invalid_type\",input:i,inst:e,...r?{received:r}:{}}),n}})",
+      "moduleId": "28500"
+    },
+    {
+      "id": "schema-main-strict-merge",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 444498,
+      "byteEnd": 444629,
+      "sha256": "47e51e2781c55ecf7075a95cc30621955b099e17cd06cf1c908dc09f0b2d0adb",
+      "source": "function E(...e){let t={};for(let n of e)Object.assign(t,Object.getOwnPropertyDescriptors(n));return Object.defineProperties({},t)}",
+      "moduleId": "43578"
+    },
+    {
+      "id": "schema-main-strict-never",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 326570,
+      "byteEnd": 326603,
+      "sha256": "fbd0bfb4446b331d96fe98d60d22500d8c84c5060df8754a87ff38ef551fa1c3",
+      "source": "function eX(e){return l.G8(eY,e)}",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-strict-never-type",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 326466,
+      "byteEnd": 326569,
+      "sha256": "d87ad59cd1d7b9a42febc0b934475715ad3822034317845702457d2d61df3887",
+      "source": "eY=a.xI(\"ZodNever\",(e,t)=>{r.Um.init(e,t),v.init(e,t),e._zod.processJSONSchema=(t,n,a)=>p.RH(e,t,n,a)})",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-integer-constructor",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 324578,
+      "byteEnd": 324611,
+      "sha256": "4e60cb2ded63920739f1e435b82e67795f944a46ed2db639fec87ff72a99a28e",
+      "source": "function eO(e){return l.LK(eE,e)}",
+      "moduleId": "35553"
+    },
+    {
+      "id": "schema-main-integer-format",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 324515,
+      "byteEnd": 324577,
+      "sha256": "caae40d513c4bbcec46b52b732351d209f9793d89f906047f3803e6966216d22",
+      "source": "eE=a.xI(\"ZodNumberFormat\",(e,t)=>{r.I.init(e,t),eA.init(e,t)})",
+      "moduleId": "35553"
+    },
+    {
+      "id": "registry-main-appearance",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281692,
+      "byteEnd": 281733,
+      "sha256": "bb2fd1c0cbf4c829257b1aab53a6346da8f795b2fa76f1ec47cd01ad92b1bfc9",
+      "source": "contrast:a.number().int().min(0).max(100)",
+      "moduleId": "37581"
+    },
+    {
+      "id": "registry-main-appearance-font",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281542,
+      "byteEnd": 281617,
+      "sha256": "aa180339bc29e03c1dcb880dbff0fc000d3dcea63768ff10df8a7d45c3fb8134",
+      "source": "a.object({family:a.string(),fullName:a.string(),postscriptName:a.string()})",
+      "moduleId": "37581"
+    },
+    {
+      "id": "registry-main-derived-0",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 216400,
+      "byteEnd": 218693,
+      "sha256": "c413924a49884ca6b2725b97ee860c608465e1fd6cf26fff9dc63eb1db677b60",
+      "source": "of=[...Object.values(rL),...Object.values(rB),...Object.values(rK),...Object.values(rH),...Object.values(rY),...Object.values(r0),...Object.values(a=a??{activityNotifications:(0,nY.at)({agentAccess:\"hidden\",default:!1,description:\"Show experimental pull request approval and review-request notifications\",key:\"code-review-activity-notifications\",schema:o.boolean()}),gitHostingProvider:(0,nY.at)({agentAccess:\"hidden\",default:\"github\",description:\"Selected code hosting provider for Code Review\",key:\"code-review-git-hosting-provider\",schema:rJ}),gitlabConnectorId:(0,nY.at)({agentAccess:\"hidden\",default:null,description:\"GitLab connection used by Code Review; unset uses gitlab.com\",key:\"code-review-gitlab-connector-id\",schema:o.string().trim().min(1).nullable()}),githubConnection:(0,nY.at)({agentAccess:\"hidden\",default:null,description:\"GitHub connection used by Code Review; unset uses github.com\",key:\"code-review-github-connection\",schema:rV}),sidebarSections:(0,nY.at)({agentAccess:\"hidden\",default:[\"waiting_for_review\",\"needs_my_review\",\"needs_my_teams_review\"],description:\"Visible sections in the Code Review sidebar\",key:\"code-review-sidebar-sections\",schema:rG}),sidebarLayout:(0,nY.at)({agentAccess:\"hidden\",default:\"detailed\",description:\"Layout of pull requests in the Code Review sidebar\",key:\"code-review-sidebar-layout\",schema:o.enum([\"compact\",\"detailed\"])}),githubLinkTarget:(0,nY.at)({agentAccess:\"hidden\",default:\"github\",description:\"Where pull request and merge request links open\",key:\"code-review-github-link-target\",schema:o.enum([\"code-review-tab\",\"github\"])}),localReviewInstructions:(0,nY.at)({agentAccess:\"read-only\",default:\"\",description:\"Personal instructions for private code reviews you start\",key:\"code-review-local-instructions\",schema:o.string()})}),...Object.values((0,r1.W)()),...Object.values(r6),...Object.values(r9),...Object.values(r7),...Object.values(oe),...Object.values(nX),...Object.values(ot.K),...Object.values(oa),...Object.values(os),...Object.values(ol),(0,nY.at)({agentAccess:\"hidden\",default:!0,description:\"Whether Recents includes chats created by your dot\",key:\"sidebarShowYourDotInRecents\",schema:nG.uf}),or().fontSize,or().fullWidth,or().smartPunctuationEnabled,...Object.values(oc),...Object.values(ou.u),...Object.values(n0)]",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-derived-1",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 220281,
+      "byteEnd": 220291,
+      "sha256": "4968c1781274427fc19062972617ecbaa3f5464ec272af3e06965672e093fdf9",
+      "source": "oy=[...of]",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-key-map",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 220654,
+      "byteEnd": 220683,
+      "sha256": "157b8be6a103d8cdb408b52d0e97915320c4a145ff8d5d9d36c5d53275e05923",
+      "source": "new Map(oy.map(e=>[e.key,e]))",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-schema-namespace",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 206466,
+      "byteEnd": 206503,
+      "sha256": "66f995550bfb7d0e0ff36f447c1d0a1aca7bd59618fb9c3a943cfe3b95846f04",
+      "source": "schema:o.number().int().nonnegative()",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-derived-2",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 220651,
+      "byteEnd": 220683,
+      "sha256": "c45c2889608a996b4150863c73218953e15ad5c90b10423174611b6b945da5a7",
+      "source": "ok=new Map(oy.map(e=>[e.key,e]))",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-lookup-definition",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 220684,
+      "byteEnd": 220716,
+      "sha256": "dd54164603c16e7484636f20aa52f7a802268c5a22fcd0bb6c013bdfcbc5abb4",
+      "source": "function oI(e){return ok.get(e)}",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-lookup-schema",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 220716,
+      "byteEnd": 220751,
+      "sha256": "c50b15d3cf293baa4ee7b17b5282e724406c53bc88d97b8b74a25be2309e268e",
+      "source": "function oS(e){return oI(e).schema}",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-main-lookup-validator",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 220751,
+      "byteEnd": 220790,
+      "sha256": "cd9d45224229b92fb8322cf6bb671a225bd08aa56c7c151886177673f306a33e",
+      "source": "function oA(e,t){return oS(e).parse(t)}",
+      "moduleId": "41549"
+    },
+    {
+      "id": "registry-worker",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 104796,
+      "byteEnd": 104984,
+      "sha256": "d01d408e29294cee4913c1e7d9e841de9c2ece1f80f19aae38d65d695e849a8a",
+      "source": "agentUsageResetEnabled:ib({agentAccess:\"read-only\",default:!1,description:\"Whether Codex can use usage resets after explicit user authorization\",key:\"agent-usage-reset-enabled\",schema:ip})",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-map",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 104571,
+      "byteEnd": 107239,
+      "sha256": "6d59c9536380e15240c339f5db4bc234fae75762e002e34112eaf7627a85b66f",
+      "source": "{confirmBeforeClose:ib({agentAccess:\"read-write\",default:\"keyboardOnly\",description:\"When to ask for confirmation before closing a desktop window\",key:\"confirm-before-close\",schema:rc.k5n([\"never\",\"keyboardOnly\",\"always\"])}),agentUsageResetEnabled:ib({agentAccess:\"read-only\",default:!1,description:\"Whether Codex can use usage resets after explicit user authorization\",key:\"agent-usage-reset-enabled\",schema:ip}),mcpStartupAuthentication:ib({agentAccess:\"read-only\",default:!1,description:\"Whether to prompt for MCP authentication at startup\",key:\"mcp_startup_authentication\",schema:ip}),primaryNumberShortcutTarget:ib({agentAccess:\"read-write\",default:\"tabs\",description:\"Whether primary-modifier number shortcuts select sidebar tasks or tabs\",key:\"primary-number-shortcut-target\",schema:rc.k5n([\"sidebar\",\"tabs\"])}),defaultWorkspaceFullView:ib({agentAccess:\"read-write\",default:!1,description:\"Whether new tasks start with the workspace in full view\",key:\"default-workspace-full-view\",schema:ip}),appBetaPreferencesByAccountId:iy({agentAccess:\"hidden\",default:{},description:\"Desktop app beta feature preferences by account\",key:\"desktop-app-beta-preferences-by-account-id\",schema:rc.g1P(rc.YjP(),rc.zMY())}),macMenuBarEnabled:iy({agentAccess:\"read-write\",default:!0,description:\"Whether the macOS menu bar is shown\",key:\"mac-menu-bar-enabled\",schema:ip}),chronicleMenuBarIndicatorEnabled:ib({agentAccess:\"read-write\",default:!0,description:\"Whether the macOS menu bar shows the Computer History recording indicator\",key:\"chronicle-menu-bar-indicator-enabled\",schema:ip}),openInTargetPreferences:iy({agentAccess:\"read-write\",default:{},description:\"Preferred targets for opening paths\",key:\"open-in-target-preferences\",schema:rc.Ikc({global:rc.YjP().optional(),perPath:rc.g1P(rc.YjP(),rc.YjP()).optional()})}),openLinkInTargetPreference:iS({agentAccess:\"read-write\",default:s6,description:\"Preferred target for opening links\",key:\"open-link-in-target-preference\",schema:rc.k5n([\"in-app-browser\",\"external-browser\"])}),externalBrowserLinkShortcut:iS({agentAccess:\"read-write\",default:\"primary\",description:\"Modifier-click shortcut for opening web links in the default browser\",key:\"external-browser-link-shortcut\",schema:rc.k5n([\"unassigned\",\"primary\",\"alt\",\"primary-shift\"])}),openLocalUrlInTargetPreference:iS({agentAccess:\"read-write\",default:s6,description:\"Preferred target for opening local URLs\",key:\"open-local-url-in-target-preference\",schema:rc.k5n([\"in-app-browser\",\"external-browser\"])}),customFileHandlers:iS({agentAccess:\"read-write\",default:{},description:\"Custom file handlers for opening files from Codex App\",key:\"custom_file_handlers\",schema:s7})}",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-factory",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 58620,
+      "byteEnd": 58791,
+      "sha256": "d8cbe2cd2373d14ef4765ee246922557f8d99662fbbcbdd6d05e47aec0eff089",
+      "source": "function ib({agentAccess:e,default:t,description:r,key:n,schema:i}){return{agentAccess:e,default:t,description:r,key:n,hostStorage:{kind:\"persisted-atom\",key:n},schema:i}}",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-boolean-binding",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 57757,
+      "byteEnd": 57768,
+      "sha256": "d2288905169a3044a232f34407a22687ade086db6a62e6189c5235bcf6325274",
+      "source": "ip=rc.zMY()",
+      "moduleId": "83481"
+    },
+    {
+      "id": "schema-worker-boolean",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2027948,
+      "byteEnd": 2027981,
+      "sha256": "4cba0a5e135f42a56fff61ea8909fbdad727210f36b4ea80eaeddc9db08307d4",
+      "source": "function eU(e){return A._L(eL,e)}",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-boolean-type",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2027841,
+      "byteEnd": 2027947,
+      "sha256": "2216d2c0beecf0b947ddaac0a90283ce8e1b3e0e731503454f0a357b87046543",
+      "source": "eL=p.xI(\"ZodBoolean\",(e,t)=>{b.sF.init(e,t),en.init(e,t),e._zod.processJSONSchema=(t,r,n)=>w.dO(e,t,r,n)})",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-number",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2027741,
+      "byteEnd": 2027774,
+      "sha256": "aba8f35e4d7a992d6a800e538d53f6c44dae31c9b16afabdaeca98a3d454777a",
+      "source": "function eM(e){return A.F7(ek,e)}",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-number-type",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2026701,
+      "byteEnd": 2027740,
+      "sha256": "9b98fcf2a2227f035d24da6449a0968b618189d9f0bb67b6a768ec64c5839ff4",
+      "source": "ek=p.xI(\"ZodNumber\",(e,t)=>{b.vz.init(e,t),en.init(e,t),e._zod.processJSONSchema=(t,r,n)=>w.Wg(e,t,r,n),e.isFinite=!0},h.un({minValue:e=>{let{minimum:t,exclusiveMinimum:r}=w.Fs(e);return Math.max(t??-1/0,r??-1/0)},maxValue:e=>{let{maximum:t,exclusiveMaximum:r}=w.Fs(e);return Math.min(t??1/0,r??1/0)},isInt:e=>{let{isInt:t,multipleOf:r}=w.Fs(e);return!!t||!!r?.some(Number.isSafeInteger)},format:e=>w.Fs(e).format??null},{gt(e,t){return this.check(A.Tx(e,t))},gte(e,t){return this.check(A.qm(e,t))},min(e,t){return this.check(A.qm(e,t))},lt(e,t){return this.check(A.Au(e,t))},lte(e,t){return this.check(A.Zm(e,t))},max(e,t){return this.check(A.Zm(e,t))},int(e){var t;return this.check((t=e,A.LK(eD,t)))},safe(e){var t;return this.check((t=e,A.LK(eD,t)))},positive(e){return this.check(A.Tx(0,e))},nonnegative(e){return this.check(A.qm(0,e))},negative(e){return this.check(A.Au(0,e))},nonpositive(e){return this.check(A.Zm(0,e))},multipleOf(e,t){return this.check(A.Hi(e,t))},step(e,t){return this.check(A.Hi(e,t))},finite(){return this}}))",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-object",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2029579,
+      "byteEnd": 2029650,
+      "sha256": "52858761ebc1aca4aa289761e40b8d16f8592d72e21a291e772152f572585141",
+      "source": "function eH(e,t){return new e$({type:\"object\",shape:e??{},...h.A2(t)})}",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-object-type",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2028737,
+      "byteEnd": 2029578,
+      "sha256": "7e0f9b9ec82e6b0332eb73991464f0d40818cc10e9cf80b162c4f2952d63988f",
+      "source": "e$=p.xI(\"ZodObject\",(e,t)=>{er(),b.w.init(e,t),en.init(e,t),e._zod.processJSONSchema=(t,r,n)=>w.Ec(e,t,r,n),h.X(e,\"shape\",e=>e._zod.def.shape,!1)},{keyof(){return e8(Object.keys(this._zod.def.shape))},catchall(e){return this.clone(h.zM(this._zod.def,{catchall:e}))},passthrough(){return this.clone(h.zM(this._zod.def,{catchall:eV()}))},loose(){return this.clone(h.zM(this._zod.def,{catchall:eV()}))},strict(){return this.clone(h.zM(this._zod.def,{catchall:A.G8(eq,void 0)}))},strip(){return this.clone(h.zM(this._zod.def,{catchall:void 0}))},extend(e){return h.X$(this,e)},safeExtend(e){return h.W0(this,e)},merge(e){return h.h1(this,e)},pick(e){return h.Up(this,e)},omit(e){return h.cJ(this,e)},partial(...e){return h.OH(tt,this,e[0])},exactPartial(...e){return h.OH(tn,this,e[0],\"exactPartial\")},required(...e){return h.mw(tl,this,e[0])}})",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-number-finite",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2072421,
+      "byteEnd": 2072827,
+      "sha256": "8e3feee6fa7bb13be022fa0cb85f1b2ebdfb48b42136ccbba41e6367a56fb49f",
+      "source": "H=i.xI(\"$ZodNumber\",(e,t)=>{c.init(e,t),e._zod.pattern=o.ai,e._zod.parse=(r,n)=>{if(t.coerce)try{r.value=Number(r.value)}catch(e){}let i=r.value;if(\"number\"==typeof i&&!Number.isNaN(i)&&Number.isFinite(i))return r;let a=\"number\"==typeof i?Number.isNaN(i)?\"NaN\":Number.isFinite(i)?void 0:String(i):void 0;return r.issues.push({expected:\"number\",code:\"invalid_type\",input:i,inst:e,...a?{received:a}:{}}),r}})",
+      "moduleId": "69274"
+    },
+    {
+      "id": "schema-worker-strict-merge",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2106572,
+      "byteEnd": 2106703,
+      "sha256": "be4ec1c762d9ee181c6820c345482916fd597350d6703f6645e8089edca13e36",
+      "source": "function y(...e){let t={};for(let r of e)Object.assign(t,Object.getOwnPropertyDescriptors(r));return Object.defineProperties({},t)}",
+      "moduleId": "43578"
+    },
+    {
+      "id": "schema-worker-strict-never-type",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2028267,
+      "byteEnd": 2028371,
+      "sha256": "14ee421904c2b0720fcb5a5359cc6095e77035886ca1a7bd3c040a2e2a480e6c",
+      "source": "eq=p.xI(\"ZodNever\",(e,t)=>{b.Um.init(e,t),en.init(e,t),e._zod.processJSONSchema=(t,r,n)=>w.RH(e,t,r,n)})",
+      "moduleId": "69432"
+    },
+    {
+      "id": "schema-worker-integer-format",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2027778,
+      "byteEnd": 2027840,
+      "sha256": "f748e86c0eb561f41a38efbcd0d9e08089d6dee7ce62526e42c7ffc2d9366624",
+      "source": "eD=p.xI(\"ZodNumberFormat\",(e,t)=>{b.I.init(e,t),ek.init(e,t)})",
+      "moduleId": "69432"
+    },
+    {
+      "id": "registry-worker-appearance",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 58002,
+      "byteEnd": 58041,
+      "sha256": "a8c38bf9eef92a216d236e82ccfa6320f8ae3c7e0d6878cf69f9c6f9929e7cf6",
+      "source": "contrast:rc.aig().int().min(0).max(100)",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-appearance-font",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 57860,
+      "byteEnd": 57927,
+      "sha256": "dd11c374f251c062f58eaffcb9f717df64aee959dc90a79b1b9222542574855c",
+      "source": "rc.Ikc({family:rc.YjP(),fullName:rc.YjP(),postscriptName:rc.YjP()})",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-derived-0",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 119168,
+      "byteEnd": 121534,
+      "sha256": "a771bd8abc654a6a734a5d8b2ebffc03811f443041e20535db8d0e5ca448943e",
+      "source": "l_=[...Object.values(sH),...Object.values(sQ),...Object.values(sX),...Object.values(sJ),...Object.values(s3),...Object.values(s8),...Object.values(c=c??{activityNotifications:ib({agentAccess:\"hidden\",default:!1,description:\"Show experimental pull request approval and review-request notifications\",key:\"code-review-activity-notifications\",schema:rc.zMY()}),gitHostingProvider:ib({agentAccess:\"hidden\",default:\"github\",description:\"Selected code hosting provider for Code Review\",key:\"code-review-git-hosting-provider\",schema:s1}),gitlabConnectorId:ib({agentAccess:\"hidden\",default:null,description:\"GitLab connection used by Code Review; unset uses gitlab.com\",key:\"code-review-gitlab-connector-id\",schema:rc.YjP().trim().min(1).nullable()}),githubConnection:ib({agentAccess:\"hidden\",default:null,description:\"GitHub connection used by Code Review; unset uses github.com\",key:\"code-review-github-connection\",schema:s0}),sidebarSections:ib({agentAccess:\"hidden\",default:[\"waiting_for_review\",\"needs_my_review\",\"needs_my_teams_review\"],description:\"Visible sections in the Code Review sidebar\",key:\"code-review-sidebar-sections\",schema:s2}),sidebarLayout:ib({agentAccess:\"hidden\",default:\"detailed\",description:\"Layout of pull requests in the Code Review sidebar\",key:\"code-review-sidebar-layout\",schema:rc.k5n([\"compact\",\"detailed\"])}),githubLinkTarget:ib({agentAccess:\"hidden\",default:\"github\",description:\"Where pull request and merge request links open\",key:\"code-review-github-link-target\",schema:rc.k5n([\"code-review-tab\",\"github\"])}),localReviewInstructions:ib({agentAccess:\"read-only\",default:\"\",description:\"Personal instructions for private code reviews you start\",key:\"code-review-local-instructions\",schema:rc.YjP()})}),...Object.values({enabled:ib({agentAccess:\"hidden\",default:!0,description:\"Whether the composer predicts the user's next message\",key:\"composer-predictions-enabled\",schema:ip})}),...Object.values(le),...Object.values(ln),...Object.values(li),...Object.values(la),...Object.values(iv),...Object.values(ls),...Object.values(ll),...Object.values(lp),...Object.values(lh),ib({agentAccess:\"hidden\",default:!0,description:\"Whether Recents includes chats created by your dot\",key:\"sidebarShowYourDotInRecents\",schema:ip}),lu().fontSize,lu().fullWidth,lu().smartPunctuationEnabled,...Object.values(lf),...Object.values(lm),...Object.values(iw)]",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-derived-1",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 121535,
+      "byteEnd": 121545,
+      "sha256": "f706915fc1fdb4e261dda47393980fd2424cabd7491c2076e9d478b41d019e49",
+      "source": "lE=[...l_]",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-worker-key-map",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 121889,
+      "byteEnd": 121918,
+      "sha256": "ca12cf451a7d6356890e05c8aacb25bc4f085a0b171c702cb1ace6c81845bf90",
+      "source": "new Map(lE.map(e=>[e.key,e]))",
+      "moduleId": "83481"
+    },
+    {
+      "id": "registry-renderer",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1889568,
+      "byteEnd": 1889756,
+      "sha256": "a222162a7bdf81eb85d26ffbbd3b66e2a743accbde305f3d128d7a5325e6ce1f",
+      "source": "agentUsageResetEnabled:vX({agentAccess:`read-only`,default:!1,description:`Whether Codex can use usage resets after explicit user authorization`,key:`agent-usage-reset-enabled`,schema:uX})"
+    },
+    {
+      "id": "registry-renderer-map",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1889347,
+      "byteEnd": 1891917,
+      "sha256": "150e404bdf583f03bd0777fa732324cf18ccf9a42e0ff076c3e65115d404bac0",
+      "source": "{confirmBeforeClose:vX({agentAccess:`read-write`,default:`keyboardOnly`,description:`When to ask for confirmation before closing a desktop window`,key:`confirm-before-close`,schema:Fm([`never`,`keyboardOnly`,`always`])}),agentUsageResetEnabled:vX({agentAccess:`read-only`,default:!1,description:`Whether Codex can use usage resets after explicit user authorization`,key:`agent-usage-reset-enabled`,schema:uX}),mcpStartupAuthentication:vX({agentAccess:`read-only`,default:!1,description:`Whether to prompt for MCP authentication at startup`,key:`mcp_startup_authentication`,schema:uX}),primaryNumberShortcutTarget:vX({agentAccess:`read-write`,default:`tabs`,description:`Whether primary-modifier number shortcuts select sidebar tasks or tabs`,key:`primary-number-shortcut-target`,schema:Fm([`sidebar`,`tabs`])}),defaultWorkspaceFullView:vX({agentAccess:`read-write`,default:!1,description:`Whether new tasks start with the workspace in full view`,key:`default-workspace-full-view`,schema:uX}),appBetaPreferencesByAccountId:_X({agentAccess:`hidden`,default:{},description:`Desktop app beta feature preferences by account`,key:pJ.DESKTOP_APP_BETA_PREFERENCES_BY_ACCOUNT_ID,schema:Pm(q(),mm())}),macMenuBarEnabled:_X({agentAccess:`read-write`,default:!0,description:`Whether the macOS menu bar is shown`,key:`mac-menu-bar-enabled`,schema:uX}),chronicleMenuBarIndicatorEnabled:vX({agentAccess:`read-write`,default:!0,description:`Whether the macOS menu bar shows the Computer History recording indicator`,key:`chronicle-menu-bar-indicator-enabled`,schema:uX}),openInTargetPreferences:_X({agentAccess:`read-write`,default:{},description:`Preferred targets for opening paths`,key:`open-in-target-preferences`,schema:J({global:q().optional(),perPath:Pm(q(),q()).optional()})}),openLinkInTargetPreference:gX({agentAccess:`read-write`,default:UJ,description:`Preferred target for opening links`,key:`open-link-in-target-preference`,schema:Fm([`in-app-browser`,`external-browser`])}),externalBrowserLinkShortcut:gX({agentAccess:`read-write`,default:`primary`,description:`Modifier-click shortcut for opening web links in the default browser`,key:`external-browser-link-shortcut`,schema:Fm(Vht)}),openLocalUrlInTargetPreference:gX({agentAccess:`read-write`,default:UJ,description:`Preferred target for opening local URLs`,key:`open-local-url-in-target-preference`,schema:Fm([`in-app-browser`,`external-browser`])}),customFileHandlers:gX({agentAccess:`read-write`,default:{},description:`Custom file handlers for opening files from Codex App`,key:`custom_file_handlers`,schema:Uht})}"
+    },
+    {
+      "id": "registry-renderer-factory",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1819856,
+      "byteEnd": 1820027,
+      "sha256": "7b686366b6b353994976f89ae73a4b236b912b9dd553bdf1f9b36e4dd34ad6f5",
+      "source": "function vX({agentAccess:e,default:t,description:n,key:r,schema:i}){return{agentAccess:e,default:t,description:n,key:r,hostStorage:{kind:`persisted-atom`,key:r},schema:i}}"
+    },
+    {
+      "id": "registry-renderer-boolean-binding",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1819051,
+      "byteEnd": 1819058,
+      "sha256": "33e18c689d33290b71a326f49c054050ac9c7cc07f732a709831c6d0547c434e",
+      "source": "uX=mm()"
+    },
+    {
+      "id": "schema-renderer-boolean",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 360489,
+      "byteEnd": 360520,
+      "sha256": "a834eea6ea538f554289a2e5ae39be9d2421d7b339ef89f16b492f108b067a19",
+      "source": "function mm(e){return Wd(Ph,e)}"
+    },
+    {
+      "id": "schema-renderer-boolean-type",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 371416,
+      "byteEnd": 371516,
+      "sha256": "f156c77a34249af7dcc1bb6e908c33daa13f015cdff1b39d567f34cc2a4097af",
+      "source": "Ph=K(`ZodBoolean`,(e,t)=>{Fa.init(e,t),th.init(e,t),e._zod.processJSONSchema=(t,n,r)=>bne(e,t,n,r)})"
+    },
+    {
+      "id": "schema-renderer-number",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 360303,
+      "byteEnd": 360334,
+      "sha256": "6c3f97358d25d0f3eea9538cc4206a31d1f84e361bd1b9620219c40f5e0b0123",
+      "source": "function cm(e){return Ld(Mh,e)}"
+    },
+    {
+      "id": "schema-renderer-number-type",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 370391,
+      "byteEnd": 371356,
+      "sha256": "3cbfeac61793eae768d5e1a33c524daac2a0e6b624093d3c57b5748b7781f8af",
+      "source": "Mh=K(`ZodNumber`,(e,t)=>{Na.init(e,t),th.init(e,t),e._zod.processJSONSchema=(t,n,r)=>yne(e,t,n,r),e.isFinite=!0},He({minValue:e=>{let{minimum:t,exclusiveMinimum:n}=Hf(e);return Math.max(t??-1/0,n??-1/0)},maxValue:e=>{let{maximum:t,exclusiveMaximum:n}=Hf(e);return Math.min(t??1/0,n??1/0)},isInt:e=>{let{isInt:t,multipleOf:n}=Hf(e);return!!t||!!n?.some(Number.isSafeInteger)},format:e=>Hf(e).format??null},{gt(e,t){return this.check(nf(e,t))},gte(e,t){return this.check(rf(e,t))},min(e,t){return this.check(rf(e,t))},lt(e,t){return this.check(ef(e,t))},lte(e,t){return this.check(tf(e,t))},max(e,t){return this.check(tf(e,t))},int(e){return this.check(lm(e))},safe(e){return this.check(lm(e))},positive(e){return this.check(nf(0,e))},nonnegative(e){return this.check(rf(0,e))},negative(e){return this.check(ef(0,e))},nonpositive(e){return this.check(tf(0,e))},multipleOf(e,t){return this.check(lf(e,t))},step(e,t){return this.check(lf(e,t))},finite(){return this}}))"
+    },
+    {
+      "id": "schema-renderer-number-finite",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 62357,
+      "byteEnd": 62757,
+      "sha256": "008e367bfa54236bf5cfe9e1a4e73ef6b0b948e4e587e0cd5fc7f39a6a68f289",
+      "source": "Na=K(`$ZodNumber`,(e,t)=>{Zi.init(e,t),e._zod.pattern=sr,e._zod.parse=(n,r)=>{if(t.coerce)try{n.value=Number(n.value)}catch{}let i=n.value;if(typeof i==`number`&&!Number.isNaN(i)&&Number.isFinite(i))return n;let a=typeof i==`number`?Number.isNaN(i)?`NaN`:Number.isFinite(i)?void 0:String(i):void 0;return n.issues.push({expected:`number`,code:`invalid_type`,input:i,inst:e,...a?{received:a}:{}}),n}})"
+    },
+    {
+      "id": "schema-renderer-object",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 360960,
+      "byteEnd": 361035,
+      "sha256": "002dee24f1af876da065483d42196708fac345066fe7b44f3df5e4e3f7bb72c5",
+      "source": "function J(e,t){let n={type:`object`,shape:e??{},...G(t)};return new Kh(n)}"
+    },
+    {
+      "id": "schema-renderer-object-type",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 373532,
+      "byteEnd": 374325,
+      "sha256": "7023fe62ae10ba71aa1527cc31b0b95b2122ee679f6d201497fa764d485d0183",
+      "source": "Kh=K(`ZodObject`,(e,t)=>{Ap(),Qa.init(e,t),th.init(e,t),e._zod.processJSONSchema=(t,n,r)=>Hne(e,t,n,r),Ke(e,`shape`,e=>e._zod.def.shape,!1)},{keyof(){return Fm(Object.keys(this._zod.def.shape))},catchall(e){return this.clone(z(this._zod.def,{catchall:e}))},passthrough(){return this.clone(z(this._zod.def,{catchall:Sm()}))},loose(){return this.clone(z(this._zod.def,{catchall:Sm()}))},strict(){return this.clone(z(this._zod.def,{catchall:Cm()}))},strip(){return this.clone(z(this._zod.def,{catchall:void 0}))},extend(e){return me(this,e)},safeExtend(e){return ge(this,e)},merge(e){return _e(this,e)},pick(e){return de(this,e)},omit(e){return pe(this,e)},partial(...e){return ve(ag,this,e[0])},exactPartial(...e){return ve(og,this,e[0],`exactPartial`)},required(...e){return ye(ug,this,e[0])}})"
+    },
+    {
+      "id": "schema-renderer-strict-merge",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 14358,
+      "byteEnd": 14498,
+      "sha256": "1c15c3c813d8c3b6ee7dd17eac9e8b9a6b477f7eb6a8b4bb5ac0db7ec6ebc3ef",
+      "source": "function z(...e){let t={};for(let n of e){let e=Object.getOwnPropertyDescriptors(n);Object.assign(t,e)}return Object.defineProperties({},t)}"
+    },
+    {
+      "id": "schema-renderer-strict-never",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 360766,
+      "byteEnd": 360797,
+      "sha256": "ef3e496660cf4722934a9db56836d666857c2e07fb725b2c524df8f6a7bba5db",
+      "source": "function Cm(e){return Zd(Hh,e)}"
+    },
+    {
+      "id": "schema-renderer-strict-never-type",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 372738,
+      "byteEnd": 372836,
+      "sha256": "4c64c19b83c1bd2b3257e4f8694fb198f568cdff21ffe41da0a2053fcc5302ab",
+      "source": "Hh=K(`ZodNever`,(e,t)=>{Ua.init(e,t),th.init(e,t),e._zod.processJSONSchema=(t,n,r)=>Ene(e,t,n,r)})"
+    },
+    {
+      "id": "registry-renderer-appearance",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1819246,
+      "byteEnd": 1819281,
+      "sha256": "33e781a43af20aa3ea2b17d04dce7cc084fa59ae3de1a2582e2887f1b54d78cb",
+      "source": "contrast:cm().int().min(0).max(100)"
+    },
+    {
+      "id": "registry-renderer-appearance-font",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1819132,
+      "byteEnd": 1819179,
+      "sha256": "fde659b87e1bf2b0691b20225f172efe2ba92d9b249d9bae81bba01989bd9fdd",
+      "source": "J({family:q(),fullName:q(),postscriptName:q()})"
+    },
+    {
+      "id": "registry-renderer-derived-0",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1905110,
+      "byteEnd": 1905619,
+      "sha256": "c462908e1833fe2611a6cf1db858b64cb7a7eda3c11402bb001a11c1f7554954",
+      "source": "Ngt=[...Object.values(_ht),...Object.values(HX),...Object.values(bht),...Object.values(Sht),...Object.values(jht),...Object.values(Iht),...Object.values(wht()),...Object.values(Rht()),...Object.values(Wht),...Object.values(qht),...Object.values(Yht),...Object.values(Zht),...Object.values(yX),...Object.values(GX),...Object.values(rgt),...Object.values(ugt),...Object.values(pgt),ygt(),qX().fontSize,qX().fullWidth,qX().smartPunctuationEnabled,...Object.values(hgt),...Object.values(_gt),...Object.values(xX)]"
+    },
+    {
+      "id": "registry-renderer-derived-1",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1905897,
+      "byteEnd": 1905909,
+      "sha256": "6876688836592be3a3545142660fb1a50f809ba674365b833060c76126da2ffd",
+      "source": "Rgt=[...Ngt]"
+    },
+    {
+      "id": "registry-renderer-key-map",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 1906115,
+      "byteEnd": 1906145,
+      "sha256": "6d0585ed057a399b9083f82157620f240ee99bab3f7484b80ca3648be18c7570",
+      "source": "new Map(Rgt.map(e=>[e.key,e]))"
+    },
+    {
+      "id": "registry-display-worker",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 363364,
+      "byteEnd": 363550,
+      "sha256": "4caed973220cf8d919db4c08af31f27bf792ce81c7b7c6194e848b692f4e5cb7",
+      "source": "agentUsageResetEnabled:$({agentAccess:`read-only`,default:!1,description:`Whether Codex can use usage resets after explicit user authorization`,key:`agent-usage-reset-enabled`,schema:X})"
+    },
+    {
+      "id": "registry-display-worker-map",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 363145,
+      "byteEnd": 365686,
+      "sha256": "1e6e7c8b00dc0d1f988625e7f0192e16b2dcc4f101e11f7cb4b899e89885b1eb",
+      "source": "{confirmBeforeClose:$({agentAccess:`read-write`,default:`keyboardOnly`,description:`When to ask for confirmation before closing a desktop window`,key:`confirm-before-close`,schema:G([`never`,`keyboardOnly`,`always`])}),agentUsageResetEnabled:$({agentAccess:`read-only`,default:!1,description:`Whether Codex can use usage resets after explicit user authorization`,key:`agent-usage-reset-enabled`,schema:X}),mcpStartupAuthentication:$({agentAccess:`read-only`,default:!1,description:`Whether to prompt for MCP authentication at startup`,key:`mcp_startup_authentication`,schema:X}),primaryNumberShortcutTarget:$({agentAccess:`read-write`,default:`tabs`,description:`Whether primary-modifier number shortcuts select sidebar tasks or tabs`,key:`primary-number-shortcut-target`,schema:G([`sidebar`,`tabs`])}),defaultWorkspaceFullView:$({agentAccess:`read-write`,default:!1,description:`Whether new tasks start with the workspace in full view`,key:`default-workspace-full-view`,schema:X}),appBetaPreferencesByAccountId:Q({agentAccess:`hidden`,default:{},description:`Desktop app beta feature preferences by account`,key:J.DESKTOP_APP_BETA_PREFERENCES_BY_ACCOUNT_ID,schema:W(L(),z())}),macMenuBarEnabled:Q({agentAccess:`read-write`,default:!0,description:`Whether the macOS menu bar is shown`,key:`mac-menu-bar-enabled`,schema:X}),chronicleMenuBarIndicatorEnabled:$({agentAccess:`read-write`,default:!0,description:`Whether the macOS menu bar shows the Computer History recording indicator`,key:`chronicle-menu-bar-indicator-enabled`,schema:X}),openInTargetPreferences:Q({agentAccess:`read-write`,default:{},description:`Preferred targets for opening paths`,key:`open-in-target-preferences`,schema:H({global:L().optional(),perPath:W(L(),L()).optional()})}),openLinkInTargetPreference:Z({agentAccess:`read-write`,default:Xv,description:`Preferred target for opening links`,key:`open-link-in-target-preference`,schema:G([`in-app-browser`,`external-browser`])}),externalBrowserLinkShortcut:Z({agentAccess:`read-write`,default:`primary`,description:`Modifier-click shortcut for opening web links in the default browser`,key:`external-browser-link-shortcut`,schema:G(OD)}),openLocalUrlInTargetPreference:Z({agentAccess:`read-write`,default:Xv,description:`Preferred target for opening local URLs`,key:`open-local-url-in-target-preference`,schema:G([`in-app-browser`,`external-browser`])}),customFileHandlers:Z({agentAccess:`read-write`,default:{},description:`Custom file handlers for opening files from Codex App`,key:`custom_file_handlers`,schema:AD})}"
+    },
+    {
+      "id": "registry-display-worker-factory",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 305859,
+      "byteEnd": 306029,
+      "sha256": "2d91681447b4f3e60d5ff365b583e05cae865361533b89fb2d23e1a6e0498032",
+      "source": "function $({agentAccess:e,default:t,description:n,key:r,schema:i}){return{agentAccess:e,default:t,description:n,key:r,hostStorage:{kind:`persisted-atom`,key:r},schema:i}}"
+    },
+    {
+      "id": "registry-display-worker-boolean-binding",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 305071,
+      "byteEnd": 305076,
+      "sha256": "13ed1c545fb5078ae837cb1ab8864ba70274f25f6d121a87f08f9b34912df04a",
+      "source": "X=z()"
+    },
+    {
+      "id": "schema-display-worker-boolean",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 180780,
+      "byteEnd": 180825,
+      "sha256": "072fdecdffd9702b1a708ad6f19cc438c45fba91638a6dad5d4b48f22c3dde93",
+      "source": "function z(e){return/* @__PURE__ */ _a(Nh,e)}"
+    },
+    {
+      "id": "schema-display-worker-boolean-type",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 180667,
+      "byteEnd": 180779,
+      "sha256": "fd4f685efb154effcd9bd7ec1ffcdd2824eca5bb50a2f6b679999dd1c78a67af",
+      "source": "Nh=/*@__PURE__*/ D(`ZodBoolean`,(e,t)=>{wr.init(e,t),I.init(e,t),e._zod.processJSONSchema=(t,n,r)=>To(e,t,n,r)})"
+    },
+    {
+      "id": "schema-display-worker-number",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 180491,
+      "byteEnd": 180536,
+      "sha256": "e2714bff1940ef8e2b7f1eef9dcad5e6f3e786ae9d608dda7769c5bfaf19e9b6",
+      "source": "function R(e){return/* @__PURE__ */ ha(Ah,e)}"
+    },
+    {
+      "id": "schema-display-worker-number-type",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 179307,
+      "byteEnd": 180490,
+      "sha256": "45cb0f5c0487e23a55a2504b4b289d5d52b13b85a99ec92b07d3f67c00472586",
+      "source": "Ah=/*@__PURE__*/ D(`ZodNumber`,(e,t)=>{Sr.init(e,t),I.init(e,t),e._zod.processJSONSchema=(t,n,r)=>wo(e,t,n,r),e.isFinite=!0},/*@__PURE__*/ Ve({minValue:e=>{let{minimum:t,exclusiveMinimum:n}=yo(e);return Math.max(t??-1/0,n??-1/0)},maxValue:e=>{let{maximum:t,exclusiveMaximum:n}=yo(e);return Math.min(t??1/0,n??1/0)},isInt:e=>{let{isInt:t,multipleOf:n}=yo(e);return!!t||!!n?.some(Number.isSafeInteger)},format:e=>yo(e).format??null},{gt(e,t){return this.check(/* @__PURE__ */ Ca(e,t))},gte(e,t){return this.check(/* @__PURE__ */ wa(e,t))},min(e,t){return this.check(/* @__PURE__ */ wa(e,t))},lt(e,t){return this.check(/* @__PURE__ */ xa(e,t))},lte(e,t){return this.check(/* @__PURE__ */ Sa(e,t))},max(e,t){return this.check(/* @__PURE__ */ Sa(e,t))},int(e){return this.check(Mh(e))},safe(e){return this.check(Mh(e))},positive(e){return this.check(/* @__PURE__ */ Ca(0,e))},nonnegative(e){return this.check(/* @__PURE__ */ wa(0,e))},negative(e){return this.check(/* @__PURE__ */ xa(0,e))},nonpositive(e){return this.check(/* @__PURE__ */ Sa(0,e))},multipleOf(e,t){return this.check(/* @__PURE__ */ Ta(e,t))},step(e,t){return this.check(/* @__PURE__ */ Ta(e,t))},finite(){return this}}))"
+    },
+    {
+      "id": "schema-display-worker-number-finite",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 31902,
+      "byteEnd": 32315,
+      "sha256": "c2d4b06fe948f3761fb8ab64a7766a66e85b0e1285ee084c6d886f71da321de5",
+      "source": "Sr=/*@__PURE__*/ D(`$ZodNumber`,(e,t)=>{O.init(e,t),e._zod.pattern=cn,e._zod.parse=(n,r)=>{if(t.coerce)try{n.value=Number(n.value)}catch{}let i=n.value;if(typeof i==`number`&&!Number.isNaN(i)&&Number.isFinite(i))return n;let a=typeof i==`number`?Number.isNaN(i)?`NaN`:Number.isFinite(i)?void 0:String(i):void 0;return n.issues.push({expected:`number`,code:`invalid_type`,input:i,inst:e,...a?{received:a}:{}}),n}})"
+    },
+    {
+      "id": "schema-display-worker-object",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 182556,
+      "byteEnd": 182631,
+      "sha256": "27c71038612c7b1600a0e9ec067e46e644ede2810a631729f99ec81448ae5863",
+      "source": "function H(e,t){let n={type:`object`,shape:e??{},...w(t)};return new Bh(n)}"
+    },
+    {
+      "id": "schema-display-worker-object-type",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 181753,
+      "byteEnd": 182555,
+      "sha256": "79223b489a3e203a322f7c4eedf07244d4d2145f417af20ac143dd6bbd13d469",
+      "source": "Bh=/*@__PURE__*/ D(`ZodObject`,(e,t)=>{th(),Lr.init(e,t),I.init(e,t),e._zod.processJSONSchema=(t,n,r)=>Jo(e,t,n,r),qe(e,`shape`,e=>e._zod.def.shape,!1)},{keyof(){return G(Object.keys(this._zod.def.shape))},catchall(e){return this.clone(S(this._zod.def,{catchall:e}))},passthrough(){return this.clone(S(this._zod.def,{catchall:B()}))},loose(){return this.clone(S(this._zod.def,{catchall:B()}))},strict(){return this.clone(S(this._zod.def,{catchall:Rh()}))},strip(){return this.clone(S(this._zod.def,{catchall:void 0}))},extend(e){return xe(this,e)},safeExtend(e){return Ce(this,e)},merge(e){return we(this,e)},pick(e){return ve(this,e)},omit(e){return be(this,e)},partial(...e){return Te(tg,this,e[0])},exactPartial(...e){return Te(rg,this,e[0],`exactPartial`)},required(...e){return Ee(dg,this,e[0])}})"
+    },
+    {
+      "id": "schema-display-worker-strict-merge",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 2217,
+      "byteEnd": 2357,
+      "sha256": "c63c1b9f064c1e1d96e1a1c071155baaefab198d6dd5c06f94c674ce6bcb5ec9",
+      "source": "function S(...e){let t={};for(let n of e){let e=Object.getOwnPropertyDescriptors(n);Object.assign(t,e)}return Object.defineProperties({},t)}"
+    },
+    {
+      "id": "schema-display-worker-strict-never",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 181260,
+      "byteEnd": 181306,
+      "sha256": "8214acbf799ddf626c4bc244a0bef9caeebc14547e49445469ac063ba0706488",
+      "source": "function Rh(e){return/* @__PURE__ */ ba(Lh,e)}"
+    },
+    {
+      "id": "schema-display-worker-strict-never-type",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 181149,
+      "byteEnd": 181259,
+      "sha256": "0fab480b039c57d4d085c00cb5446a23a936d090cf71042a14a5ae0452389deb",
+      "source": "Lh=/*@__PURE__*/ D(`ZodNever`,(e,t)=>{Dr.init(e,t),I.init(e,t),e._zod.processJSONSchema=(t,n,r)=>jo(e,t,n,r)})"
+    },
+    {
+      "id": "registry-display-worker-appearance",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 305259,
+      "byteEnd": 305293,
+      "sha256": "1058b08b4d2da686453ec34cde6b6441a673663cdcd73dbf0a99ac8a23772d56",
+      "source": "contrast:R().int().min(0).max(100)"
+    },
+    {
+      "id": "registry-display-worker-appearance-font",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 305147,
+      "byteEnd": 305194,
+      "sha256": "abb448ca87d55e9eabbe9a89a18d9a1c97e34ee01ff508263be01324a47465ad",
+      "source": "H({family:L(),fullName:L(),postscriptName:L()})"
+    },
+    {
+      "id": "registry-display-worker-derived-0",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 377351,
+      "byteEnd": 377842,
+      "sha256": "53bdee1d91340462724b23399d4215f9a3e34619c006570ebf5cb69e5e7b58d3",
+      "source": "ZD=[...Object.values(pD),...Object.values(hD),...Object.values(gD),...Object.values(_D),...Object.values(CD),...Object.values(ED),...Object.values(SD()),...Object.values(DD()),...Object.values(jD),...Object.values(PD),...Object.values(FD),...Object.values(ID),...Object.values(uC),...Object.values(RD),...Object.values(zD),...Object.values(GD),...Object.values(KD),YD(),UD().fontSize,UD().fullWidth,UD().smartPunctuationEnabled,...Object.values(qD),...Object.values(JD),...Object.values(fC)]"
+    },
+    {
+      "id": "registry-display-worker-derived-1",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 377843,
+      "byteEnd": 377853,
+      "sha256": "02fed5eee03b3199cc76ffca0c7f434fe461ecaafb5460f61468f742725223b8",
+      "source": "QD=[...ZD]"
+    },
+    {
+      "id": "registry-display-worker-key-map",
+      "sourcePath": "webview/assets/page-bootstrap-display.worker-5c02c3e8b8f6.js",
+      "byteStart": 378050,
+      "byteEnd": 378079,
+      "sha256": "7e643a5bed2b10b7345b6ffe62d343f063b1ee3b03f39eee7c3837a01f0c1b52",
+      "source": "new Map(QD.map(e=>[e.key,e]))"
+    },
+    {
+      "id": "native-header-early-bootstrap.js-41549",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 106909,
+      "byteEnd": 106936,
+      "sha256": "1eaa92a8e0dd78d68809589923f82ea420f9a8606e99333713dd8fec0f10a2cf",
+      "source": ",41549(e,t,n){\"use strict\";",
+      "moduleId": "41549"
+    },
+    {
+      "id": "native-import-early-bootstrap.js-41549-1",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 113794,
+      "byteEnd": 113804,
+      "sha256": "740b48266b2e6130f2c4e08ca8a66833490bb71cc5b9a5a5920903c44d115e15",
+      "source": "o=n(35553)",
+      "moduleId": "41549"
+    },
+    {
+      "id": "native-import-early-bootstrap.js-41549-34",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 156320,
+      "byteEnd": 156331,
+      "sha256": "5a57ae53a89a4fe8756c4f8286844cd0f964a813a364b9c09263266810354482",
+      "source": "nG=n(37581)",
+      "moduleId": "41549"
+    },
+    {
+      "id": "native-import-early-bootstrap.js-41549-35",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 156332,
+      "byteEnd": 156343,
+      "sha256": "c91be85decfda8723b9e10f704982d20fd15920c67b936e8df6b5b068368f883",
+      "source": "nY=n(41803)",
+      "moduleId": "41549"
+    },
+    {
+      "id": "native-exports-early-bootstrap.js-41549",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 106944,
+      "byteEnd": 113778,
+      "sha256": "3854362d72f93e9d0a783d602a43b449abdd7d6bd922f30b977350b5c35a1ea1",
+      "source": "n.d(t,{Oi9:()=>R,GP5:()=>U,ONi:()=>oH.ON,gCo:()=>ao.gC,vKV:()=>es.vK,SsO:()=>es.Ss,qck:()=>ed,n1Q:()=>ng,jp6:()=>nv,BAA:()=>B.BA,p5P:()=>B.p5,e$f:()=>B.e$,pFD:()=>e$,IYj:()=>eD,VuE:()=>eU,Ufb:()=>eN,Zkw:()=>eM,Zam:()=>eW,wb1:()=>eL,bZi:()=>eZ,ofg:()=>q,ozQ:()=>ea,HFH:()=>el.H,Y9T:()=>es.Y9,cQD:()=>tm.cQ,d33:()=>nf,bUX:()=>tm.bU,D3l:()=>tm.D3,RFx:()=>tm.RF,c06:()=>tm.c0,kcU:()=>e7,EAE:()=>te,Wq_:()=>e5,zqs:()=>e9,v94:()=>tP,aQz:()=>tz,ThQ:()=>tt,xPC:()=>ta,mPM:()=>tn,sRd:()=>to,DIy:()=>ti,s3P:()=>ts,DVx:()=>t$.DV,aU6:()=>tO,ADS:()=>eR.AD,t_6:()=>tm.t_,XRS:()=>tE,pG2:()=>tj,kJv:()=>eJ.kJ,Qgq:()=>eJ.Qg,Y6k:()=>eJ.Y6,g28:()=>eJ.g2,$MS:()=>eJ.$M,IW7:()=>eJ.IW,POp:()=>eJ.PO,t_C:()=>eJ.t_,ygO:()=>eJ.yg,iRL:()=>eJ.iR,y$e:()=>eJ.y$,_NM:()=>eJ._N,x1u:()=>eV,YR$:()=>nl,vgw:()=>W,Ubp:()=>tQ,ICf:()=>tY,DI5:()=>eR.DI,Jbi:()=>rz,NLx:()=>ab.NL,CPn:()=>se,WaA:()=>r.W,BAs:()=>rx,esV:()=>rb,$zB:()=>oj,O8h:()=>nh,wI6:()=>t0,uC1:()=>ab.uC,SJM:()=>B.SJ,JCZ:()=>eq,XKp:()=>tm.XK,SKQ:()=>eR.SK,Lg_:()=>tw,FhT:()=>n5,oeH:()=>n8,fH5:()=>i3,shR:()=>nJ.sh,crV:()=>rE,sT7:()=>nq.sT,Krz:()=>re,iwv:()=>nJ.iw,qDu:()=>na.qD,vAN:()=>nn,c2p:()=>L,HRg:()=>nr,BLI:()=>no,VJf:()=>nz.VJ,oyJ:()=>nC,ENM:()=>n2.EN,uLF:()=>o7,blx:()=>nR,n4$:()=>si,ea9:()=>sr,$kD:()=>p.$k,aeC:()=>p.ae,Q2Y:()=>nq.Q2,wCz:()=>oH.wC,c9T:()=>p.c9,R2t:()=>eR.R2,e$b:()=>oC,muO:()=>oH.mu,zV$:()=>aR.z,Pex:()=>sy,xlJ:()=>st,XUd:()=>aR.X,P7:()=>i4,fRB:()=>n9,yQU:()=>n7,l_T:()=>ae,eXE:()=>at,iFb:()=>rg,xiT:()=>rs,s3R:()=>t$.s3,rju:()=>rm,G48:()=>rd,mEF:()=>rf,iiB:()=>rl,$zi:()=>ru,PL_:()=>eR.PL,JXP:()=>as,cSM:()=>ap.cS,DeS:()=>ao.De,MjT:()=>eu,lap:()=>av,c9A:()=>eR.c9,gVp:()=>ab.gV,wLF:()=>ab.wL,zNv:()=>ab.zN,Fvh:()=>ab.Fv,n9i:()=>ab.n9,oR3:()=>ab.oR,ytA:()=>ab.yt,AtJ:()=>e_,MY3:()=>eJ.MY,IY7:()=>p.IY,rpK:()=>t1,m20:()=>ax.m2,K7L:()=>rh,l02:()=>oH.l0,yhu:()=>nd,O3u:()=>iX,V57:()=>nJ.V5,ZWF:()=>eR.ZW,BIQ:()=>ri,MMY:()=>iN,Ym4:()=>i5,nCo:()=>oO,Hkr:()=>oE,FtW:()=>oP,faO:()=>rv,h8j:()=>o$,Wl7:()=>oq,FEK:()=>oK,pZW:()=>oJ,i0d:()=>o1,ToG:()=>oV,RFt:()=>oY,HlH:()=>oG,Wf1:()=>o4.W,M2d:()=>o8,aww:()=>o5,CN7:()=>so,R1o:()=>nm.R1,jQ:()=>eR.jQ,WEo:()=>eR.WE,orR:()=>t2,ouF:()=>nB.ou,PAg:()=>nJ.PA,z3E:()=>sa,aX$:()=>np,oQk:()=>$,bZ8:()=>M,hij:()=>rL,oKj:()=>rB,nrG:()=>nm.nr,QrD:()=>rK,i9x:()=>tm.i9,YFe:()=>tm.YF,y7N:()=>nT.y7,isz:()=>ro,Q7j:()=>rp,Ixd:()=>B.Ix,Vhs:()=>B.Vh,XhY:()=>B.Xh,CUP:()=>tm.CU,rRd:()=>e0,v3V:()=>e8,tdP:()=>e6,VU9:()=>eQ,_tc:()=>rH,dzS:()=>t$.dz,aMe:()=>rt,xcD:()=>tR,nFm:()=>p.nF,vUq:()=>p.vU,dVE:()=>t4,Er7:()=>nJ.Er,Fh0:()=>nJ.Fh,Cv$:()=>p.Cv,_RT:()=>p._R,POg:()=>ab.PO,$5i:()=>C.$5,Ctf:()=>p.Ct,G$6:()=>p.G$,Sg6:()=>ii.S,NqL:()=>C.Nq,xOp:()=>nJ.xO,EYB:()=>nJ.EY,Xhq:()=>nJ.Xh,T9S:()=>Z,FAg:()=>eG.FA,j8X:()=>eG.j8,$km:()=>oR.$k,QoX:()=>i7,AvD:()=>ak,Lnj:()=>aw,CqK:()=>rn,jME:()=>ra,S8x:()=>tI,Ab$:()=>u,Ft3:()=>p.Ft,rT6:()=>ep.r,aRT:()=>r0,XIF:()=>nb,mh4:()=>ny,IGg:()=>n_,k3V:()=>nw,cB6:()=>function e(t){let n=t.match(/^(?:\\\\\\\\|\\/\\/)\\?[\\\\/]UNC[\\\\/](wsl\\$|wsl\\.localhost)[\\\\/](.*)$/i);if(n)return e(`\\\\\\\\${n[1]}\\\\${n[2]}`);let a=t.match(/^(?:\\\\\\\\|\\/\\/)\\?[\\\\/]([a-zA-Z]):[\\\\/](.*)$/);if(a){let e=a[1].toLowerCase(),t=a[2].replace(/\\\\/g,\"/\");return`/mnt/${e}/${t}`}if(/^(\\\\\\\\|\\/\\/)(wsl\\$|wsl\\.localhost)/i.test(t)){let e=t.replace(/^((\\\\\\\\|\\/\\/)(wsl\\$|wsl\\.localhost)[\\\\/]+)/i,\"\").split(/[\\\\/]/);e.shift();let n=e.join(\"/\").replace(/\\\\/g,\"/\");return 0===n.length?\"/\":n.startsWith(\"/\")?n:`/${n}`}if(t.startsWith(\"\\\\\\\\\")||t.startsWith(\"//\"))return sv(t);if(t.startsWith(\"/\"))return t;let i=t.match(/^([a-zA-Z]):[\\\\/](.*)$/);if(i){let e=i[1].toLowerCase(),t=i[2].replace(/\\\\/g,\"/\");return`/mnt/${e}/${t}`}return t.replace(/\\\\/g,\"/\")},EAz:()=>sg,t4X:()=>tm.t4,w0M:()=>tm.w0,DHE:()=>tT,bK8:()=>eR.bK,JXB:()=>er.J,udX:()=>t7.u,knC:()=>nU,ztd:()=>nN,DIv:()=>nL,PUz:()=>nM,TE6:()=>nZ,JT0:()=>nW,Luh:()=>nF,DDP:()=>er.D,rGx:()=>ns.rG,Np8:()=>a_,VNn:()=>is,gN:()=>tp,RAB:()=>sn,sg1:()=>t9,haJ:()=>nH,Q4s:()=>ov,U6S:()=>r6,_qC:()=>ne,K20:()=>na.K2,OBg:()=>nB.OB,JzA:()=>ni,uvL:()=>og,_qz:()=>i8,k_6:()=>nS,OTv:()=>su,v6O:()=>eS,Szl:()=>oe,WGc:()=>o3.WG,PpM:()=>o3.Pp,zsm:()=>ec,e47:()=>ex,pCC:()=>o3.pC,tg6:()=>eb,SKV:()=>o3.SK,Lrv:()=>eg,Bnq:()=>C.Bn,hqW:()=>B.hq,AXl:()=>B.AX,UPE:()=>K.U,SeT:()=>eF,i9k:()=>tm.RL,BdV:()=>tf,fXS:()=>tm.fX,OeF:()=>eG.Oe,Rod:()=>tu,wmj:()=>tF,qLJ:()=>tC,DJQ:()=>tm.DJ,PfK:()=>tA,Dr0:()=>aY,kTr:()=>eJ.kT,Hrc:()=>na.Hr,jZe:()=>ev,q3U:()=>g,H_$:()=>d,Oet:()=>eY,JHM:()=>nT.JH,TVZ:()=>t5,n5J:()=>ej,Vtf:()=>nj,PCY:()=>nz.PC,VMY:()=>nz.VM,jkc:()=>ns.jk,XHz:()=>nT.XH,yDt:()=>nq.yD,Tzy:()=>n1,SSJ:()=>nJ.SS,NNU:()=>p.NN,QJ0:()=>p.QJ,vgM:()=>aC.vg,C7h:()=>iA,Xdj:()=>ij,s0l:()=>eG.s0,LX1:()=>o0,ycq:()=>aE,FWz:()=>aj,zhq:()=>aC.zh,coW:()=>aC.co,yvu:()=>ap.yv,ESg:()=>ac,yr_:()=>tc,v3D:()=>eJ.v3,SRY:()=>ay,$z3:()=>rc,UH4:()=>nc,R_c:()=>aT,dwE:()=>p.dw,VZO:()=>aC.VZ,NHl:()=>aC.NH,q2z:()=>aC.q2,dpU:()=>ns.dp,VGZ:()=>aX,ePA:()=>a8,V7u:()=>ir,mdc:()=>io,U6b:()=>i2,OMH:()=>oZ,A5V:()=>eR.A5,NCC:()=>eA,i7l:()=>eR.i7,oYK:()=>C.oY,nVh:()=>rC,crQ:()=>oI,Q6s:()=>oS,MF$:()=>oR.MF,wAQ:()=>tS,u_h:()=>nm.u_,Ax_:()=>oQ.Ax,Mxp:()=>oQ.Mx,hR3:()=>nm.hR,R8c:()=>o2,w_u:()=>ow,u3Y:()=>o3.u3,lkj:()=>eO,ShB:()=>o9.Sh,CVx:()=>o9.CV,OqV:()=>eE,o43:()=>sh,$9z:()=>om,Ugj:()=>nX,ouN:()=>nI,M$l:()=>sc,awN:()=>tm.aw,Rqq:()=>tm.Rq,Z9d:()=>o3.Z9,tKe:()=>aC.tK,cxl:()=>nT.cx,K82:()=>nT.K8,yPQ:()=>es.yP,JFB:()=>ew.JF,yQ4:()=>es.yQ,xug:()=>el.x,bzb:()=>C.bz,wPy:()=>B.wP,QPd:()=>eG.QP,L$F:()=>eR.L$,sQ3:()=>t3.s,E_f:()=>B.E_,ZJQ:()=>nJ.ZJ,d_r:()=>nD,Qj8:()=>B.Qj,tV4:()=>p.tV,q$v:()=>eG.q$,F5T:()=>oH.F5,nlm:()=>iE,hfz:()=>eG.hf,inc:()=>p.in,Rg6:()=>ao.Rg,SrG:()=>n4,qOc:()=>ab.qO,zwr:()=>eG.zw,foP:()=>eJ.fo,WqY:()=>C.Wq,PuL:()=>aO,bvA:()=>rO,FHf:()=>p.FH,dlm:()=>ey,mqi:()=>nJ.mq,sfQ:()=>nJ.sf,rsL:()=>nJ.rs,tPs:()=>nJ.tP,Tim:()=>nJ.Ti,$24:()=>nJ.$2,$S6:()=>nJ.$S,RWz:()=>oQ.RW,WLk:()=>eo,DE9:()=>ep.D,Czm:()=>oR.Cz,cb0:()=>oL,DEu:()=>oM,EsO:()=>o3.Es,tIC:()=>nT.tI,NUu:()=>sm,zjD:()=>nT.zj,vWk:()=>sf,vne:()=>eR.vn,jPp:()=>sd,Xzz:()=>nx,ZzL:()=>ab.Zz,sHj:()=>oR.sH,Gv0:()=>ar,Rt_:()=>ag.R,HGT:()=>tm.HG,KYW:()=>ot.K,Bic:()=>nm.Bi,qPI:()=>oF,GGi:()=>oU,AAe:()=>oX,KoA:()=>sv,qzM:()=>oa,ok:()=>i6,wBE:()=>G,n5:()=>eI,MEy:()=>tm.ME,Qvf:()=>tm.Qv,Zs6:()=>m.Z,$Cs:()=>nP,Ekp:()=>n6,cCV:()=>p.cC,b9:()=>aA,E$9:()=>rD.E$,OTq:()=>p.OT,BSL:()=>aV,OS5:()=>a6,E52:()=>a7,eFT:()=>ia,KoP:()=>iY,AKj:()=>iG,tN7:()=>aP,jls:()=>oA,pRA:()=>oT,Ko0:()=>oR.Ko,o2C:()=>o6,DZs:()=>oQ.DZ,kWF:()=>os,QKy:()=>ab.QK,YUQ:()=>c,iwW:()=>l,H7T:()=>nT.H7,fx1:()=>rj,zkv:()=>a3,qIo:()=>tU,bzs:()=>C.uW,tYF:()=>nK,bvT:()=>ns.bv,iax:()=>ns.i,fsg:()=>oy,YYJ:()=>iQ,$L7:()=>i0,AQM:()=>nT.AQ,LS9:()=>B.LS,YNA:()=>B.YN,L9S:()=>C.L9,fL$:()=>ry,c8y:()=>rS,IkK:()=>nB.Ik,uct:()=>ei,cNE:()=>o3.cN,tXO:()=>o3.tX,ps1:()=>eG.ps,naf:()=>iI,kqw:()=>nT.kq,due:()=>nT.du,aSH:()=>oQ.aS,SKH:()=>rT,SDF:()=>ns.SD,LXO:()=>H,Uf9:()=>o3.Uf,f5g:()=>o3.f5,ubS:()=>ou.u,POs:()=>sb,krl:()=>nB.kr,yIh:()=>sl,PHv:()=>n0})",
+      "moduleId": "41549"
+    },
+    {
+      "id": "native-header-early-bootstrap.js-37581",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281377,
+      "byteEnd": 281404,
+      "sha256": "dc871650bb4ccb61efcf8076d3014b128c4313deb5d9158c5255b92e45c239eb",
+      "source": ",37581(e,t,n){\"use strict\";",
+      "moduleId": "37581"
+    },
+    {
+      "id": "native-import-early-bootstrap.js-37581-0",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281408,
+      "byteEnd": 281418,
+      "sha256": "ce10a9f7d9e816bfa9acca21b3c95eb9ca9d9b227142d095649a2c4f9d9baf0c",
+      "source": "a=n(35553)",
+      "moduleId": "37581"
+    },
+    {
+      "id": "native-exports-early-bootstrap.js-37581",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281947,
+      "byteEnd": 281983,
+      "sha256": "a6acabe2ac13573dc604a3d51d446116bd70952643caaa6a2b170df7a709762a",
+      "source": "n.d(t,{},{JV:l,PK:o,S4:s,uf:r,wV:p})",
+      "moduleId": "37581"
+    },
+    {
+      "id": "native-header-early-bootstrap.js-41803",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 281984,
+      "byteEnd": 282011,
+      "sha256": "1962f9fc8938dc6a4d0a3ec76a8b1419a7902fb0ed89ae29c772dcb569fc6e09",
+      "source": ",41803(e,t,n){\"use strict\";",
+      "moduleId": "41803"
+    },
+    {
+      "id": "native-exports-early-bootstrap.js-41803",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 282536,
+      "byteEnd": 282571,
+      "sha256": "82a969025ef2d6edd58b77f4e0a0f8a2ebf41d96a7064b33afc314c863128358",
+      "source": "n.d(t,{IZ:()=>a,KF:()=>i,at:()=>r})",
+      "moduleId": "41803"
+    },
+    {
+      "id": "native-header-early-bootstrap.js-35553",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 315942,
+      "byteEnd": 315969,
+      "sha256": "64ed7b338cbff034d2a9f51442e73e85ea649a9be226447a0469e44bb3a8d197",
+      "source": ",35553(e,t,n){\"use strict\";",
+      "moduleId": "35553"
+    },
+    {
+      "id": "native-import-early-bootstrap.js-35553-2",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 316002,
+      "byteEnd": 316012,
+      "sha256": "f2f8c8ff554f4bf1bdc7c0ed98cf3011d2c0649f8bcda25a7916964075e37d4b",
+      "source": "r=n(28500)",
+      "moduleId": "35553"
+    },
+    {
+      "id": "native-import-early-bootstrap.js-35553-3",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 316013,
+      "byteEnd": 316023,
+      "sha256": "7325abb655f848e524343daec8fdd80b358e6c8a2986378efed5295ece20034e",
+      "source": "o=n(43578)",
+      "moduleId": "35553"
+    },
+    {
+      "id": "native-exports-early-bootstrap.js-35553",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 337790,
+      "byteEnd": 340293,
+      "sha256": "3bc93bef1b4dc56c6fac0050526cd1dc6a46c60638b4b453fdaff5bcdb7c0f3e",
+      "source": "n.d(t,{_default:()=>t$,_function:()=>t5,any:()=>eV,array:()=>e4,base64:()=>ec,base64url:()=>ep,bigint:()=>eN,boolean:()=>e$,catch:()=>tW,check:()=>t7,cidrv4:()=>er,cidrv6:()=>es,codec:()=>tJ,creditCard:()=>eh,cuid:()=>W,cuid2:()=>B,currencyCode:()=>eI,custom:()=>ne,date:()=>e2,discriminatedUnion:()=>tr,e164:()=>em,email:()=>j,emoji:()=>L,enum:()=>tb,exactOptional:()=>tP,file:()=>tI,float32:()=>eP,float64:()=>ez,function:()=>t5,guid:()=>O,hash:()=>eS,hex:()=>ek,hostname:()=>ew,httpUrl:()=>N,iban:()=>ev,instanceof:()=>no,int:()=>eO,int32:()=>eT,int64:()=>eL,intersection:()=>ts,invertCodec:()=>tG,ipv4:()=>Q,ipv6:()=>ea,json:()=>ns,jwt:()=>eb,keyof:()=>e6,ksuid:()=>Y,lazy:()=>t3,literal:()=>tw,looseObject:()=>e7,looseRecord:()=>tm,mac:()=>et,map:()=>th,nan:()=>tB,nanoid:()=>F,nativeEnum:()=>ty,never:()=>eX,nonoptional:()=>tL,null:()=>eK,nullable:()=>tT,nullish:()=>tC,number:()=>ej,object:()=>e5,optional:()=>tE,partialRecord:()=>td,pipe:()=>tH,prefault:()=>tN,preprocess:()=>nl,promise:()=>t6,readonly:()=>tQ,record:()=>tp,refine:()=>nt,set:()=>tv,strictObject:()=>e9,string:()=>y,stringFormat:()=>e_,success:()=>tF,superRefine:()=>nn,symbol:()=>eZ,templateLiteral:()=>t1,transform:()=>tA,tuple:()=>tc,uint32:()=>eC,uint64:()=>eU,ulid:()=>H,undefined:()=>eq,union:()=>tt,unknown:()=>eG,url:()=>D,uuid:()=>z,uuidv4:()=>T,uuidv6:()=>C,uuidv7:()=>R,void:()=>e0,xid:()=>J,xor:()=>ta},{ZodAny:eH,ZodArray:e3,ZodBase64:el,ZodBase64URL:eu,ZodBigInt:eD,ZodBigIntFormat:eM,ZodBoolean:eR,ZodCIDRv4:ei,ZodCIDRv6:eo,ZodCUID:Z,ZodCUID2:q,ZodCatch:tZ,ZodCodec:tV,ZodCreditCard:ef,ZodCustom:t9,ZodCustomStringFormat:ey,ZodDate:e1,ZodDefault:tR,ZodDiscriminatedUnion:ti,ZodE164:ed,ZodEmail:A,ZodEmoji:M,ZodEnum:tx,ZodExactOptional:tO,ZodFile:tk,ZodFunction:t8,ZodGUID:E,ZodIBAN:eg,ZodIPv4:X,ZodIPv6:en,ZodISODate:k,ZodISODateTime:w,ZodISODuration:S,ZodISOTime:I,ZodInstanceOf:nr,ZodIntersection:to,ZodJWT:ex,ZodKSUID:G,ZodLazy:t2,ZodLiteral:t_,ZodMAC:ee,ZodMap:tf,ZodNaN:tq,ZodNanoID:U,ZodNever:eY,ZodNonOptional:tM,ZodNull:eB,ZodNullable:tz,ZodNumber:eA,ZodNumberFormat:eE,ZodObject:e8,ZodOptional:tj,ZodPipe:tK,ZodPrefault:tD,ZodPreprocess:tY,ZodPromise:t4,ZodReadonly:tX,ZodRecord:tu,ZodSet:tg,ZodString:b,ZodStringFormat:_,ZodSuccess:tU,ZodSymbol:eF,ZodTemplateLiteral:t0,ZodTransform:tS,ZodTuple:tl,ZodType:v,ZodULID:K,ZodURL:$,ZodUUID:P,ZodUndefined:eW,ZodUnion:te,ZodUnknown:eJ,ZodVoid:eQ,ZodXID:V,ZodXor:tn,_ZodString:x,describe:na,meta:ni,stringbool:(...e)=>l.fI({Codec:tV,Boolean:eR,String:b},...e)})",
+      "moduleId": "35553"
+    },
+    {
+      "id": "native-header-early-bootstrap.js-28500",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 392235,
+      "byteEnd": 392262,
+      "sha256": "97cb644b06d123c3c14f1af0dd600ebba5e676940717352610973be4ff91b117",
+      "source": ",28500(e,t,n){\"use strict\";",
+      "moduleId": "28500"
+    },
+    {
+      "id": "native-exports-early-bootstrap.js-28500",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 431780,
+      "byteEnd": 432400,
+      "sha256": "8ff85c7ab9fe754dd7c14301e4eb21a7d99fa4fb2824c6063181c84a206b7dfc",
+      "source": "n.d(t,{D3:()=>eU,DT:()=>en,IB:()=>eD,L$:()=>b,NH:()=>k,SW:()=>U,UY:()=>K,Xe:()=>q,YK:()=>m,Yf:()=>S,bL:()=>I,c2:()=>ei,o8:()=>l.clone,qU:()=>y,tV:()=>G,uv:()=>ee,y5:()=>_},{$N:N,$p:eS,$v:f,Ax:D,BN:eu,CI:W,CQ:Y,CT:eQ,Cn:B,Dq:V,Dw:te,EY:h,G3:eZ,GP:eg,GY:C,Gb:eh,I:el,IT:ep,Ix:1,KX:tc,Ko:R,L8:eP,LJ:eL,Lc:M,Mv:em,N$:e9,Oi:eJ,Oy:X,P0:eM,Py:E,RL:e3,Sb:tu,TF:T,U5:ed,Um:ev,VF:e5,VO:eY,VY:A,W4:u,WH:ex,Wc:e0,YY:to,ZQ:eo,ZZ:et,Zc:g,Zn:v,Zu:P,Zy:F,_A:tm,_m:ti,b0:tg,bc:2,bl:O,cG:j,cq:H,cu:eC,d:td,eb:eH,ew:ea,g5:z,h:eK,h8:er,hA:tf,ig:e2,kU:th,nu:eX,o5:eb,pm:e$,qG:x,qc:e4,rO:Z,rv:e6,sF:ec,t$:tn,v1:$,vz:es,w:ez,x8:ef,xE:J,zP:ta})",
+      "moduleId": "28500"
+    },
+    {
+      "id": "native-header-early-bootstrap.js-43578",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 441255,
+      "byteEnd": 441282,
+      "sha256": "0758402dc89f590b655455b10bce0dcdcc2b89a053e3e864af770e658adb53b5",
+      "source": ",43578(e,t,n){\"use strict\";",
+      "moduleId": "43578"
+    },
+    {
+      "id": "native-exports-early-bootstrap.js-43578",
+      "sourcePath": ".vite/build/early-bootstrap.js",
+      "byteStart": 441295,
+      "byteEnd": 442746,
+      "sha256": "728efae3a847c88ff511277ed153d5111fa1954757623886c21c3abf9894b482",
+      "source": "n.d(t,{BIGINT_FORMAT_RANGES:()=>Y,CONSTANT_CATCH:()=>eD,Class:()=>ej,NUMBER_FORMAT_RANGES:()=>G,aborted:()=>es,allowsEval:()=>N,assert:()=>u,assertEqual:()=>r,assertIs:()=>l,assertNever:()=>c,assertNotEqual:()=>o,assignProp:()=>w,attachSchema:()=>ed,base64ToUint8Array:()=>e_,base64urlToUint8Array:()=>ek,cached:()=>h,captureStackTrace:()=>$,cleanEnum:()=>ey,cleanRegex:()=>v,clone:()=>B,cloneDef:()=>O,codePointLength:()=>eg,constantCatch:()=>eN,createTransparentProxy:()=>H,defineLazy:()=>y,defineLazyInternal:()=>eR,derived:()=>ez,esc:()=>C,escapeRegex:()=>q,explicitlyAborted:()=>el,extend:()=>et,finalizeIssue:()=>em,floatSafeRemainder:()=>x,getElementAtPath:()=>P,getEnumValues:()=>p,getLengthableOrigin:()=>ev,getParsedType:()=>F,getSizableOrigin:()=>ef,hexToUint8Array:()=>eS,hide:()=>eP,installLazyProp:()=>e$,isObject:()=>D,isPlainObject:()=>M,issue:()=>eb,joinValues:()=>d,jsonStringifyReplacer:()=>m,members:()=>eE,merge:()=>ei,mergeDefs:()=>E,normalizeParams:()=>K,nullish:()=>g,numKeys:()=>U,objectClone:()=>_,omit:()=>ee,optionalKeys:()=>J,own:()=>eO,parsedType:()=>ex,partial:()=>er,pick:()=>X,prefixIssues:()=>ec,primitiveTypes:()=>W,promiseAllObject:()=>z,propertyKeyTypes:()=>Z,randomString:()=>T,rawShape:()=>k,required:()=>eo,safeExtend:()=>ea,shallowClone:()=>L,sizeCaps:()=>ep,slugify:()=>R,stringifyPrimitive:()=>V,toZod:()=>s,uint8ArrayToBase64:()=>ew,uint8ArrayToBase64url:()=>eI,uint8ArrayToHex:()=>eA,unwrapMessage:()=>eu})",
+      "moduleId": "43578"
+    },
+    {
+      "id": "native-header-worker.js-83481",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 18,
+      "byteEnd": 45,
+      "sha256": "487702ff7fbd13ed201aefab095007994519ad3e522cd357bd7fb0e468ee1b0c",
+      "source": "{83481(e,t,r){\"use strict\";",
+      "moduleId": "83481"
+    },
+    {
+      "id": "native-import-worker.js-83481-0",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 24367,
+      "byteEnd": 24378,
+      "sha256": "bdc49749a639e31537df82cd67da61e6f8567d1b6c888178ea795e5c6e6351a7",
+      "source": "rc=r(69432)",
+      "moduleId": "83481"
+    },
+    {
+      "id": "native-header-worker.js-69432",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2009214,
+      "byteEnd": 2009241,
+      "sha256": "d42516c9b2196862538e31da7ac20685e02f7a2274706129ca3c746d8172c24c",
+      "source": ",69432(e,t,r){\"use strict\";",
+      "moduleId": "69432"
+    },
+    {
+      "id": "native-import-worker.js-69432-1",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2009562,
+      "byteEnd": 2009572,
+      "sha256": "d92b44be509aa6d44eb782d540b6168ccea93e3d24454c982eda34778877f781",
+      "source": "h=r(43578)",
+      "moduleId": "69432"
+    },
+    {
+      "id": "native-import-worker.js-69432-2",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2012709,
+      "byteEnd": 2012719,
+      "sha256": "20d133ca1ced8f75f65914d8051fd2b1e0dd67d3c15ef86d0860ca605a02b059",
+      "source": "b=r(69274)",
+      "moduleId": "69432"
+    },
+    {
+      "id": "native-exports-worker.js-69432",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2009263,
+      "byteEnd": 2009546,
+      "sha256": "d4da69356598a2359efd449fde427a47dfa3a10df95a33894c30305c2cb60e8f",
+      "source": "r.d(t,{You:()=>el,YOg:()=>eF,zMY:()=>eU,IeY:()=>tT,gMt:()=>eX,k5n:()=>e8,E$q:()=>e0,Pq9:()=>tS,RZV:()=>t_,euz:()=>e9,_H3:()=>eK,chJ:()=>eB,aig:()=>eM,Ikc:()=>eH,lqM:()=>tr,vkY:()=>ty,g1P:()=>e4,rej:()=>eW,YjP:()=>eo,Uy$:()=>tm,PVZ:()=>e2,KCZ:()=>eZ,L5J:()=>eV,OZ5:()=>e_,uRe:()=>em})",
+      "moduleId": "69432"
+    },
+    {
+      "id": "native-header-worker.js-69274",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2064408,
+      "byteEnd": 2064435,
+      "sha256": "1336c2528f433b0bc92df968a65f5c3c3e16da6cedcbb6088f2ba9ddfcd45d9e",
+      "source": ",69274(e,t,r){\"use strict\";",
+      "moduleId": "69274"
+    },
+    {
+      "id": "native-exports-worker.js-69274",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2064435,
+      "byteEnd": 2064984,
+      "sha256": "86cd0e462a467f56eb93fe27e912f59115947aba8bf2b9a58bc096af03569fbf",
+      "source": "r.d(t,{$p:()=>ee,Dq:()=>V,CQ:()=>Y,sF:()=>K,CI:()=>U,Cn:()=>j,bl:()=>A,Zu:()=>w,t$:()=>eI,b0:()=>ej,rv:()=>eA,P0:()=>ec,Oy:()=>F,qG:()=>_,cG:()=>b,VO:()=>e_,RL:()=>eb,Zc:()=>m,Lc:()=>k,Zy:()=>L,v1:()=>I,Ko:()=>O,$N:()=>P,Ax:()=>N,LJ:()=>eu,h8:()=>$,GY:()=>x,kU:()=>eU,nu:()=>eE,Py:()=>v,Um:()=>Q,N$:()=>eC,x8:()=>z,qc:()=>ev,vz:()=>H,I:()=>W,w:()=>eo,ig:()=>ey,_m:()=>eN,VF:()=>eR,KX:()=>ek,Sb:()=>eM,h:()=>eg,$v:()=>h,EY:()=>f,d:()=>eL,Wc:()=>eT,G3:()=>ep,W4:()=>c,g5:()=>R,VY:()=>y,Zn:()=>g,cu:()=>el,GP:()=>Z,TF:()=>C,cq:()=>G,xE:()=>q,YK:()=>p})",
+      "moduleId": "69274"
+    },
+    {
+      "id": "native-header-worker.js-43578",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2104574,
+      "byteEnd": 2104601,
+      "sha256": "dc1cba2f88272b1e43081943a6983d20e6609e545bdcd4e32683e5be39a3ff28",
+      "source": ",43578(e,t,r){\"use strict\";",
+      "moduleId": "43578"
+    },
+    {
+      "id": "native-exports-worker.js-43578",
+      "sourcePath": ".vite/build/worker.js",
+      "byteStart": 2104607,
+      "byteEnd": 2105084,
+      "sha256": "ac26b823a22d017e7810563f5329df4eefd65788a4768255d3a59409c84d075c",
+      "source": "r.d(t,{A2:()=>k,B7:()=>M,GW:()=>en,Gv:()=>w,LG:()=>p,MO:()=>g,NM:()=>D,NR:()=>U,O7:()=>et,OH:()=>$,PO:()=>c,QH:()=>W,Qd:()=>C,Rc:()=>er,SS:()=>eh,UQ:()=>b,Up:()=>j,Vy:()=>m,W0:()=>Y,X:()=>ep,X$:()=>V,Yv:()=>v,bI:()=>I,cJ:()=>G,cl:()=>u,d3:()=>X,gJ:()=>f,gx:()=>A,h1:()=>F,hI:()=>R,hi:()=>Q,iR:()=>J,jD:()=>es,jw:()=>o,k8:()=>s,lQ:()=>z,mw:()=>H,o8:()=>P,ol:()=>ea,p6:()=>d,qQ:()=>O,qh:()=>eo,rL:()=>K,sD:()=>N,sn:()=>ei,un:()=>el,v5:()=>ed,w5:()=>a,yG:()=>x,zH:()=>L,zM:()=>y})",
+      "moduleId": "43578"
+    },
+    {
+      "id": "handler",
+      "sourcePath": "webview/assets/execution-42e8bacbeb01.js",
+      "byteStart": 50212,
+      "byteEnd": 52252,
+      "sha256": "d98ce9782acd54436f98fef7c9feb4ec10a33d960f34f8d703122c127999592e",
+      "source": "async function Qd({argumentsValue:e,readAuthMethod:t,isUsageResetEnabled:n,getSendRequest:r,invalidateUsage:i,logger:a,signal:o}){let s=Oc.safeParse(e);if(!s.success)return X(`${Cc} requires a nonempty idempotencyKey and no other arguments.`);let{idempotencyKey:c}=s.data;try{if(o?.aborted)return X(`Usage reset was cancelled before redemption.`);if(!await n())return X($d);if(await t()!==`chatgpt`)return X(`Usage resets require a ChatGPT account on this task's host.`);if(o?.aborted)return X(`Usage reset was cancelled before redemption.`);let e=r(),a=await e(`account/rateLimits/read`,void 0).catch(()=>null);if(o?.aborted)return X(`Usage reset was cancelled before redemption.`);let s=a?.rateLimitsByLimitId?.codex??(a?.rateLimits.limitId===`codex`||a?.rateLimits.limitId==null&&(a?.rateLimits.limitName==null||a.rateLimits.limitName===`codex`)?a?.rateLimits:null),l=[s?.primary,s?.secondary].flatMap(e=>e!=null&&Number.isFinite(e.usedPercent)?[e.usedPercent]:[]);if(!l.some(e=>e>=90))return X(JSON.stringify({idempotencyKey:c,error:`${l.length===0?`Current core Codex usage is unavailable.`:`More than 10% remains in every available core Codex usage window.`} This call did not attempt a reset. If an earlier attempt was uncertain, it may already have succeeded; keep the same idempotencyKey for any retry.`}));if(!await n())return X($d);if(o?.aborted)return X(`Usage reset was cancelled before redemption.`);let{outcome:u}=await e(`account/rateLimitResetCredit/consume`,{idempotencyKey:c}),[d]=await Promise.allSettled([e(`account/rateLimits/read`,void 0),i([`rate-limit-status`]),i([`rate-limit-reset-credits`])]);return{contentItems:[{type:`inputText`,text:JSON.stringify({idempotencyKey:c,outcome:u,usage:d.status===`fulfilled`?d.value:null},(e,t)=>typeof t==`bigint`?t.toString():t)}],success:!0}}catch(e){return a.warning(`Could not confirm usage reset`,{safe:{tool:Cc},sensitive:{error:e}}),X(JSON.stringify({idempotencyKey:c,error:`Usage reset could not be confirmed. Retry this attempt only with the same idempotencyKey.`}))}}"
+    },
+    {
+      "id": "wrapper",
+      "sourcePath": "webview/assets/execution-42e8bacbeb01.js",
+      "byteStart": 52477,
+      "byteEnd": 52777,
+      "sha256": "4fd80f7031fff66e8ebee3e0dbb8bc4489607ebca32e057f4c1a863a1f7f9b68",
+      "source": "async function tf({scope:e,argumentsValue:t,hostId:n,queryClient:r,signal:i}){return Qd({argumentsValue:t,readAuthMethod:()=>en(e,n),isUsageResetEnabled:()=>Ie(ke.agentUsageResetEnabled),getSendRequest:()=>{let t=J(e,n);return(e,n)=>t.sendRequest(e,n)},invalidateUsage:e=>Aa(r,e),logger:j,signal:i})}"
+    },
+    {
+      "id": "usage-row",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 35998,
+      "byteEnd": 37465,
+      "sha256": "4ed33e54498a2510489d7ee5ef16874ccf524e0b87eb0d63147c17646ee7f086",
+      "source": "function ia(){let e=(0,aa.c)(6),t=ge(b),n=i(),r=v(he.agentUsageResetEnabled),a,s;e[0]===Symbol.for(`react.memo_cache_sentinel`)?(a=(0,oa.jsx)(K,{id:`settings.usage.resets.agentEnabled.label`,defaultMessage:`Allow your assistant to use resets`,description:`Label for the desktop setting that lets the assistant use a banked usage reset after the user explicitly authorizes it`}),s=(0,oa.jsx)(K,{id:`settings.usage.resets.agentEnabled.description`,defaultMessage:`Allow your assistant to use a reset only when you explicitly request it during a conversation and your current limit has 10% or less remaining. Resets are never used automatically.`,description:`Explains that the assistant only uses a reset when explicitly requested during a conversation, with 10 percent or less of the current limit remaining, and never automatically`}),e[0]=a,e[1]=s):(a=e[0],s=e[1]);let c;return e[2]!==r||e[3]!==n||e[4]!==t?(c=(0,oa.jsx)(q,{children:(0,oa.jsx)(q.Content,{children:(0,oa.jsx)(S,{children:(0,oa.jsx)(U,{label:a,description:s,control:e=>(0,oa.jsx)(C,{...e,checked:r,onChange:e=>{o(t,he.agentUsageResetEnabled,e).catch(()=>{t.get(xe).danger(n.formatMessage({id:`settings.usage.resets.agentEnabled.error`,defaultMessage:`Couldn’t update usage reset setting`,description:`Error shown when saving whether the assistant can use usage resets fails`}),{errorAnalytics:{toastId:`settings.usage.resets.agentEnabled.error`}})})}})})})})}),e[2]=r,e[3]=n,e[4]=t,e[5]=c):c=e[5],c}"
+    },
+    {
+      "id": "native-read",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 2114934,
+      "byteEnd": 2115083,
+      "sha256": "31e0e54773b48f8f5899d113f3cf1c01335fabe3e216526815208f484593c8ae",
+      "source": "async function skt(e){if(KQ?.settings!=null)return(await c$(KQ.settings.read(e.key))).effective;throw Error(`Settings are unavailable on this host`)}"
+    },
+    {
+      "id": "request-wrapper",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 2081344,
+      "byteEnd": 2081571,
+      "sha256": "51ffede4c648f69671cfce43912c166bb9879733fb1ad3b01c4cfe96caa256fa",
+      "source": "async function c$(e,t){let n=!1,r=()=>{n||(n=!0,e[Symbol.dispose]?.())};t?.addEventListener(`abort`,r,{once:!0});try{t?.throwIfAborted();let n=await e;return t?.throwIfAborted(),n}finally{t?.removeEventListener(`abort`,r),r()}}"
+    },
+    {
+      "id": "ui-import-0",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 162,
+      "byteEnd": 217,
+      "sha256": "2b6fb8ee0af685ca661b49b8e93db33270e18c9bbd01a5c80e6c4f52a34967ed",
+      "source": "import{n as e}from\"./rolldown-runtime-428824ca0286.js\";"
+    },
+    {
+      "id": "ui-import-1",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 217,
+      "byteEnd": 919,
+      "sha256": "c2cbdd00731257851db3a34cde66e0f57190dde26a06a6797ffbd186c6370312",
+      "source": "import{$S as t,AP as n,BFt as r,Cjt as i,Cot as a,Eot as o,Ewt as s,FH as c,GDt as l,GFt as u,Gwt as d,JV as f,KDt as p,LP as m,Lwt as h,MP as g,MRt as _,Mot as v,NRt as y,Olt as b,PH as x,QS as S,RP as C,RZ as w,Rlt as T,Slt as E,Srt as D,UDt as O,VFt as k,WDt as A,XDt as ee,Xct as j,YDt as M,YV as N,Ywt as P,Zct as F,blt as I,cH as L,cTt as R,eC as z,eTt as B,elt as te,fjt as ne,i5 as re,j5 as ie,kU as ae,klt as oe,lC as se,lWt as V,ljt as ce,ls as le,mlt as ue,nC as de,o5 as H,oC as U,oTt as fe,oot as pe,pjt as W,plt as me,qdt as he,rTt as ge,rot as _e,sH as ve,tTt as ye,tlt as be,uWt as G,uot as xe,us as Se,vgt as Ce,vjt as K,xlt as we,ylt as Te,zP as Ee}from\"./app-shared-7a3b5b1a0788.js\";"
+    },
+    {
+      "id": "ui-import-2",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 2904,
+      "byteEnd": 2965,
+      "sha256": "9371116a94d3a53723af9b54a39e71ddc52bcbbcb56b7da6d7211bc8469c5438",
+      "source": "import{n as mr,t as q}from\"./settings-group-19b1582aa25c.js\";"
+    },
+    {
+      "id": "ui-import-3",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 3619,
+      "byteEnd": 3720,
+      "sha256": "1b7e5def234866b57ebe734a9a8da10eab64a2fb58e79accdb988296be3fc3ab",
+      "source": "import{a as Hr,i as Ur,n as Wr,o as Gr,r as Kr,s as qr,t as Jr}from\"./settings-form-30f8a3176e42.js\";"
+    },
+    {
+      "id": "execution-import",
+      "sourcePath": "webview/assets/execution-42e8bacbeb01.js",
+      "byteStart": 203,
+      "byteEnd": 987,
+      "sha256": "aba84cdebdf29d52bcb24c1d256539387bbbbb425d66ad6619fc8b55c7e0952b",
+      "source": "import{$gt as n,Act as r,Avt as i,Bct as a,Bpt as o,Clt as s,Cot as c,Dbt as l,Ddt as u,Dlt as d,Dyt as f,Ebt as p,Eyt as m,FRt as h,Fot as g,Gut as _,HRt as v,Hgt as y,Hxt as b,IRt as x,Iot as S,Ivt as C,Iyt as w,JBt as ee,KRt as T,Ktt as te,LVt as E,Lvt as ne,MRt as re,NRt as D,NTt as O,OV as ie,Odt as ae,Olt as oe,Pst as se,Pvt as ce,QBt as k,Qut as le,Rlt as A,SHt as ue,Syt as de,Tlt as fe,UHt as pe,URt as j,Uxt as me,VBt as M,Vct as N,XVt as he,ZVt as ge,Zgt as _e,aHt as ve,agt as ye,bbt as be,cHt as P,cRt as xe,cmt as Se,cwt as F,dft as Ce,hwt as we,igt as Te,jct as Ee,klt as De,lHt as I,ldt as Oe,mwt as L,qdt as ke,qtt as Ae,rot as je,sdt as Me,tTt as Ne,uVt as Pe,uft as R,vbt as Fe,wot as Ie,xHt as Le,xot as Re,zpt as ze,zvt as Be}from\"./app-shared-7a3b5b1a0788.js\";"
+    },
+    {
+      "id": "ui-row-initializer",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 37475,
+      "byteEnd": 37578,
+      "sha256": "03d6a59277fdd3c270c14a0462204594ca7a9d2d14fcd5cd1161ae11967661ae",
+      "source": "function sa(){return(sa=e((()=>{aa=V(),ye(),T(),W(),pe(),Ee(),oe(),a(),mr(),se(),t(),na(),oa=u()})))()}"
+    },
+    {
+      "id": "ui-react-initializer",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 35373,
+      "byteEnd": 35518,
+      "sha256": "4f7fa8853f8890aa0c04d73d5079c360252bfa4abfbfa1a26141762909fd355c",
+      "source": "function na(){return(na=e((()=>{ea=V(),_e(),ye(),ta=G(),W(),tt(),H(),ot(),Je(),pe(),$e(),oe(),mr(),_r(),se(),de(),t(),Ii(),Bi(),Xi(),Y=u()})))()}"
+    },
+    {
+      "id": "ui-react-useRef",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 29566,
+      "byteEnd": 29585,
+      "sha256": "091b43eab93e29aea3b6ccaffbbcf2d58b8b5d6bd81194af150e1f246d26d12c",
+      "source": "(0,ta.useRef)(null)"
+    },
+    {
+      "id": "ui-react-useId",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 29588,
+      "byteEnd": 29602,
+      "sha256": "b0fb4a99f779a0bfb28a0aaeb1a2c49c2742eff2072c39bb0b730aa0b289ab10",
+      "source": "(0,ta.useId)()"
+    },
+    {
+      "id": "ui-react-useState",
+      "sourcePath": "webview/assets/page-2f18a45b6e14.js",
+      "byteStart": 29609,
+      "byteEnd": 29630,
+      "sha256": "07fbed5447b98648bc457518ab24897d24aec59203ee4f5d6235343bdcccd3ba",
+      "source": "(0,ta.useState)(null)"
+    },
+    {
+      "id": "binding-export-Cjt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6158147,
+      "byteEnd": 6158156,
+      "sha256": "5aec0fad00310d235ed90b22bc27aea4e7daf45a73248b338742593bb090cd26",
+      "source": "Zj as Cjt"
+    },
+    {
+      "id": "binding-export-Eot",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6160459,
+      "byteEnd": 6160469,
+      "sha256": "1956ae537de4cc43b33a8ed1d1c9795edf86791d5ca4bc55db68ceb40bbac4da",
+      "source": "akt as Eot"
+    },
+    {
+      "id": "binding-export-GFt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6162013,
+      "byteEnd": 6162021,
+      "sha256": "41977b09fce43d41b5ba0fb790e8fd9a39add9414eb3de7bb2de44ec263cd677",
+      "source": "Y as GFt"
+    },
+    {
+      "id": "binding-export-Mot",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6169265,
+      "byteEnd": 6169275,
+      "sha256": "546bd2283e85c198fa32380d90addb8da780852616a19f1b6928adefaf8f6e26",
+      "source": "ekt as Mot"
+    },
+    {
+      "id": "binding-export-Olt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6171407,
+      "byteEnd": 6171416,
+      "sha256": "134d8a3e0d305038363da66a5cde9458dc22a836009468c87de2112589fb88ac",
+      "source": "EZ as Olt"
+    },
+    {
+      "id": "binding-export-QS",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6173238,
+      "byteEnd": 6173247,
+      "sha256": "17372490d4ab6f1aed3900ee455f1d18adfad28bd965360db3990393c3fcba8d",
+      "source": "gYn as QS"
+    },
+    {
+      "id": "binding-export-RP",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6174290,
+      "byteEnd": 6174299,
+      "sha256": "39b2ee986403cd39fadde4291d2ea1ecd411ae2e4bb9254e63ca33b9b5b95da6",
+      "source": "Ubn as RP"
+    },
+    {
+      "id": "binding-export-lWt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6197627,
+      "byteEnd": 6197635,
+      "sha256": "661b6de6f111ea6af106b0370207264ecc49d3fa42631628d300030e2448d2db",
+      "source": "c as lWt"
+    },
+    {
+      "id": "binding-export-oC",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6200588,
+      "byteEnd": 6200597,
+      "sha256": "496e2c5f064da9e51f36437a1310e571b96bf2c992a940df4a3ffb9ae12bb50a",
+      "source": "eYn as oC"
+    },
+    {
+      "id": "binding-export-qdt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6203308,
+      "byteEnd": 6203318,
+      "sha256": "d9846116365dbff117c4f3ae8ee5682738c8145caa4b6334030df5bd17869a5b",
+      "source": "Wht as qdt"
+    },
+    {
+      "id": "binding-export-rTt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6204229,
+      "byteEnd": 6204239,
+      "sha256": "62dcde6c066686c46e0756aa62fc87def7cb355d102b2344098eca0622d097ef",
+      "source": "Y2e as rTt"
+    },
+    {
+      "id": "binding-export-uWt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6207634,
+      "byteEnd": 6207642,
+      "sha256": "1319b442ce598f50597cf66ee7ced480b238899988fa4c58f9c46af162de5ca7",
+      "source": "o as uWt"
+    },
+    {
+      "id": "binding-export-uot",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6207986,
+      "byteEnd": 6207995,
+      "sha256": "50a374bd23e0f956b44ac836db7e4dab9528c637f127c4e80b745add8c8edf5a",
+      "source": "X$ as uot"
+    },
+    {
+      "id": "binding-export-vjt",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6208984,
+      "byteEnd": 6208993,
+      "sha256": "91ed54d98ca4520d5b32995a37c60d2832ae316d9715ae95e7afa0bbdf479667",
+      "source": "oM as vjt"
+    },
+    {
+      "id": "binding-export-t",
+      "sourcePath": "webview/assets/settings-group-19b1582aa25c.js",
+      "byteStart": 3505,
+      "byteEnd": 3511,
+      "sha256": "13e7fa1b6de1dbb3a052dcbb78d1245151b1dce2e22f61d4c6307e16df71735f",
+      "source": "m as t"
+    },
+    {
+      "id": "binding-export-wot",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6210191,
+      "byteEnd": 6210201,
+      "sha256": "900f769b913aae2df0e2490d9098cec5f9ff32fa261fd43165bf1092dac55022",
+      "source": "skt as wot"
+    },
+    {
+      "id": "native-reader-export",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 6210191,
+      "byteEnd": 6210201,
+      "sha256": "900f769b913aae2df0e2490d9098cec5f9ff32fa261fd43165bf1092dac55022",
+      "source": "skt as wot"
+    },
+    {
+      "id": "ui-numeric-style",
+      "sourcePath": "webview/assets/settings-form-30f8a3176e42.js",
+      "byteStart": 1626,
+      "byteEnd": 1989,
+      "sha256": "72bdfda13d817f47886479102cb6e2aaffc877df802ab29b91f2913c9c89f7f0",
+      "source": "function Mt(){return(Mt=e((()=>{wt=`_fields_5lmnb_2`,Tt=`_actions_5lmnb_12`,Et=`_primaryActions_5lmnb_13`,Dt=`_field_5lmnb_2`,Ot=`_label_5lmnb_40`,U=`_helper_5lmnb_47`,kt=`_inputContainer_5lmnb_57`,At=`_input_5lmnb_57`,jt=`_endContent_5lmnb_108`,W={fields:wt,actions:Tt,primaryActions:Et,field:Dt,label:Ot,helper:U,inputContainer:kt,input:At,endContent:jt}})))()}"
+    },
+    {
+      "id": "catalog",
+      "sourcePath": "webview/assets/thread-handoff-dynamic-tool-3f1c9dbad285.js",
+      "byteStart": 42383,
+      "byteEnd": 43280,
+      "sha256": "62bd51e5a5533a8bd1730c019c2d9f75e10e929c8b496e5d920bd68232a4ae03",
+      "source": "var xr,Sr,Cr;function wr(){return(wr=e((()=>{u(),xr=`consume_usage_reset`,Sr=O({idempotencyKey:M().trim().min(1).describe(`Unique ID for this logical reset attempt. A UUID is recommended. Reuse exactly the same ID when retrying an uncertain or failed response.`)}),Cr={name:xr,description:`Redeem one existing Codex reset for the ChatGPT account signed in on this task's host. Get explicit user confirmation for each use; a successful UI or tool reset fulfills that request. Every call checks fresh core usage: either the five-hour or weekly window must have 10% or less remaining. Retry uncertain attempts only with the same idempotencyKey. reset applies a new reset; alreadyRedeemed means this attempt was already used. Both complete the attempt even if usage refresh fails. noCredit/nothingToReset apply no reset. Use get_usage_limits for follow-up checks.`,inputSchema:f().parse(E(Sr))}})))()}"
+    },
+    {
+      "id": "search",
+      "sourcePath": "webview/assets/_virtual_settings-search-documents-e84bcda5b237.js",
+      "byteStart": 490739,
+      "byteEnd": 521815,
+      "sha256": "82736be2f9cba6bb06c57dd78881833d166351bcbae13d1444473652435f6586",
+      "source": "usage:[{defaultMessage:`Couldn’t reset usage. Please try again`,id:`codex.rateLimitResetModal.error`},{defaultMessage:`Retry`,id:`common.retry`},{defaultMessage:`{years, plural, one {annual limit} other {{years} year limit}}`,id:`composer.mode.rateLimit.annualDynamicSentence`},{defaultMessage:`{years, plural, one {Annual} other {{years} Years}}`,id:`composer.mode.rateLimit.annualDynamicTitle`},{defaultMessage:`{days}d`,id:`composer.mode.rateLimit.day`},{defaultMessage:`Usage remaining`,id:`composer.mode.rateLimit.heading`},{defaultMessage:`{hours}h`,id:`composer.mode.rateLimit.hour`},{defaultMessage:`{minutes}m`,id:`composer.mode.rateLimit.minute`},{defaultMessage:`{months, plural, one {monthly limit} other {{months} month limit}}`,id:`composer.mode.rateLimit.monthlyDynamicSentence`},{defaultMessage:`{months, plural, one {Monthly} other {{months} Months}}`,id:`composer.mode.rateLimit.monthlyDynamicTitle`},{defaultMessage:`{weeks, plural, one {weekly limit} other {{weeks} week limit}}`,id:`composer.mode.rateLimit.weeklyDynamicSentence`},{defaultMessage:`{weeks, plural, one {Weekly} other {{weeks} Weeks}}`,id:`composer.mode.rateLimit.weeklyDynamicTitle`},{defaultMessage:`Enabling auto-reload will charge your card every time you drop below your minimum balance. You can disable it in settings at any time.`,id:`settings.usage.autoTopUp.dialog.chargeDescription`},{defaultMessage:`Your card will be automatically charged`,id:`settings.usage.autoTopUp.dialog.chargeTitle`},{defaultMessage:`OpenAI will charge your payment method automatically when you reach your minimum balance.`,id:`settings.usage.autoTopUp.dialog.description`},{defaultMessage:`Automatically purchase credits when you’re running low`,id:`settings.usage.autoTopUp.dialog.discountDescription`},{defaultMessage:`Manage auto-reload`,id:`settings.usage.autoTopUp.dialog.manageTitle`},{defaultMessage:`Auto-reload`,id:`settings.usage.autoTopUp.dialog.setupTitle`},{defaultMessage:`Auto-reload credits`,id:`settings.usage.autoTopUp.dialog.title`},{defaultMessage:`Failed to disable auto reload`,id:`settings.usage.autoTopUp.disable.error`},{defaultMessage:`Disabled auto reload`,id:`settings.usage.autoTopUp.disable.success`},{defaultMessage:`Failed to enable auto reload`,id:`settings.usage.autoTopUp.enable.error`},{defaultMessage:`Enabled auto reload`,id:`settings.usage.autoTopUp.enable.success`},{defaultMessage:`Enabling auto reload will trigger a one-time purchase of {creditCount, number} credit to reach your target balance. Estimated cost: <strong>{amount}</strong>.`,id:`settings.usage.autoTopUp.immediateTopUpNotice.enable`},{defaultMessage:`Updating your settings will trigger a one-time purchase of {creditCount, number} credit with an estimated cost of <strong>{amount}</strong>.`,id:`settings.usage.autoTopUp.immediateTopUpNotice.update`},{defaultMessage:`<managePayment>Update your payment method</managePayment> or <purchaseCredit>purchase credit directly</purchaseCredit>`,id:`settings.usage.autoTopUp.initialPaymentDeclined.actions`},{defaultMessage:`Could not load automatic reload settings`,id:`settings.usage.autoTopUp.load.error`},{defaultMessage:`Loading automatic reload settings…`,id:`settings.usage.autoTopUp.load.loading`},{defaultMessage:`Unable to open payment settings right now. Please try again.`,id:`settings.usage.autoTopUp.managePayment.error`},{defaultMessage:`Auto-reload monthly limit`,id:`settings.usage.autoTopUp.monthlyLimit.ariaLabel`},{defaultMessage:`Monthly reload limit (optional)`,id:`settings.usage.autoTopUp.monthlyLimit.discount.label`},{defaultMessage:`Limit the total number of credits purchased through auto-reload each month. Leave blank for no limit.`,id:`settings.usage.autoTopUp.monthlyLimit.helper`},{defaultMessage:`Maximum monthly spend (optional)`,id:`settings.usage.autoTopUp.monthlyLimit.label`},{defaultMessage:`No limit`,id:`settings.usage.autoTopUp.monthlyLimit.placeholder`},{defaultMessage:`Could not load credit pricing. Try again to continue.`,id:`settings.usage.autoTopUp.pricing.error`},{defaultMessage:`Failed to save auto reload settings`,id:`settings.usage.autoTopUp.save.error`},{defaultMessage:`Auto-reload target balance`,id:`settings.usage.autoTopUp.target.ariaLabel`},{defaultMessage:`Minimum {creditCount, number} credit will be purchased, equivalent to <strong>{amount}</strong>`,id:`settings.usage.autoTopUp.target.equivalent`},{defaultMessage:`Loading price`,id:`settings.usage.autoTopUp.target.equivalent.loading`},{defaultMessage:`Target balance must be at most {maximumCredits, number} credits`,id:`settings.usage.autoTopUp.target.error.maximum`},{defaultMessage:`Set the target balance to at least 125 credits above the minimum balance.`,id:`settings.usage.autoTopUp.target.error.minimumDifference`},{defaultMessage:`Enter a target balance.`,id:`settings.usage.autoTopUp.target.error.missing`},{defaultMessage:`Target balance must be a whole number.`,id:`settings.usage.autoTopUp.target.error.wholeNumber`},{defaultMessage:`Bring my balance back to this amount if I hit my minimum`,id:`settings.usage.autoTopUp.target.helper`},{defaultMessage:`Target balance`,id:`settings.usage.autoTopUp.target.label`},{defaultMessage:`Auto-reload minimum balance`,id:`settings.usage.autoTopUp.threshold.ariaLabel`},{defaultMessage:`Set the minimum balance to at least 125 credits.`,id:`settings.usage.autoTopUp.threshold.error.minimum`},{defaultMessage:`Enter a minimum balance (at least 125 credits).`,id:`settings.usage.autoTopUp.threshold.error.missing`},{defaultMessage:`Minimum balance must be a whole number.`,id:`settings.usage.autoTopUp.threshold.error.wholeNumber`},{defaultMessage:`Automatically purchase credits when my balance drops below this amount`,id:`settings.usage.autoTopUp.threshold.helper`},{defaultMessage:`Minimum balance`,id:`settings.usage.autoTopUp.threshold.label`},{defaultMessage:`Failed to update auto reload`,id:`settings.usage.autoTopUp.update.error`},{defaultMessage:`Updated auto reload settings`,id:`settings.usage.autoTopUp.update.success`},{defaultMessage:`Could not load automatic reload settings`,id:`settings.usage.autoTopUp.workspace.loadError`},{defaultMessage:`Updated daily. Bars carry the last observed balance forward between samples and estimate full allowance at resets. Balances and reset times are approximate.`,id:`settings.usage.balanceHistory.carriedBalanceHelp`},{defaultMessage:`How your activity draws down your allowance`,id:`settings.usage.balanceHistory.description`},{defaultMessage:`Balance history isn’t available yet`,id:`settings.usage.balanceHistory.empty`},{defaultMessage:`History through {time}`,id:`settings.usage.balanceHistory.historyThroughCaption`},{defaultMessage:`Now`,id:`settings.usage.balanceHistory.now`},{defaultMessage:`Recent usage isn’t available yet`,id:`settings.usage.balanceHistory.pendingAggregation`},{defaultMessage:`Reset`,id:`settings.usage.balanceHistory.reset`},{defaultMessage:`Recent plan usage`,id:`settings.usage.balanceHistory.title`},{defaultMessage:`View usage history`,id:`settings.usage.balanceHistory.viewHistory`},{defaultMessage:`Plan limit window`,id:`settings.usage.balanceHistory.window`},{defaultMessage:`{minutes, select, 300 {5-hour} other {Weekly}}`,id:`settings.usage.balanceHistory.windowLabel`},{defaultMessage:`No banked reset activity in the past 30 days`,id:`settings.usage.bankedResetHistory.empty`},{defaultMessage:`Couldn’t load banked reset history`,id:`settings.usage.bankedResetHistory.error`},{defaultMessage:`Loading banked reset history…`,id:`settings.usage.bankedResetHistory.loading`},{defaultMessage:`Show more`,id:`settings.usage.bankedResetHistory.more`},{defaultMessage:`Past 30 days`,id:`settings.usage.bankedResetHistory.period`},{defaultMessage:`Reset received`,id:`settings.usage.bankedResetHistory.received`},{defaultMessage:`Reset used`,id:`settings.usage.bankedResetHistory.redeemed`},{defaultMessage:`{balance, plural, one {# workspace credit} other {# workspace credits}}`,id:`settings.usage.businessCredits.balance.count`},{defaultMessage:`Workspace credit balance unavailable`,id:`settings.usage.businessCredits.balanceUnknown`},{defaultMessage:`Shared workspace credits let you keep using Work and Codex beyond included usage.`,id:`settings.usage.businessCredits.description`},{defaultMessage:`Increase monthly limit`,id:`settings.usage.businessCredits.increaseLimit`},{defaultMessage:`Loading workspace credits…`,id:`settings.usage.businessCredits.loading`},{defaultMessage:`Monthly credit limits are set by your workspace owner.`,id:`settings.usage.businessCredits.member.description`},{defaultMessage:`Shared workspace credits let you keep using Work and Codex beyond included usage. Monthly credit limits are set by your workspace owner.`,id:`settings.usage.businessCredits.member.unavailableDescription`},{defaultMessage:`{remaining, number} of {limit, number} monthly credits left`,id:`settings.usage.businessCredits.monthlyRemaining`},{defaultMessage:`Couldn’t load usage request settings`,id:`settings.usage.businessCredits.requestPolicy.error`},{defaultMessage:`Loading usage request settings…`,id:`settings.usage.businessCredits.requestPolicy.loading`},{defaultMessage:`Request more usage`,id:`settings.usage.businessCredits.requestUsage`},{defaultMessage:`Workspace credits are unavailable`,id:`settings.usage.businessCredits.unavailable`},{defaultMessage:`Your subscription is managed through your Apple account. You'll need to <cancel>cancel via iOS</cancel>`,id:`settings.usage.cancelPlan.appleDescription`},{defaultMessage:`Your subscription is managed through your Google Play account. You'll need to <cancel>cancel via Android</cancel>`,id:`settings.usage.cancelPlan.googlePlayDescription`},{defaultMessage:`Add more`,id:`settings.usage.credit.balance.addBusinessCredits`},{defaultMessage:`Add more`,id:`settings.usage.credit.balance.addMore`},{defaultMessage:`Automatic reload`,id:`settings.usage.credit.balance.automaticReload`},{defaultMessage:`Toggle automatic reload`,id:`settings.usage.credit.balance.automaticReload.ariaLabel`},{defaultMessage:`Automatic reload`,id:`settings.usage.credit.balance.autoReloadLabel`},{defaultMessage:`Current balance`,id:`settings.usage.credit.balance.current`},{defaultMessage:`Buy credits or turn on automatic reload to continue using Work and Codex when you reach usage limits. <link>Learn more</link>`,id:`settings.usage.credit.balance.description`},{defaultMessage:`Up to {discountPercent, number}% off`,id:`settings.usage.credit.balance.discountOffer`},{defaultMessage:`Gift credits`,id:`settings.usage.credit.balance.giftCredits`},{defaultMessage:`Buy credits for someone else`,id:`settings.usage.credit.balance.giftCredits.description`},{defaultMessage:`Manage auto-reload`,id:`settings.usage.credit.balance.manageAutoReload`},{defaultMessage:`Buy credits to continue using Work and Codex when you reach usage limits`,id:`settings.usage.credit.balance.purchase.description`},{defaultMessage:`Your remaining credits`,id:`settings.usage.credit.balance.readOnly.description`},{defaultMessage:`Set up auto-reload`,id:`settings.usage.credit.balance.setupAutoReload`},{defaultMessage:`Credits`,id:`settings.usage.credit.balance.title`},{defaultMessage:`Allow other apps to use credits after reaching your usage limit`,id:`settings.usage.credit.chatpass.ariaLabel`},{defaultMessage:`Applies to apps you’ve allowed to use your ChatGPT plan.`,id:`settings.usage.credit.chatpass.description`},{defaultMessage:`Allow other apps to use credits after reaching your usage limit`,id:`settings.usage.credit.chatpass.title`},{defaultMessage:`{credits, plural, one {# credit remaining} other {# credits remaining}}`,id:`settings.usage.credit.remaining.count`},{defaultMessage:`Credit remaining unavailable`,id:`settings.usage.credit.remaining.unavailable`},{defaultMessage:`Unlimited credit`,id:`settings.usage.credit.remaining.unlimited`},{defaultMessage:`No credit usage recorded yet`,id:`settings.usage.creditHistory.empty`},{defaultMessage:`Could not load credit usage history`,id:`settings.usage.creditHistory.error`},{defaultMessage:`Next`,id:`settings.usage.creditHistory.next`},{defaultMessage:`Previous`,id:`settings.usage.creditHistory.previous`},{defaultMessage:`{from}-{to} of {total} usage events`,id:`settings.usage.creditHistory.range`},{defaultMessage:`Credit usage history`,id:`settings.usage.creditHistory.title`},{defaultMessage:`Credits let you keep working. Valid for 12 months. <link>View rate card</link>`,id:`settings.usage.creditReload.addCredits.description`},{defaultMessage:`Credits let you keep working. Valid for 12 months. View rate card`,id:`settings.usage.creditReload.addCredits.screenReaderDescription`},{defaultMessage:`Add credits`,id:`settings.usage.creditReload.addCredits.title`},{defaultMessage:`{creditQuantity, number} credits`,id:`settings.usage.creditReload.amount.credits`},{defaultMessage:`{discountPercent, number}% off`,id:`settings.usage.creditReload.amount.discount`},{defaultMessage:`Other`,id:`settings.usage.creditReload.amount.other`},{defaultMessage:`Custom reload amount`,id:`settings.usage.creditReload.amount.other.ariaLabel`},{defaultMessage:`—`,id:`settings.usage.creditReload.amount.pending`},{defaultMessage:`Back`,id:`settings.usage.creditReload.autoReload.back`},{defaultMessage:`Auto-reload`,id:`settings.usage.creditReload.autoReload.checkbox`},{defaultMessage:`Automatically add credits when your balance runs low`,id:`settings.usage.creditReload.autoReload.checkboxDescription`},{defaultMessage:`When my balance hits {thresholdAmount}, top up to {targetAmount}, up to {monthlyLimitAmount} per month`,id:`settings.usage.creditReload.autoReload.description`},{defaultMessage:`When my balance hits {thresholdAmount}, top up to {targetAmount}, with no monthly maximum`,id:`settings.usage.creditReload.autoReload.description.noLimit`},{defaultMessage:`If your balance falls below the minimum, your credits will automatically reload`,id:`settings.usage.creditReload.autoReload.description.pending`},{defaultMessage:`Failed to disable auto-reload`,id:`settings.usage.creditReload.autoReload.disable.error`},{defaultMessage:`Disabled auto-reload`,id:`settings.usage.creditReload.autoReload.disable.success`},{defaultMessage:`Minimum reload amount`,id:`settings.usage.creditReload.autoReload.discount.reloadAmount.label`},{defaultMessage:`Enable auto-reload`,id:`settings.usage.creditReload.autoReload.enable`},{defaultMessage:`Failed to enable auto-reload`,id:`settings.usage.creditReload.autoReload.enable.error`},{defaultMessage:`Enabled auto-reload`,id:`settings.usage.creditReload.autoReload.enable.success`},{defaultMessage:`Manage auto-reload`,id:`settings.usage.creditReload.autoReload.manage.title`},{defaultMessage:`Automatically add credits when your balance runs low`,id:`settings.usage.creditReload.autoReload.modalDescription`},{defaultMessage:`Automatically purchase credits when you’re running low`,id:`settings.usage.creditReload.autoReload.offer.description.v2`},{defaultMessage:`Auto-reload`,id:`settings.usage.creditReload.autoReload.offer.title`},{defaultMessage:`Save`,id:`settings.usage.creditReload.autoReload.save`},{defaultMessage:`Set up auto-reload`,id:`settings.usage.creditReload.autoReload.setup.title`},{defaultMessage:`Turn off`,id:`settings.usage.creditReload.autoReload.turnOff`},{defaultMessage:`Turn auto-reload off`,id:`settings.usage.creditReload.autoReload.turnOffDiscounted`},{defaultMessage:`Turn on auto-reload`,id:`settings.usage.creditReload.autoReload.turnOn`},{defaultMessage:`Failed to update auto-reload`,id:`settings.usage.creditReload.autoReload.update.error`},{defaultMessage:`Updated auto-reload settings`,id:`settings.usage.creditReload.autoReload.update.success`},{defaultMessage:`Close`,id:`settings.usage.creditReload.close`},{defaultMessage:`Continue to checkout`,id:`settings.usage.creditReload.continueToCheckout`},{defaultMessage:`Current balance: {balance}`,id:`settings.usage.creditReload.currentBalance`},{defaultMessage:`Current balance unavailable`,id:`settings.usage.creditReload.currentBalance.unavailable`},{defaultMessage:`Enter credits in increments of {quantityStep, number}`,id:`settings.usage.creditReload.error.increment`},{defaultMessage:`Enter an amount that converts to a whole number of credits`,id:`settings.usage.creditReload.error.invalidCurrencyAmount`},{defaultMessage:`Enter no more than {maximumQuantity, number} credits`,id:`settings.usage.creditReload.error.maximum`},{defaultMessage:`Target balance must be at most {maximumAmount}.`,id:`settings.usage.creditReload.error.maximumCurrency`},{defaultMessage:`Enter at least {minimumQuantity, number} credits`,id:`settings.usage.creditReload.error.minimum`},{defaultMessage:`Set the minimum balance to at least {minimumAmount}.`,id:`settings.usage.creditReload.error.minimumCurrency`},{defaultMessage:`Enter an amount`,id:`settings.usage.creditReload.error.missing`},{defaultMessage:`Enter a minimum balance (at least {minimumAmount}).`,id:`settings.usage.creditReload.error.missingMinimumCurrency`},{defaultMessage:`Set the monthly limit high enough to cover one reload`,id:`settings.usage.creditReload.error.monthlyLimit`},{defaultMessage:`Set the target balance at least {minimumQuantity, number} credits above the minimum balance`,id:`settings.usage.creditReload.error.targetBalance`},{defaultMessage:`Enter a whole number of credits`,id:`settings.usage.creditReload.error.wholeNumber`},{defaultMessage:`The initial reload for an estimated {amount} failed. <managePayment>Update your payment method</managePayment>`,id:`settings.usage.creditReload.immediateTopUpFailure.amount`},{defaultMessage:`The initial reload failed. <managePayment>Update your payment method</managePayment>`,id:`settings.usage.creditReload.immediateTopUpFailure.generic`},{defaultMessage:`We couldn’t confirm the initial top-up. Check your transaction history before trying again.`,id:`settings.usage.creditReload.immediateTopUpFailure.unconfirmed`},{defaultMessage:`Cancel`,id:`settings.usage.creditReload.load.cancel`},{defaultMessage:`Could not load credit settings`,id:`settings.usage.creditReload.load.error`},{defaultMessage:`Loading credit settings…`,id:`settings.usage.creditReload.load.loading`},{defaultMessage:`Retry`,id:`settings.usage.creditReload.load.retry`},{defaultMessage:`Unable to open payment settings right now. Please try again`,id:`settings.usage.creditReload.managePayment.error`},{defaultMessage:`Minimum balance`,id:`settings.usage.creditReload.minimumBalance`},{defaultMessage:`Minimum balance`,id:`settings.usage.creditReload.minimumBalance.ariaLabel`},{defaultMessage:`Minimum balance`,id:`settings.usage.creditReload.minimumBalance.discounted.ariaLabel.v2`},{defaultMessage:`Automatically purchase credits when my balance drops below this amount`,id:`settings.usage.creditReload.minimumBalance.discounted.tooltip`},{defaultMessage:`About minimum balance`,id:`settings.usage.creditReload.minimumBalance.discounted.tooltip.ariaLabel`},{defaultMessage:`Minimum balance`,id:`settings.usage.creditReload.minimumBalance.discounted.v2`},{defaultMessage:`Purchase credits to keep working when your included usage runs out. <link>View rate card</link>`,id:`settings.usage.creditReload.oneTimePurchase.description`},{defaultMessage:`Purchase credits to keep working when your included usage runs out. View rate card`,id:`settings.usage.creditReload.oneTimePurchase.screenReaderDescription`},{defaultMessage:`One time credit purchase`,id:`settings.usage.creditReload.oneTimePurchase.title`},{defaultMessage:`Maximum monthly spend`,id:`settings.usage.creditReload.spendLimit`},{defaultMessage:`Monthly reload spend limit`,id:`settings.usage.creditReload.spendLimit.ariaLabel`},{defaultMessage:`Maximum monthly spend (optional)`,id:`settings.usage.creditReload.spendLimit.discounted.ariaLabel`},{defaultMessage:`Maximum monthly spend must cover the minimum balance plus the reload amount`,id:`settings.usage.creditReload.spendLimit.discounted.error`},{defaultMessage:`(Optional)`,id:`settings.usage.creditReload.spendLimit.optional`},{defaultMessage:`(optional)`,id:`settings.usage.creditReload.spendLimit.optional.discounted`},{defaultMessage:`No limit`,id:`settings.usage.creditReload.spendLimit.placeholder`},{defaultMessage:`View rate card`,id:`settings.usage.creditReload.viewRateCard`},{defaultMessage:`{value, number} {value, plural, one {credit} other {credits}}`,id:`settings.usage.credits.value`},{defaultMessage:`Loading usage history…`,id:`settings.usage.history.loading`},{defaultMessage:`Retry`,id:`settings.usage.history.retry`},{defaultMessage:`Add credits to keep going`,id:`settings.usage.limits.addCredits`},{defaultMessage:`Buy an instant reset`,id:`settings.usage.limits.buyReset.button`},{defaultMessage:`Reset your usage limits now`,id:`settings.usage.limits.buyReset.label`},{defaultMessage:`This is not a banked reset. Buying an instant reset will reset your limits immediately.`,id:`settings.usage.limits.buyReset.tooltip`},{defaultMessage:`How buying a reset works`,id:`settings.usage.limits.buyReset.tooltipLabel`},{defaultMessage:`Request more usage`,id:`settings.usage.limits.customRequestIncrease`},{defaultMessage:`Daily usage limit`,id:`settings.usage.limits.day.label`},{defaultMessage:`5 hour usage limit`,id:`settings.usage.limits.fiveHour.label`},{defaultMessage:`Usage limit`,id:`settings.usage.limits.genericWindow.label`},{defaultMessage:`Monthly limit`,id:`settings.usage.limits.monthly.billingLabel`},{defaultMessage:`Monthly credits used`,id:`settings.usage.limits.monthly.billingProgressAriaLabel`},{defaultMessage:`{used} of {limit} credits used · Est. {usedCost} of {limitCost} used`,id:`settings.usage.limits.monthly.creditsAndEstimatedSpendUsed`},{defaultMessage:`{used} of {limit} credits used`,id:`settings.usage.limits.monthly.creditsUsed`},{defaultMessage:`Your usage this month`,id:`settings.usage.limits.monthly.currentUsage`},{defaultMessage:`{credits, plural, one {# credit} other {# credits}}`,id:`settings.usage.limits.monthly.currentUsageCredits`},{defaultMessage:`{credits, plural, one {# credit} other {# credits}} · Est. {cost}`,id:`settings.usage.limits.monthly.currentUsageCreditsAndEstimatedSpend`},{defaultMessage:`Monthly usage limit`,id:`settings.usage.limits.monthly.label`},{defaultMessage:`Your admin hasn’t set a usage limit`,id:`settings.usage.limits.monthly.none`},{defaultMessage:`{remaining}% remaining`,id:`settings.usage.limits.monthly.progress.remaining`},{defaultMessage:`Monthly usage remaining`,id:`settings.usage.limits.monthly.progress.remainingAriaLabel`},{defaultMessage:`Monthly spend used`,id:`settings.usage.limits.monthly.usdProgressAriaLabel`},{defaultMessage:`{used} of {limit} used`,id:`settings.usage.limits.monthly.usdUsed`},{defaultMessage:`Shared across Codex, Work, Workspace Agents, and ChatGPT for Excel. Chat conversations are not included.`,id:`settings.usage.limits.plan.subtitle`},{defaultMessage:`Plan limits`,id:`settings.usage.limits.plan.title`},{defaultMessage:`Usage remaining`,id:`settings.usage.limits.progress.ariaLabel`},{defaultMessage:`{remaining}% left`,id:`settings.usage.limits.progress.remaining`},{defaultMessage:`Cancel`,id:`settings.usage.limits.requestCancel`},{defaultMessage:`Request more usage`,id:`settings.usage.limits.requestIncrease`},{defaultMessage:`Justification`,id:`settings.usage.limits.requestJustificationLabel`},{defaultMessage:`Tell your admin why you need more usage`,id:`settings.usage.limits.requestJustificationPlaceholder`},{defaultMessage:`Enter a justification to submit your request`,id:`settings.usage.limits.requestMissingJustification`},{defaultMessage:`Your request is pending admin review.`,id:`settings.usage.limits.requestPending`},{defaultMessage:`Submit request`,id:`settings.usage.limits.requestSave`},{defaultMessage:`Request submitted`,id:`settings.usage.limits.requestSaved`},{defaultMessage:`Could not save your request. Please try again`,id:`settings.usage.limits.requestSaveError`},{defaultMessage:`Update request`,id:`settings.usage.limits.requestUpdate`},{defaultMessage:`Request updated`,id:`settings.usage.limits.requestUpdated`},{defaultMessage:`GPT-5.3-Codex-Spark usage limits`,id:`settings.usage.limits.spark.title`},{defaultMessage:`General usage limits`,id:`settings.usage.limits.title`},{defaultMessage:`Update pending request`,id:`settings.usage.limits.updatePendingRequest`},{defaultMessage:`Weekly usage limit`,id:`settings.usage.limits.week.label`},{defaultMessage:`Resets {time}`,id:`settings.usage.limits.window.resetAt`},{defaultMessage:`Could not load usage settings.`,id:`settings.usage.load.error`},{defaultMessage:`Loading usage settings…`,id:`settings.usage.load.loading`},{defaultMessage:`Retry`,id:`settings.usage.load.retry`},{defaultMessage:`Overview`,id:`settings.usage.overviewTab`},{defaultMessage:`5-hour limit`,id:`settings.usage.personalLimits.fiveHour`},{defaultMessage:`Resets in {days}d {hours}h`,id:`settings.usage.personalLimits.resetsInDaysHours`},{defaultMessage:`Resets in {duration}`,id:`settings.usage.personalLimits.resetsInDuration`},{defaultMessage:`Resets in {hours}h {minutes}m`,id:`settings.usage.personalLimits.resetsInHoursMinutes`},{defaultMessage:`Resets in {minutes}m`,id:`settings.usage.personalLimits.resetsInMinutes`},{defaultMessage:`Resets now`,id:`settings.usage.personalLimits.resetsNow`},{defaultMessage:`Shared across Codex, Work, Workspace Agents, and ChatGPT for Excel. Chat conversations are not included.`,id:`settings.usage.personalLimits.sharedDescription`},{defaultMessage:`Plan limits`,id:`settings.usage.personalLimits.title`},{defaultMessage:`Shared across Codex, Work, Workspace Agents, and ChatGPT for Excel. Chat conversations are not included. To increase usage, <upgrade>upgrade your plan</upgrade>`,id:`settings.usage.personalLimits.upgradeDescription`},{defaultMessage:`Weekly limit`,id:`settings.usage.personalLimits.weekly`},{defaultMessage:`ChatGPT Free`,id:`settings.usage.plan.free`},{defaultMessage:`ChatGPT Go`,id:`settings.usage.plan.go`},{defaultMessage:`Your subscription is managed through ChatGPT. Go to <cancel>Settings > Billing on Web</cancel> to manage or cancel your plan`,id:`settings.usage.plan.manageOnWebDescription`},{defaultMessage:`{price} / month`,id:`settings.usage.plan.monthlyPrice`},{defaultMessage:`ChatGPT Plus`,id:`settings.usage.plan.plus`},{defaultMessage:`ChatGPT {plan, select, prolite {Pro 100} pro {Pro 200} promax {Pro 500} other {Pro}}`,id:`settings.usage.plan.pro.numberedTiers`},{defaultMessage:`Your plan`,id:`settings.usage.plan.title`},{defaultMessage:`View plans`,id:`settings.usage.plan.view`},{defaultMessage:`Allow your assistant to use a reset only when you explicitly request it during a conversation and your current limit has 10% or less remaining. Resets are never used automatically.`,id:`settings.usage.resets.agentEnabled.description`},{defaultMessage:`Couldn’t update usage reset setting`,id:`settings.usage.resets.agentEnabled.error`},{defaultMessage:`Allow your assistant to use resets`,id:`settings.usage.resets.agentEnabled.label`},{defaultMessage:`Confirm`,id:`settings.usage.resets.confirmReset`},{defaultMessage:`Use a reset to restore your 5-hour limit, weekly limit, or both`,id:`settings.usage.resets.description`},{defaultMessage:`No resets available`,id:`settings.usage.resets.empty`},{defaultMessage:`Expires {date}`,id:`settings.usage.resets.expiresWithTimeZone`},{defaultMessage:`Usage reset`,id:`settings.usage.resets.fallbackTitle`},{defaultMessage:`Couldn’t load usage limit resets`,id:`settings.usage.resets.loadError`},{defaultMessage:`Loading usage limit resets…`,id:`settings.usage.resets.loading`},{defaultMessage:`Retry`,id:`settings.usage.resets.retry`},{defaultMessage:`Usage limits reset`,id:`settings.usage.resets.success`},{defaultMessage:`Available <count>{availableCount}</count>`,id:`settings.usage.resets.tabs.available.label`},{defaultMessage:`History`,id:`settings.usage.resets.tabs.history`},{defaultMessage:`Usage limit resets`,id:`settings.usage.resets.tabs.label`},{defaultMessage:`Usage limit resets`,id:`settings.usage.resets.title`},{defaultMessage:`Use reset`,id:`settings.usage.resets.useReset`},{defaultMessage:`Back`,id:`settings.usage.subscriptionScheduleConflict.back`},{defaultMessage:`Go to billing settings`,id:`settings.usage.subscriptionScheduleConflict.billingSettings`},{defaultMessage:`Confirm plan changes`,id:`settings.usage.subscriptionScheduleConflict.title`},{defaultMessage:`Cancel your upcoming subscription change to continue`,id:`settings.usage.subscriptionScheduleConflict.upgradeExplanation`},{defaultMessage:`Couldn't load app limits`,id:`settings.usage.subscriptionSharing.apps.loadError`},{defaultMessage:`Loading app limits…`,id:`settings.usage.subscriptionSharing.apps.loading`},{defaultMessage:`Plan limit for {app}`,id:`settings.usage.subscriptionSharing.apps.planLimitLabel`},{defaultMessage:`Retry`,id:`settings.usage.subscriptionSharing.apps.retry`},{defaultMessage:`Allow {app} to use plan limits`,id:`settings.usage.subscriptionSharing.apps.usePlanLimitsLabel`},{defaultMessage:`Couldn’t load credit preference`,id:`settings.usage.subscriptionSharing.credits.loadError`},{defaultMessage:`Loading credit preference…`,id:`settings.usage.subscriptionSharing.credits.loading`},{defaultMessage:`Set limits for each app’s use of your ChatGPT plan and credits.`,id:`settings.usage.subscriptionSharing.description`},{defaultMessage:`App limits`,id:`settings.usage.subscriptionSharing.title`},{defaultMessage:`Access tokens`,id:`settings.usage.surface.agentIdentity`},{defaultMessage:`CLI`,id:`settings.usage.surface.cli`},{defaultMessage:`Codex Security Cloud`,id:`settings.usage.surface.codexSecurityCloud`},{defaultMessage:`Desktop App`,id:`settings.usage.surface.desktopApp`},{defaultMessage:`Exec`,id:`settings.usage.surface.exec`},{defaultMessage:`GitHub`,id:`settings.usage.surface.github`},{defaultMessage:`GitHub code review`,id:`settings.usage.surface.githubCodeReview`},{defaultMessage:`JetBrains`,id:`settings.usage.surface.jetbrains`},{defaultMessage:`Linear`,id:`settings.usage.surface.linear`},{defaultMessage:`Mobile`,id:`settings.usage.surface.mobile`},{defaultMessage:`Other`,id:`settings.usage.surface.other`},{defaultMessage:`SDK`,id:`settings.usage.surface.sdk`},{defaultMessage:`Slack`,id:`settings.usage.surface.slack`},{defaultMessage:`Uncategorized`,id:`settings.usage.surface.unknown`},{defaultMessage:`Extension`,id:`settings.usage.surface.vscode`},{defaultMessage:`Cloud`,id:`settings.usage.surface.web`},{defaultMessage:`Desktop (Work)`,id:`settings.usage.surface.workDesktop`},{defaultMessage:`Mobile`,id:`settings.usage.surface.workMobile`},{defaultMessage:`Web`,id:`settings.usage.surface.workWeb`},{defaultMessage:`Usage sections`,id:`settings.usage.tabsLabel`},{defaultMessage:`We couldn’t confirm a usable card. Select an eligible card or add a different card. If loading failed, use Retry above.`,id:`wham.usageDashboard.autoTopOff.paymentMethodSelect.addNeedsReconciliation`}]"
+    },
+    {
+      "id": "manual-http",
+      "sourcePath": "webview/assets/app-initial-c4cac3105190.js",
+      "byteStart": 6009272,
+      "byteEnd": 6009433,
+      "sha256": "5beb67cfeb50112a6067daf925a7aadc4a05b8ef702f2e74ec40c9cbfef71773",
+      "source": "function x8i(e){let{creditId:t,redeemRequestId:n}=e;return M_.safePost(`/wham/rate-limit-reset-credits/consume`,{requestBody:{credit_id:t,redeem_request_id:n}})}"
+    },
+    {
+      "id": "manual-retry",
+      "sourcePath": "webview/assets/redemption-16a052327444.js",
+      "byteStart": 55,
+      "byteEnd": 683,
+      "sha256": "5cd8b80991dc284c49c2e5531d7c9657340e81b5a9d80808e28a01d974b3b3cf",
+      "source": "function t(){let e=!1,t;return{async redeem({availableCount:n,consume:r,creditId:i}){if(e)return{status:`in_flight`};t??={availableCount:n,creditId:i,hasTransportFailure:!1,redeemRequestId:crypto.randomUUID()};let a=t;e=!0;try{let e=await r({creditId:a.creditId,redeemRequestId:a.redeemRequestId});return t=void 0,e.code===`reset`||a.hasTransportFailure&&e.code===`already_redeemed`?{availableCountBefore:a.availableCount,creditId:a.creditId,resetType:e.credit?.reset_type??null,status:`reset`}:{code:e.code,status:`rejected`}}catch{return a.hasTransportFailure=!0,{creditId:a.creditId,status:`transport_error`}}finally{e=!1}}}}"
+    },
+    {
+      "id": "master-gate",
+      "sourcePath": ".vite/build/early-bootstrap-916-2f6483d5bfd826f1.js",
+      "byteStart": 4165366,
+      "byteEnd": 4165620,
+      "sha256": "ad3df9af3fdc364aa75c4236a0a22d0b0e71e3838fbcced02a8b58396b2a5654",
+      "source": "transformOutgoingMessage:e=>{if(\"method\"in e&&\"account/rateLimitResetCredit/consume\"===e.method&&!0!==this.options.settingsStore.getEffective(el.U6S.agentUsageResetEnabled.key))throw new em.l34(\"Usage resets are disabled in settings.\");return u?.(e)??e},"
+    },
+    {
+      "id": "catalog-availability",
+      "sourcePath": "webview/assets/initialize-app-host-services-32dd4cad0b90.js",
+      "byteStart": 142820,
+      "byteEnd": 146241,
+      "sha256": "bc7f53fee3250fb92c2a2e83667cd1c039cc20af33e1984ae40795b38c189d89",
+      "source": "function dT({desktop:e,localDesktopHost:t,pluginManagementDynamicTools:n,appServerVersion:r,managedWorktreesAvailable:i=!1,cloudWorktreesEnabled:a=!1,latexAvailable:o=!1,availableHandoffHosts:s,appshotsAvailable:c=!1,appshotsEnabled:l=!1,authMethod:u,agentUsageResetEnabled:d=!1,crossHostHandoffEnabled:f=!1,cloudEnvironmentsEnabled:p=!1,existingThreadVoiceEnabled:m=!1,voiceCallEndEnabled:h=!1,voiceCallTransferEnabled:g=!1,enabledReasoningEfforts:_,featureOverrides:v,hasConfiguredModelCatalog:y=!1,confettiAvailable:x=!1,hostedAutomationsEnabled:S=!1,hostId:C,requestedHistoryMode:w,includeUltraReasoningEffort:T,isAuthLoading:E,isTabAvailable:D,isCustomModelProvider:O=!1,workspaceDependenciesEnabled:k=!1,models:A,modelAvailabilityConfig:j,pagesEnabled:M=!1,runningSummaryEnabled:N=!1,screenAnnotationsAllowed:ee=!1,screenSizeForAnnotations:P=null,platform:te,projectToolsEnabled:ne=!1,pullRequestAssociationEnabled:re=!1,pullRequestCheckDiagnosticsEnabled:F=!1,sidebarCustomSectionsEnabled:I=!1,navigateToCodexPageEnabled:ie=!0,mode:L=`default`,threadStartKind:R=`default`,threadSharingEnabled:ae=!1}){let z=R===`all`,B=v?.[mh]===!0,oe=v?.[ki]===!0,se=e&&z||x,ce=Vh({authMethod:u,hasConfiguredModelCatalog:y,enabledReasoningEfforts:_,includeUltraReasoningEffort:T,isAuthLoading:E,isCustomModelProvider:O,models:A,modelAvailabilityConfig:j}),le=e&&re,ue=i&&(we(C)?a:b(r,`threadAttachments`)),de=[...ue&&e&&(z||L===\"default\"&&R===\"default\")?[...we(C)?[{...zh,description:`Create a protected checkout at a Git ref already present on this chat’s remote executor. Use list_artifacts to find an existing checkout first. A pending result must be polled. If attachment or cwd confirmation fails, retry attach_worktree with the returned path. Use the returned workspace explicitly in this turn. Recovery requires the same executor and its stored files to remain available.`},{...tg,description:`Recover this chat’s protected checkout on its remote executor using the path returned by create_worktree. Retries verify Git before attaching and updating the chat’s working directory. Use the returned workspace explicitly in this turn.`}]:[zh,tg,Xh,rg],qh]:[],...N?[il]:[],...e&&t&&(z||F&&L===\"default\"&&R===\"default\")?[yg]:[],...le?[Hh,Lh]:[],...le||ue?[ag]:[],...e&&t&&!S?[ci()]:[],...R===`environment_setup`||z?[Fc,Eu]:[],...e?[Pp(D)]:[],...e&&o?[Nh]:[],...e&&t&&o?[Ph]:[],...se?[Np]:[],...e&&t&&ie?[Lp]:[],...e&&ne?[Yh,Hg]:[],Yg,...e&&t?[jh]:[],...e&&!E&&u===`chatgpt`?[Kh,...z||d?[Ih]:[]]:[],...e&&t&&M?[Bg,qg,Gg]:[],...ae?[Zh]:[],...t&&(k||e&&z)?[Gd]:[],...z||R===`realtime_voice`||m&&R===\"default\"?gm({desktop:e,enabled:z||v?.realtime_conversation===!0,appshotsAvailable:z&&te===`macOS`||c,appshotsEnabled:z||l,endRealtimeVoiceCallEnabled:z||h,transferVoiceCallEnabled:z||g,platform:te}):[],...e?lT(e,{availableHandoffHosts:s,availableModels:ce,crossHostHandoffEnabled:f,cloudEnvironmentsEnabled:p,sidebarCustomSectionsEnabled:I,forkThreadEnabled:(w!==`paginated`||Ft(r))&&L!==`durable`&&R!==`aeon`}):[],...e?[Eh]:[],...e&&t?[Ah]:[],...e&&I?wh():[],...t&&B?[Pg,...z||L===\"default\"&&R===\"default\"?[bg]:[]]:[],...R===`conversational_onboarding`||z?[_g]:[],...e&&t&&(R===`sidebar_onboarding_checklist`||z)?[Th]:[],...z||oe&&R!==`conversational_onboarding`&&R!==`environment_setup`?[...jo,Yo]:[]];return hh({tools:de,eagerToolNames:fT,deferredToolNames:m?vm:[],supportsDynamicToolNamespaces:!0,additionalNamespaces:n})}"
+    },
+    {
+      "id": "catalog-import",
+      "sourcePath": "webview/assets/initialize-app-host-services-32dd4cad0b90.js",
+      "byteStart": 11160,
+      "byteEnd": 11558,
+      "sha256": "30a52fc2cabf104c76cd52d1a0442fabc04f6b2b2a5dbadc38eb3d52fc9ea89a",
+      "source": "import{B as Sh,Ct as Ch,F as wh,G as Th,H as Eh,I as Dh,K as Oh,Ot as kh,R as Ah,Tt as jh,W as Mh,Y as Nh,Z as Ph,_t as Fh,a as Ih,bt as Lh,c as Rh,ct as zh,f as Bh,g as Vh,gt as Hh,h as Uh,i as Wh,it as Gh,l as Kh,lt as qh,mt as Jh,nt as Yh,ot as Xh,p as Zh,q as Qh,r as $h,rt as eg,st as tg,tt as ng,ut as rg,v as ig,vt as ag,xt as og,yt as sg}from\"./thread-handoff-dynamic-tool-3f1c9dbad285.js\";"
+    },
+    {
+      "id": "catalog-export",
+      "sourcePath": "webview/assets/thread-handoff-dynamic-tool-3f1c9dbad285.js",
+      "byteStart": 56248,
+      "byteEnd": 56255,
+      "sha256": "3d039dbb4c9674c86c57f25d376a3df6a3e3b96d32a623083eb03b4e3112ad07",
+      "source": "Cr as a"
+    },
+    {
+      "id": "native-store",
+      "sourcePath": ".vite/build/early-bootstrap-133-a2b781596743bab7.js",
+      "byteStart": 22450,
+      "byteEnd": 28449,
+      "sha256": "67bcbf62a776d973ccfc2f62e6a2e1d10ef91a96098f706ce7cf2037ce6d10ad",
+      "source": "class f{filePath;globalState;state;changeListeners=new Map;pendingLegacyMigrations=new Map;pendingWrites=new Map;desktopConfig;managedStorage=new Map;configClient=null;persistQueued=Promise.resolve();constructor(e,t){this.filePath=e,this.globalState=t,this.desktopConfig=function(e){if(!(0,i.existsSync)(e))return{};try{var t=p.parse((0,o.qg)((0,i.readFileSync)(e,\"utf8\"))).desktop??{};let r={};for(let[e,i]of Object.entries(t)){let t=d.safeParse(i);if(!t.success){c().warning(\"Dropping unsupported desktop config value\",{safe:{key:e},sensitive:{}});continue}r[e]=t.data}return r}catch(e){return c().warning(\"Failed to load desktop settings from config.toml\",{safe:{},sensitive:{error:e}}),{}}}(this.filePath),this.state=m(this.desktopConfig),function(e,t,r){let i=r.getStored(l.Oq);for(let s of n.fsg){if(e.has(s.key))continue;let o=function(e,t,r){let{hostStorage:i}=e;switch(i.kind){case\"configuration\":{let s=t.getStored(i.key);if(void 0!==s)return s;if(e.key===n.Szl.composerEnterBehavior.key&&null!=r&&Object.prototype.hasOwnProperty.call(r,u))return r[u];if(e.key===n.Szl.keepRemoteControlAwakeWhilePluggedIn.key)return t.getStored(n.Szl.preventSleepWhileRunning.key);return}case\"global-state\":return t.getStored(i.key);case\"persisted-atom\":if(null==r||!Object.prototype.hasOwnProperty.call(r,i.key))return;if(e.key===n.kWF.defaultServiceTier.key)return(0,n.E$9)(r);return r[i.key]}}(s,r,i);if(void 0===o)continue;let a=(0,n.Q6s)(s.key).safeParse(o);if(!a.success){c().warning(\"Dropping invalid migrated setting\",{safe:{key:s.key},sensitive:{}});continue}e.set(s.key,a.data),t.set(s.key,a.data)}}(this.state,this.pendingLegacyMigrations,this.globalState)}getStateFilePath(){return this.filePath}getDesktopConfig(){return this.desktopConfig}async captureInitialFollowUpQueueMode(){let e=this.globalState.getStored(l.$6);if(null!=e)return e;let t=this.globalState.getStored(l.Oq),r=t?.[\"electron:onboarding-projectless-completed\"]===!0,i=Object.keys(this.globalState.getStored(n.Q2Y.LOCAL_PROJECTS)??{}).length>0,s=r||i?\"queue\":\"steer\";return this.globalState.set(l.$6,s),await this.globalState.flush(),s}async initialize(e){let t=await this.captureInitialFollowUpQueueMode(),r=new Map([...this.changeListeners.keys()].map(e=>[e,this.get(e)]));if(void 0!==e.storageRequirements){this.managedStorage.clear();let t=e.storageRequirements?.application?.storage;for(let e of[n.Szl.defaultProjectParent.key,n.Szl.projectlessWorkspaceRoot.key]){let r=t?.[e];null!=r&&(this.managedStorage.set(e,r),this.pendingWrites.delete(e),this.pendingLegacyMigrations.delete(e))}}this.configClient=e,this.desktopConfig=e.config.desktop??{};let i=m(this.desktopConfig),s=new Set;for(let e of n.fsg)if(!this.pendingWrites.has(e.key)){if(i.has(e.key)){this.state.set(e.key,i.get(e.key)),this.pendingLegacyMigrations.delete(e.key)&&s.add(e.key);continue}this.pendingLegacyMigrations.has(e.key)||this.state.delete(e.key)}for(let[e,t]of this.managedStorage)this.state.set(e,t),this.desktopConfig[e]=t;for(let[e,i]of(this.initializeFollowUpQueueMode(t),r))Object.is(i,this.get(e))||this.notifyChangeListeners(e);g(s,this.globalState),await this.persistPendingSettings()}onDidChange(e,t){let r=this.changeListeners.get(e)??new Set;return r.add(t),this.changeListeners.set(e,r),()=>{r.delete(t),0===r.size&&this.changeListeners.delete(e)}}get(e){return this.state.get(e)}getEffective(e){return this.get(e)??(0,n.crQ)(e).default}set(e,t){this.managedStorage.has(e)||(this.setValue(e,t),this.persistPendingSettings())}setAndPersist(e,t){if(null==this.configClient)throw Error(\"Settings persistence is not initialized\");if(this.managedStorage.has(e))throw Error(\"This setting is managed by your organization\");let r=this.setValue(e,t,{rollbackOnFailure:!0});return this.persistPendingSettings({reportError:!0}).then(()=>{r.status=\"saved\",r.previous=void 0},t=>{if(\"saved\"!==r.status){if(r.status=\"failed\",this.pendingWrites.get(e)===r){let t=r.previous;for(;t?.write?.status===\"failed\";)t=t.write.previous;if(null!=t){let r=this.get(e);t.hadValue?this.state.set(e,t.value):this.state.delete(e),t.hadConfiguredValue?this.desktopConfig[e]=t.configuredValue:delete this.desktopConfig[e],t.write?.status===\"pending\"?this.pendingWrites.set(e,t.write):this.pendingWrites.delete(e),Object.is(r,t.value)||this.notifyChangeListeners(e)}}throw t}})}setValue(e,t,{rollbackOnFailure:r=!1}={}){let i=this.get(e),s=(0,n.Q6s)(e).parse(t),o={value:s,status:\"pending\",previous:r?{value:i,hadValue:this.state.has(e),configuredValue:this.desktopConfig[e],hadConfiguredValue:Object.hasOwn(this.desktopConfig,e),write:this.pendingWrites.get(e)}:void 0};return this.state.set(e,s),this.desktopConfig[e]=(0,n.uvL)((0,n.Q6s)(e),s),this.pendingWrites.set(e,o),Object.is(i,s)||this.notifyChangeListeners(e),o}flush(){return this.persistQueued.then(()=>this.persistPendingSettings())}notifyChangeListeners(e){for(let t of this.changeListeners.get(e)??[])t()}initializeFollowUpQueueMode(e){let t=n.Szl.followUpQueueMode.key;this.state.has(t)||(this.state.set(t,e),this.desktopConfig[t]=(0,n.uvL)((0,n.Q6s)(t),e),this.pendingWrites.set(t,{value:e,status:\"pending\",previous:void 0}))}persistPendingSettings({reportError:e=!1}={}){let t=this.configClient;if(null==t)return this.persistQueued;let r=this.persistQueued.then(async()=>{let e=new Map(this.pendingLegacyMigrations),r=new Map(this.pendingWrites),i=new Map(e);for(let[e,t]of r)i.set(e,t.value);if(0!==i.size)try{for(let[r,s]of(await t.batchWriteConfigValues({edits:[...i.entries()].map(([e,t])=>{let r=(0,n.uvL)((0,n.Q6s)(e),t);return{keyPath:`desktop.${e}`,mergeStrategy:\"replace\",value:r}})}),e))this.pendingLegacyMigrations.get(r)===s&&this.pendingLegacyMigrations.delete(r);for(let[e,t]of r)t.status=\"saved\",t.previous=void 0,this.pendingWrites.get(e)===t&&this.pendingWrites.delete(e);g(new Set(e.keys()),this.globalState)}catch(e){throw c().warning(\"Failed to persist desktop settings\",{safe:{},sensitive:{error:e}}),e}});return this.persistQueued=r.catch(()=>void 0),e?r:this.persistQueued}}"
+    },
+    {
+      "id": "native-load",
+      "sourcePath": ".vite/build/early-bootstrap-133-a2b781596743bab7.js",
+      "byteStart": 28449,
+      "byteEnd": 28743,
+      "sha256": "084d713ec953a61916de039a6a83f3855ba8c523e318f6033d4d8387928db927",
+      "source": "function m(e){let t=new Map;for(let[r,i]of Object.entries(e)){let e=(0,n.crQ)(r);if(null==e)continue;let s=(0,n.Q6s)(e.key).safeParse((0,n.Q4s)((0,n.Q6s)(e.key),i));if(!s.success){c().warning(\"Dropping invalid desktop setting\",{safe:{key:r},sensitive:{}});continue}t.set(e.key,s.data)}return t}"
+    },
+    {
+      "id": "native-write",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 2113119,
+      "byteEnd": 2114713,
+      "sha256": "5033d41f96b7feb735146a0215bfb995a249fd4921dc6001ff19b42b597c7d52",
+      "source": "async function akt(e,t,n,r){let i=e.query.snapshot(N$),a=i.cancel(),o=i.getData(),s=r?.optimistic??!0,c=e.get(M$,t.key),l,u;if(s){l={previous:o,optimistic:i.setData({configuredValues:o?.configuredValues==null?void 0:{...o.configuredValues,[t.key]:n},values:{...o?.values,[t.key]:n}}),previousWrite:c.current,status:`pending`},c.current=l;let r=e.queryClient.getQueryCache(),a=r.find({queryKey:i.queryKey,exact:!0})?.queryHash;u=r.subscribe(e=>{e.type===`updated`&&e.query.queryHash===a&&e.action.type===`success`&&!e.action.manual&&(c.current=void 0)})}await a;try{if(await ckt(t,n),l!=null)l.status=`saved`,l.previousWrite=void 0,c.current===l&&(c.current=void 0);else{c.current=void 0;let e=i.getData();i.setData({configuredValues:e?.configuredValues==null?void 0:{...e.configuredValues,[t.key]:n},values:{...e?.values,[t.key]:n}})}}catch(e){if(l!=null&&(l.status=`failed`,c.current===l)){let e=l.previous,n=l.previousWrite;for(;n?.status===`failed`;)e=n.previous,n=n.previousWrite;c.current=n?.status===`pending`?n:void 0;let r=l.optimistic;i.setData(n=>{if(n==null||n.values[t.key]!==r?.values[t.key]||n.configuredValues?.[t.key]!==r?.configuredValues?.[t.key])return c.current=void 0,n;let i={...n.values,[t.key]:e?.values[t.key]};(e==null||!Object.hasOwn(e.values,t.key))&&delete i[t.key];let a=n.configuredValues==null?void 0:{...n.configuredValues,[t.key]:e?.configuredValues?.[t.key]};return a!=null&&(e?.configuredValues==null||!Object.hasOwn(e.configuredValues,t.key))&&delete a[t.key],{...n,values:i,configuredValues:a}})}throw e}finally{u?.(),await i.invalidate(),oTt(i.queryKey)}}"
+    },
+    {
+      "id": "native-write-raw",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 2115083,
+      "byteEnd": 2115224,
+      "sha256": "394ff199c1446a59b73eb82cb5a6abce8df9a039eb58760d495f54cfd6cf074b",
+      "source": "async function ckt(e,t){if(KQ?.settings!=null)await c$(KQ.settings.write(e.key,t));else throw Error(`Settings are unavailable on this host`)}"
+    },
+    {
+      "id": "native-bridge-write",
+      "sourcePath": ".vite/build/early-bootstrap-916-2f6483d5bfd826f1.js",
+      "byteStart": 2005352,
+      "byteEnd": 2005495,
+      "sha256": "1c6a909d45dc6899f8df7c9f6a84bcdb3f406e3b824b4d30eef30ff314ddf9d1",
+      "source": "async write(e,t){let r=this.store.setAndPersist(e,t);this.applyWriteSideEffects(e);try{await r}catch(t){throw this.applyWriteSideEffects(e),t}}"
+    },
+    {
+      "id": "agent-write",
+      "sourcePath": ".vite/build/early-bootstrap-916-2f6483d5bfd826f1.js",
+      "byteStart": 1992929,
+      "byteEnd": 1993379,
+      "sha256": "dd3a9c3bc93f419f62fb011a08e7940514b0b2e1c295f1c794a83005232533ab",
+      "source": "async writeForAgent(e,t){let r=new Set(this.keys());for(let{key:t,value:n}of Object.entries(e).map(([e,t])=>{let n=(0,el.crQ)(e);if(null==n||!r.has(n.key))throw Error(`Unknown setting: ${e}`);if(\"read-write\"!==n.agentAccess)throw Error(`Setting cannot be written by Codex: ${e}`);return{key:n.key,value:(0,el.jls)(n.key,t)}}))await this.write(t,n);let{settings:n,effectiveSettings:i}=await this.readForAgent(t);return{settings:n,effectiveSettings:i}}"
+    },
+    {
+      "id": "native-subscription",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 2112953,
+      "byteEnd": 2112987,
+      "sha256": "559094bd37b45351be216c77a1fdd904e7524036a31d7294f8ae0856a83e1275",
+      "source": "function ekt(e){return K2e(mkt,e)}"
+    },
+    {
+      "id": "native-subscription-initializer",
+      "sourcePath": "webview/assets/app-shared-7a3b5b1a0788.js",
+      "byteStart": 2115274,
+      "byteEnd": 2116544,
+      "sha256": "cc9f95575192436feb618a05f95e6b4a5faa52b2dd415ae830caafeb626a295f",
+      "source": "function gkt(){return(gkt=t((()=>{UK(),ZX(),cDt(),sTt(),qQ(),DZ(),XOt(),QOt(),T$(),Hyt(),M$=SK(EZ,e=>({current:void 0})),N$=o2e(EZ,()=>({queryKey:ZOt,queryFn:async()=>{let e=KQ?.settings;return e==null?{values:{}}:c$(e.readAll())},networkMode:`always`,placeholderData:lkt,select:e=>(sDt.markInitializationPhase(`settings_ready`),e),staleTime:Vyt.FIVE_SECONDS})),ukt=TK(EZ,({get:e})=>{let t=e(N$);return t.isSuccess&&!t.isPlaceholderData}),dkt=TK(EZ,({get:e})=>{let t=e(N$);return t.isLoading||t.isPlaceholderData}),fkt=TK(EZ,({get:e})=>e(N$).isError),pkt=F0e(EZ,e=>`loading`,(e,{get:t,scope:n,set:r})=>{if(!t(ukt))return;let i=KQ?.settings;if(i==null){r(`ready`);return}let a=!0,o;return queueMicrotask(()=>{a&&i.subscribe(e,t=>{a&&(n.get(M$,e).current=void 0,n.query.setData(N$,n=>({values:{...n?.values,[e]:t.effective},configuredValues:{...n?.configuredValues,[e]:t.configured}})),r(`ready`))}).then(e=>{e==null?a&&r(`ready`):a?o=e:e[Symbol.dispose]()},()=>{a&&r(`error`)})}),()=>{a=!1,o?.[Symbol.dispose]()}}),mkt=I0e(EZ,(e,{get:t})=>(t(pkt,e.key),t(N$).data?.values[e.key]??e.default),{key:e=>e.key}),hkt=I0e(EZ,(e,{get:t})=>{t(pkt,e.key);let n=t(N$);return n.data?.configuredValues==null?n.data?.values[e.key]:n.data.configuredValues[e.key]},{key:e=>e.key})})))()}"
+    }
+  ]
+}
